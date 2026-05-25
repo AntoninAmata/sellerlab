@@ -4,8 +4,9 @@ import { useState } from 'react'
 import { useLang } from '@/app/providers'
 import SiteHeader from '@/app/components/SiteHeader'
 import SiteFooter from '@/app/components/SiteFooter'
-import { Mail, Clock } from 'lucide-react'
+import { Mail, Clock, CheckCircle } from 'lucide-react'
 
+/* Traductions de la page Contact */
 const T = {
   fr: {
     title: 'Contactez-nous',
@@ -22,10 +23,7 @@ const T = {
       messagePlaceholder: 'Décrivez votre demande en détail...',
       send: 'Envoyer le message',
     },
-    success: {
-      title: 'Message envoyé !',
-      body: "Merci pour votre message. Nous vous répondrons dans les 24 à 48 heures.",
-    },
+    success: { title: 'Message envoyé !', body: "Merci pour votre message. Nous vous répondrons dans les 24 à 48 heures." },
   },
   en: {
     title: 'Contact us',
@@ -42,10 +40,7 @@ const T = {
       messagePlaceholder: 'Describe your request in detail...',
       send: 'Send message',
     },
-    success: {
-      title: 'Message sent!',
-      body: 'Thank you for your message. We will get back to you within 24 to 48 hours.',
-    },
+    success: { title: 'Message sent!', body: 'Thank you for your message. We will get back to you within 24 to 48 hours.' },
   },
   es: {
     title: 'Contáctanos',
@@ -62,10 +57,7 @@ const T = {
       messagePlaceholder: 'Describe tu solicitud en detalle...',
       send: 'Enviar mensaje',
     },
-    success: {
-      title: '¡Mensaje enviado!',
-      body: 'Gracias por tu mensaje. Te responderemos en 24 a 48 horas.',
-    },
+    success: { title: '¡Mensaje enviado!', body: 'Gracias por tu mensaje. Te responderemos en 24 a 48 horas.' },
   },
   it: {
     title: 'Contattaci',
@@ -82,10 +74,7 @@ const T = {
       messagePlaceholder: 'Descrivi la tua richiesta in dettaglio...',
       send: 'Invia messaggio',
     },
-    success: {
-      title: 'Messaggio inviato!',
-      body: 'Grazie per il tuo messaggio. Ti risponderemo entro 24-48 ore.',
-    },
+    success: { title: 'Messaggio inviato!', body: 'Grazie per il tuo messaggio. Ti risponderemo entro 24-48 ore.' },
   },
   de: {
     title: 'Kontakt',
@@ -102,10 +91,7 @@ const T = {
       messagePlaceholder: 'Beschreibe dein Anliegen ausführlich...',
       send: 'Nachricht senden',
     },
-    success: {
-      title: 'Nachricht gesendet!',
-      body: 'Danke für deine Nachricht. Wir antworten dir innerhalb von 24 bis 48 Stunden.',
-    },
+    success: { title: 'Nachricht gesendet!', body: 'Danke für deine Nachricht. Wir antworten dir innerhalb von 24 bis 48 Stunden.' },
   },
   pl: {
     title: 'Kontakt',
@@ -122,10 +108,7 @@ const T = {
       messagePlaceholder: 'Opisz swoje zapytanie szczegółowo...',
       send: 'Wyślij wiadomość',
     },
-    success: {
-      title: 'Wiadomość wysłana!',
-      body: 'Dziękujemy za wiadomość. Odpowiemy w ciągu 24-48 godzin.',
-    },
+    success: { title: 'Wiadomość wysłana!', body: 'Dziękujemy za wiadomość. Odpowiemy w ciągu 24-48 godzin.' },
   },
   nl: {
     title: 'Contact',
@@ -142,12 +125,13 @@ const T = {
       messagePlaceholder: 'Beschrijf je vraag in detail...',
       send: 'Bericht versturen',
     },
-    success: {
-      title: 'Bericht verzonden!',
-      body: 'Bedankt voor je bericht. We reageren binnen 24 tot 48 uur.',
-    },
+    success: { title: 'Bericht verzonden!', body: 'Bedankt voor je bericht. We reageren binnen 24 tot 48 uur.' },
   },
 }
+
+/* Classes partagées pour les champs du formulaire */
+const inputClass =
+  'w-full border border-gray-200 rounded-xl px-4 py-3 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-300 focus:border-indigo-300 bg-white transition-all hover:border-gray-300'
 
 export default function ContactContent() {
   const { lang } = useLang()
@@ -163,21 +147,26 @@ export default function ContactContent() {
   return (
     <div className="min-h-screen bg-white text-gray-900">
       <SiteHeader />
-      <main className="pt-24 pb-20 px-6">
-        <div className="max-w-5xl mx-auto">
-          <div className="grid lg:grid-cols-2 gap-14 items-start">
-            {/* Left: info */}
-            <div>
-              <h1 className="text-3xl sm:text-4xl font-extrabold text-gray-900 mb-4">{page.title}</h1>
-              <p className="text-gray-500 mb-10 leading-relaxed">{page.subtitle}</p>
 
-              <div className="space-y-5">
-                <div className="flex items-center gap-4 p-5 bg-gray-50 rounded-2xl border border-gray-100">
-                  <div className="w-10 h-10 rounded-xl bg-indigo-100 flex items-center justify-center shrink-0">
-                    <Mail className="w-5 h-5 text-indigo-600" />
+      <main className="pt-28 pb-20 px-6">
+        <div className="max-w-5xl mx-auto">
+          <div className="grid lg:grid-cols-2 gap-16 items-start">
+
+            {/* Informations de contact */}
+            <div className="animate-fade-up">
+              <p className="text-indigo-600 text-xs font-bold uppercase tracking-[0.15em] mb-3">Contact</p>
+              <h1 className="font-display font-extrabold text-4xl sm:text-5xl text-gray-900 mb-5 leading-tight">
+                {page.title}
+              </h1>
+              <p className="text-gray-500 mb-10 leading-relaxed text-base">{page.subtitle}</p>
+
+              <div className="space-y-4">
+                <div className="flex items-center gap-4 p-5 bg-gray-50 rounded-2xl border border-gray-100 hover:border-gray-200 transition-colors">
+                  <div className="w-11 h-11 rounded-xl bg-indigo-600 flex items-center justify-center shrink-0">
+                    <Mail className="w-5 h-5 text-white" />
                   </div>
                   <div>
-                    <p className="text-xs text-gray-400 font-medium mb-0.5">{page.email}</p>
+                    <p className="text-xs text-gray-400 font-semibold mb-0.5 uppercase tracking-wider">{page.email}</p>
                     <a
                       href="mailto:contact@sellerlab.ai"
                       className="text-sm font-semibold text-gray-900 hover:text-indigo-600 transition-colors"
@@ -187,59 +176,63 @@ export default function ContactContent() {
                   </div>
                 </div>
 
-                <div className="flex items-center gap-4 p-5 bg-gray-50 rounded-2xl border border-gray-100">
-                  <div className="w-10 h-10 rounded-xl bg-indigo-100 flex items-center justify-center shrink-0">
+                <div className="flex items-center gap-4 p-5 bg-gray-50 rounded-2xl border border-gray-100 hover:border-gray-200 transition-colors">
+                  <div className="w-11 h-11 rounded-xl bg-indigo-100 flex items-center justify-center shrink-0">
                     <Clock className="w-5 h-5 text-indigo-600" />
                   </div>
                   <div>
-                    <p className="text-xs text-gray-400 font-medium mb-0.5">{page.response}</p>
+                    <p className="text-xs text-gray-400 font-semibold mb-0.5 uppercase tracking-wider">{page.response}</p>
                     <p className="text-sm font-semibold text-gray-900">{page.responseTime}</p>
                   </div>
                 </div>
               </div>
             </div>
 
-            {/* Right: form */}
-            <div className="bg-gray-50 rounded-2xl border border-gray-100 p-8">
+            {/* Formulaire */}
+            <div className="bg-gray-50 rounded-3xl border border-gray-100 p-8 shadow-sm animate-fade-up-d1">
               {sent ? (
-                <div className="text-center py-8">
-                  <div className="w-14 h-14 rounded-full bg-indigo-100 flex items-center justify-center mx-auto mb-4">
-                    <svg className="w-7 h-7 text-indigo-600" viewBox="0 0 20 20" fill="currentColor">
-                      <path fillRule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clipRule="evenodd" />
-                    </svg>
+                <div className="text-center py-12">
+                  <div className="w-16 h-16 rounded-full bg-green-100 flex items-center justify-center mx-auto mb-5">
+                    <CheckCircle className="w-8 h-8 text-green-500" />
                   </div>
-                  <h2 className="text-xl font-bold text-gray-900 mb-2">{page.success.title}</h2>
-                  <p className="text-gray-500 text-sm">{page.success.body}</p>
+                  <h2 className="font-display font-bold text-2xl text-gray-900 mb-3">{page.success.title}</h2>
+                  <p className="text-gray-500 text-sm leading-relaxed max-w-xs mx-auto">{page.success.body}</p>
                 </div>
               ) : (
                 <form onSubmit={handleSubmit} className="space-y-5">
                   <div>
-                    <label className="block text-xs font-semibold text-gray-700 mb-1.5">{page.form.name}</label>
+                    <label className="block text-xs font-bold text-gray-700 mb-2 uppercase tracking-wider">
+                      {page.form.name}
+                    </label>
                     <input
                       type="text"
                       required
                       value={form.name}
                       onChange={(e) => setForm({ ...form, name: e.target.value })}
-                      className="w-full border border-gray-200 rounded-xl px-4 py-3 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-300 bg-white"
+                      className={inputClass}
                     />
                   </div>
                   <div>
-                    <label className="block text-xs font-semibold text-gray-700 mb-1.5">{page.form.emailField}</label>
+                    <label className="block text-xs font-bold text-gray-700 mb-2 uppercase tracking-wider">
+                      {page.form.emailField}
+                    </label>
                     <input
                       type="email"
                       required
                       value={form.email}
                       onChange={(e) => setForm({ ...form, email: e.target.value })}
-                      className="w-full border border-gray-200 rounded-xl px-4 py-3 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-300 bg-white"
+                      className={inputClass}
                     />
                   </div>
                   <div>
-                    <label className="block text-xs font-semibold text-gray-700 mb-1.5">{page.form.subject}</label>
+                    <label className="block text-xs font-bold text-gray-700 mb-2 uppercase tracking-wider">
+                      {page.form.subject}
+                    </label>
                     <select
                       required
                       value={form.subject}
                       onChange={(e) => setForm({ ...form, subject: e.target.value })}
-                      className="w-full border border-gray-200 rounded-xl px-4 py-3 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-300 bg-white"
+                      className={inputClass}
                     >
                       <option value="">—</option>
                       {page.form.subjects.map((s) => (
@@ -248,19 +241,21 @@ export default function ContactContent() {
                     </select>
                   </div>
                   <div>
-                    <label className="block text-xs font-semibold text-gray-700 mb-1.5">{page.form.message}</label>
+                    <label className="block text-xs font-bold text-gray-700 mb-2 uppercase tracking-wider">
+                      {page.form.message}
+                    </label>
                     <textarea
                       required
                       rows={5}
                       value={form.message}
                       onChange={(e) => setForm({ ...form, message: e.target.value })}
                       placeholder={page.form.messagePlaceholder}
-                      className="w-full border border-gray-200 rounded-xl px-4 py-3 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-300 bg-white resize-none"
+                      className={`${inputClass} resize-none`}
                     />
                   </div>
                   <button
                     type="submit"
-                    className="w-full bg-indigo-600 text-white font-semibold py-3 rounded-full hover:bg-indigo-700 transition-colors text-sm"
+                    className="btn-shimmer w-full bg-indigo-600 text-white font-semibold py-3.5 rounded-full hover:bg-indigo-700 active:scale-95 transition-all text-sm shadow-md shadow-indigo-200/60"
                   >
                     {page.form.send}
                   </button>
@@ -270,6 +265,7 @@ export default function ContactContent() {
           </div>
         </div>
       </main>
+
       <SiteFooter />
     </div>
   )

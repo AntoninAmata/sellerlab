@@ -1,22 +1,118 @@
 @import "tailwindcss";
 
+/* ─── Variables ──────────────────────────────────────────────────────────── */
+
 :root {
   --background: #ffffff;
-  --foreground: #111827;
+  --foreground: #0A0A0A;
+  --accent: #6366F1;
+  --accent-hover: #4F52D9;
+  --dark: #080810;
 }
 
 @theme inline {
   --color-background: var(--background);
   --color-foreground: var(--foreground);
-  --font-sans: var(--font-geist-sans);
+  --font-sans: var(--font-body);
 }
 
-html {
-  scroll-behavior: smooth;
-}
+/* ─── Base ───────────────────────────────────────────────────────────────── */
+
+html { scroll-behavior: smooth; }
 
 body {
   background: var(--background);
   color: var(--foreground);
-  font-family: var(--font-geist-sans), Arial, Helvetica, sans-serif;
+  font-family: var(--font-body), 'DM Sans', system-ui, sans-serif;
+  -webkit-font-smoothing: antialiased;
+}
+
+/* ─── Typographie display ────────────────────────────────────────────────── */
+
+.font-display {
+  font-family: var(--font-display), 'Syne', sans-serif;
+}
+
+/* ─── Animations keyframes ───────────────────────────────────────────────── */
+
+@keyframes fadeUp {
+  from { opacity: 0; transform: translateY(22px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+
+@keyframes fadeIn {
+  from { opacity: 0; }
+  to   { opacity: 1; }
+}
+
+@keyframes float {
+  0%, 100% { transform: translateY(0); }
+  50%       { transform: translateY(-8px); }
+}
+
+@keyframes shimmer {
+  0%   { transform: translateX(-100%) skewX(-12deg); }
+  100% { transform: translateX(200%) skewX(-12deg); }
+}
+
+@keyframes pulse-dot {
+  0%, 100% { opacity: 1; transform: scale(1); }
+  50%       { opacity: 0.5; transform: scale(0.8); }
+}
+
+/* ─── Classes utilitaires d'animation ───────────────────────────────────── */
+
+.animate-fade-up         { animation: fadeUp 0.55s cubic-bezier(0.16,1,0.3,1) both; }
+.animate-fade-up-d1      { animation: fadeUp 0.55s 0.08s cubic-bezier(0.16,1,0.3,1) both; }
+.animate-fade-up-d2      { animation: fadeUp 0.55s 0.16s cubic-bezier(0.16,1,0.3,1) both; }
+.animate-fade-up-d3      { animation: fadeUp 0.55s 0.24s cubic-bezier(0.16,1,0.3,1) both; }
+.animate-fade-up-d4      { animation: fadeUp 0.55s 0.32s cubic-bezier(0.16,1,0.3,1) both; }
+.animate-float           { animation: float 4s ease-in-out infinite; }
+.animate-pulse-dot       { animation: pulse-dot 2s ease-in-out infinite; }
+
+/* Effet shimmer sur bouton */
+.btn-shimmer {
+  position: relative;
+  overflow: hidden;
+}
+.btn-shimmer::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(90deg, transparent, rgba(255,255,255,0.18), transparent);
+  transform: translateX(-100%) skewX(-12deg);
+}
+.btn-shimmer:hover::after {
+  animation: shimmer 0.7s ease forwards;
+}
+
+/* ─── Fond dark avec mesh de profondeur ──────────────────────────────────── */
+
+.mesh-dark {
+  position: relative;
+  background-color: var(--dark);
+  background-image:
+    radial-gradient(ellipse 70% 60% at 5% 90%,  rgba(99,102,241,0.14) 0%, transparent 60%),
+    radial-gradient(ellipse 50% 40% at 95% 10%, rgba(99,102,241,0.10) 0%, transparent 50%);
+}
+
+/* ─── Grille pointillée pour le hero ─────────────────────────────────────── */
+
+.dot-grid {
+  background-image: radial-gradient(circle, #e4e4e7 1.2px, transparent 1.2px);
+  background-size: 28px 28px;
+}
+
+/* ─── Accordéon FAQ : transition hauteur ────────────────────────────────── */
+
+.faq-body {
+  display: grid;
+  grid-template-rows: 0fr;
+  transition: grid-template-rows 0.28s ease;
+}
+.faq-body.open {
+  grid-template-rows: 1fr;
+}
+.faq-body > div {
+  overflow: hidden;
 }

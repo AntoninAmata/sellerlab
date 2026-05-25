@@ -5,6 +5,7 @@ import SiteHeader from '@/app/components/SiteHeader'
 import SiteFooter from '@/app/components/SiteFooter'
 import { Heart, Zap, ShieldCheck, Users } from 'lucide-react'
 
+/* Traductions de la page À propos */
 const T = {
   fr: {
     hero: {
@@ -24,32 +25,13 @@ const T = {
     values: {
       title: 'Nos valeurs',
       items: [
-        {
-          icon: 'heart',
-          title: 'Simplicité avant tout',
-          desc: "Un outil qui se comprend en 30 secondes. Pas de tutoriel de 45 minutes, pas d'interface cryptique.",
-        },
-        {
-          icon: 'shield',
-          title: 'Transparence totale',
-          desc: "On ne se connecte jamais à votre compte Vinted. Vos données restent les vôtres. Toujours.",
-        },
-        {
-          icon: 'zap',
-          title: 'Résultats concrets',
-          desc: "Chaque fonctionnalité existe parce qu'elle améliore vraiment vos ventes. Pas de gadget, que de l'utile.",
-        },
-        {
-          icon: 'users',
-          title: 'Accessible à tous',
-          desc: "Un plan gratuit pour démarrer, des prix honnêtes pour grandir. Vendre mieux ne devrait pas coûter cher.",
-        },
+        { icon: 'heart', title: 'Simplicité avant tout', desc: "Un outil qui se comprend en 30 secondes. Pas de tutoriel de 45 minutes, pas d'interface cryptique." },
+        { icon: 'shield', title: 'Transparence totale', desc: "On ne se connecte jamais à votre compte Vinted. Vos données restent les vôtres. Toujours." },
+        { icon: 'zap', title: 'Résultats concrets', desc: "Chaque fonctionnalité existe parce qu'elle améliore vraiment vos ventes. Pas de gadget, que de l'utile." },
+        { icon: 'users', title: 'Accessible à tous', desc: "Un plan gratuit pour démarrer, des prix honnêtes pour grandir. Vendre mieux ne devrait pas coûter cher." },
       ],
     },
-    cta: {
-      text: 'Prêt à tester ?',
-      btn: 'Essayer gratuitement',
-    },
+    cta: { text: 'Prêt à tester ?', btn: 'Essayer gratuitement' },
   },
   en: {
     hero: {
@@ -69,32 +51,13 @@ const T = {
     values: {
       title: 'Our values',
       items: [
-        {
-          icon: 'heart',
-          title: 'Simplicity first',
-          desc: 'A tool you understand in 30 seconds. No 45-minute tutorial, no cryptic interface.',
-        },
-        {
-          icon: 'shield',
-          title: 'Full transparency',
-          desc: 'We never connect to your Vinted account. Your data stays yours. Always.',
-        },
-        {
-          icon: 'zap',
-          title: 'Concrete results',
-          desc: "Every feature exists because it genuinely improves your sales. No gimmicks, only useful.",
-        },
-        {
-          icon: 'users',
-          title: 'Accessible to all',
-          desc: 'A free plan to start, honest prices to grow. Selling better shouldn\'t cost a fortune.',
-        },
+        { icon: 'heart', title: 'Simplicity first', desc: 'A tool you understand in 30 seconds. No 45-minute tutorial, no cryptic interface.' },
+        { icon: 'shield', title: 'Full transparency', desc: 'We never connect to your Vinted account. Your data stays yours. Always.' },
+        { icon: 'zap', title: 'Concrete results', desc: "Every feature exists because it genuinely improves your sales. No gimmicks, only useful." },
+        { icon: 'users', title: 'Accessible to all', desc: "A free plan to start, honest prices to grow. Selling better shouldn't cost a fortune." },
       ],
     },
-    cta: {
-      text: 'Ready to try it?',
-      btn: 'Try for free',
-    },
+    cta: { text: 'Ready to try it?', btn: 'Try for free' },
   },
   es: {
     hero: {
@@ -104,65 +67,46 @@ const T = {
     },
     story: {
       title: 'De la frustración a la herramienta',
-      p1: "Me di cuenta de que el problema no era el tiempo disponible, sino las herramientas. No existía nada simple y asequible para ayudar a los vendedores ocasionales como yo. Los grandes vendedores tenían sus métodos, pero para los pequeños era todo a base de ensayo y error.",
-      p2: "SellerLab AI nació de esta idea sencilla: ¿y si la IA pudiera hacer en 10 segundos lo que normalmente lleva 20 minutos? Eliminar el fondo de una foto, calcular el precio adecuado, redactar un anuncio impactante. Trabajamos en ello durante meses y estamos orgullosos de lo que hemos construido.",
+      p1: "Me di cuenta de que el problema no era el tiempo disponible, sino las herramientas. No existía nada simple y asequible para ayudar a los vendedores ocasionales como yo.",
+      p2: "SellerLab AI nació de esta idea sencilla: ¿y si la IA pudiera hacer en 10 segundos lo que normalmente lleva 20 minutos? Eliminar el fondo de una foto, calcular el precio adecuado, redactar un anuncio impactante.",
     },
     mission: {
       title: 'Nuestra misión',
-      text: "Dar a los vendedores de Vinted — tanto si venden 5 artículos como 500 — las mismas herramientas que los profesionales. Simples, rápidas, accesibles. Porque vender mejor no debería requerir horas de trabajo ni conocimientos de marketing.",
+      text: "Dar a los vendedores de Vinted — tanto si venden 5 artículos como 500 — las mismas herramientas que los profesionales. Simples, rápidas, accesibles.",
     },
     values: {
       title: 'Nuestros valores',
       items: [
-        {
-          icon: 'heart',
-          title: 'Simplicidad ante todo',
-          desc: 'Una herramienta que se entiende en 30 segundos. Sin tutoriales interminables ni interfaces crípticas.',
-        },
-        {
-          icon: 'shield',
-          title: 'Transparencia total',
-          desc: 'Nunca nos conectamos a tu cuenta de Vinted. Tus datos son siempre tuyos.',
-        },
-        {
-          icon: 'zap',
-          title: 'Resultados concretos',
-          desc: 'Cada funcionalidad existe porque realmente mejora tus ventas. Sin adornos, solo lo útil.',
-        },
-        {
-          icon: 'users',
-          title: 'Accesible para todos',
-          desc: 'Un plan gratuito para empezar, precios honestos para crecer. Vender mejor no debería costar caro.',
-        },
+        { icon: 'heart', title: 'Simplicidad ante todo', desc: 'Una herramienta que se entiende en 30 segundos. Sin tutoriales interminables ni interfaces crípticas.' },
+        { icon: 'shield', title: 'Transparencia total', desc: 'Nunca nos conectamos a tu cuenta de Vinted. Tus datos son siempre tuyos.' },
+        { icon: 'zap', title: 'Resultados concretos', desc: 'Cada funcionalidad existe porque realmente mejora tus ventas. Sin adornos, solo lo útil.' },
+        { icon: 'users', title: 'Accesible para todos', desc: 'Un plan gratuito para empezar, precios honestos para crecer.' },
       ],
     },
-    cta: {
-      text: '¿Listo para probarlo?',
-      btn: 'Probar gratis',
-    },
+    cta: { text: '¿Listo para probarlo?', btn: 'Probar gratis' },
   },
   it: {
     hero: {
       label: 'La nostra storia',
       h1: 'Nati dalla frustrazione di vendere su Vinted',
-      lead: "Come milioni di persone, ho iniziato a vendere i miei vestiti su Vinted. E come molti, mi sono ritrovato a passare ore a preparare ogni annuncio: fotografare l'articolo, cercare il prezzo giusto, scrivere una descrizione accattivante. Tutto questo per vendere una camicia a 8€.",
+      lead: "Come milioni di persone, ho iniziato a vendere i miei vestiti su Vinted. E come molti, mi sono ritrovato a passare ore a preparare ogni annuncio.",
     },
     story: {
       title: 'Dalla frustrazione allo strumento',
-      p1: "Mi sono reso conto che il problema non era il tempo, ma gli strumenti. Non esisteva nulla di semplice e accessibile per aiutare i venditori occasionali come me. I grandi venditori avevano i loro metodi, ma per i piccoli era tutto improvvisato.",
-      p2: "SellerLab AI è nato da questa semplice idea: e se l'IA potesse fare in 10 secondi quello che normalmente richiede 20 minuti? Rimuovere lo sfondo di una foto, calcolare il prezzo giusto, scrivere un annuncio efficace. Ci abbiamo lavorato per mesi e siamo orgogliosi di quello che abbiamo costruito.",
+      p1: "Mi sono reso conto che il problema non era il tempo, ma gli strumenti. Non esisteva nulla di semplice e accessibile per aiutare i venditori occasionali come me.",
+      p2: "SellerLab AI è nato da questa semplice idea: e se l'IA potesse fare in 10 secondi quello che normalmente richiede 20 minuti?",
     },
     mission: {
       title: 'La nostra missione',
-      text: "Dare ai venditori Vinted — che vendano 5 articoli o 500 — gli stessi strumenti dei professionisti. Semplici, veloci, accessibili. Perché vendere meglio non dovrebbe richiedere ore di lavoro o competenze di marketing.",
+      text: "Dare ai venditori Vinted gli stessi strumenti dei professionisti. Semplici, veloci, accessibili.",
     },
     values: {
       title: 'I nostri valori',
       items: [
-        { icon: 'heart', title: 'Semplicità prima di tutto', desc: 'Uno strumento che si capisce in 30 secondi. Nessun tutorial infinito, nessuna interfaccia criptica.' },
-        { icon: 'shield', title: 'Trasparenza totale', desc: 'Non ci connettiamo mai al tuo account Vinted. I tuoi dati restano tuoi. Sempre.' },
-        { icon: 'zap', title: 'Risultati concreti', desc: 'Ogni funzionalità esiste perché migliora davvero le tue vendite. Niente orpelli, solo utilità.' },
-        { icon: 'users', title: 'Accessibile a tutti', desc: 'Un piano gratuito per iniziare, prezzi onesti per crescere. Vendere meglio non dovrebbe costare caro.' },
+        { icon: 'heart', title: 'Semplicità prima di tutto', desc: 'Uno strumento che si capisce in 30 secondi.' },
+        { icon: 'shield', title: 'Trasparenza totale', desc: 'Non ci connettiamo mai al tuo account Vinted. I tuoi dati restano tuoi.' },
+        { icon: 'zap', title: 'Risultati concreti', desc: 'Ogni funzionalità esiste perché migliora davvero le tue vendite.' },
+        { icon: 'users', title: 'Accessibile a tutti', desc: 'Un piano gratuito per iniziare, prezzi onesti per crescere.' },
       ],
     },
     cta: { text: 'Pronto a provarlo?', btn: 'Prova gratis' },
@@ -171,24 +115,24 @@ const T = {
     hero: {
       label: 'Unsere Geschichte',
       h1: 'Entstanden aus der Frustration über den Verkauf auf Vinted',
-      lead: "Wie Millionen von Menschen habe ich angefangen, meine Kleidung auf Vinted zu verkaufen. Und wie viele andere fand ich mich schnell dabei wieder, Stunden damit zu verbringen, jedes Angebot vorzubereiten: den Artikel fotografieren, den richtigen Preis recherchieren, eine ansprechende Beschreibung schreiben. Alles für ein Hemd für 8€.",
+      lead: "Wie Millionen von Menschen habe ich angefangen, meine Kleidung auf Vinted zu verkaufen. Stunden für ein Hemd für 8€.",
     },
     story: {
       title: 'Von der Frustration zum Werkzeug',
-      p1: "Ich erkannte, dass das Problem nicht die Zeit war, sondern die Werkzeuge. Es gab nichts Einfaches und Erschwingliches, um Gelegenheitsverkäufern wie mir zu helfen. Große Verkäufer hatten ihre Methoden, aber für kleine war es reines Improvisieren.",
-      p2: "SellerLab AI entstand aus dieser einfachen Idee: Was wäre, wenn KI in 10 Sekunden das schafft, was normalerweise 20 Minuten dauert? Hintergrund entfernen, den richtigen Preis berechnen, ein überzeugendes Angebot schreiben. Wir haben monatelang daran gearbeitet und sind stolz auf das, was wir aufgebaut haben.",
+      p1: "Ich erkannte, dass das Problem nicht die Zeit war, sondern die Werkzeuge. Es gab nichts Einfaches für Gelegenheitsverkäufer wie mich.",
+      p2: "SellerLab AI entstand: Was wäre, wenn KI in 10 Sekunden das schafft, was normalerweise 20 Minuten dauert?",
     },
     mission: {
       title: 'Unsere Mission',
-      text: "Vinted-Verkäufern — ob sie 5 oder 500 Artikel verkaufen — dieselben Werkzeuge wie den Profis zu geben. Einfach, schnell, zugänglich. Denn besser verkaufen sollte keine stundenlange Arbeit oder Marketing-Expertise erfordern.",
+      text: "Vinted-Verkäufern dieselben Werkzeuge wie den Profis zu geben. Einfach, schnell, zugänglich.",
     },
     values: {
       title: 'Unsere Werte',
       items: [
-        { icon: 'heart', title: 'Einfachheit zuerst', desc: 'Ein Tool, das du in 30 Sekunden verstehst. Kein 45-Minuten-Tutorial, keine kryptische Oberfläche.' },
-        { icon: 'shield', title: 'Vollständige Transparenz', desc: 'Wir verbinden uns nie mit deinem Vinted-Konto. Deine Daten gehören dir. Immer.' },
-        { icon: 'zap', title: 'Konkrete Ergebnisse', desc: 'Jede Funktion existiert, weil sie deine Verkäufe wirklich verbessert. Keine Spielereien, nur Nützliches.' },
-        { icon: 'users', title: 'Für alle zugänglich', desc: 'Ein kostenloser Plan zum Starten, faire Preise zum Wachsen. Besser verkaufen sollte nicht teuer sein.' },
+        { icon: 'heart', title: 'Einfachheit zuerst', desc: 'Ein Tool, das du in 30 Sekunden verstehst.' },
+        { icon: 'shield', title: 'Vollständige Transparenz', desc: 'Wir verbinden uns nie mit deinem Vinted-Konto.' },
+        { icon: 'zap', title: 'Konkrete Ergebnisse', desc: 'Jede Funktion existiert, weil sie deine Verkäufe wirklich verbessert.' },
+        { icon: 'users', title: 'Für alle zugänglich', desc: 'Ein kostenloser Plan zum Starten, faire Preise zum Wachsen.' },
       ],
     },
     cta: { text: 'Bereit, es auszuprobieren?', btn: 'Kostenlos testen' },
@@ -197,24 +141,24 @@ const T = {
     hero: {
       label: 'Nasza historia',
       h1: 'Zrodzeni z frustracji sprzedawania na Vinted',
-      lead: 'Jak miliony ludzi, zacząłem sprzedawać ubrania na Vinted. I jak wielu, szybko odkryłem, że spędzam godziny na przygotowaniu każdego ogłoszenia: fotografowanie artykułu, szukanie właściwej ceny, pisanie przyciągającego opisu. Wszystko to, żeby sprzedać koszulę za 8€.',
+      lead: 'Jak miliony ludzi, zacząłem sprzedawać ubrania na Vinted. Godziny pracy, żeby sprzedać koszulę za 8€.',
     },
     story: {
       title: 'Od frustracji do narzędzia',
-      p1: 'Zdałem sobie sprawę, że problem nie leżał w czasie, lecz w narzędziach. Nie istniało nic prostego i przystępnego, co pomagałoby okazjonalnym sprzedawcom takim jak ja. Duzi sprzedawcy mieli swoje metody, ale dla małych było to improwizowanie.',
-      p2: 'SellerLab AI narodził się z tego prostego pomysłu: a co jeśli AI mogłoby w 10 sekund zrobić to, co normalnie zajmuje 20 minut? Usunąć tło zdjęcia, obliczyć właściwą cenę, napisać przekonujące ogłoszenie. Pracowaliśmy nad tym przez miesiące i jesteśmy dumni z tego, co zbudowaliśmy.',
+      p1: 'Problem nie leżał w czasie, lecz w narzędziach. Nie istniało nic prostego dla okazjonalnych sprzedawców.',
+      p2: 'SellerLab AI narodził się z pomysłu: a co jeśli AI mogłoby w 10 sekund zrobić to, co normalnie zajmuje 20 minut?',
     },
     mission: {
       title: 'Nasza misja',
-      text: 'Dać sprzedawcom Vinted — niezależnie czy sprzedają 5 czy 500 artykułów — te same narzędzia co profesjonaliści. Proste, szybkie, dostępne. Bo sprzedawanie lepiej nie powinno wymagać godzin pracy ani wiedzy marketingowej.',
+      text: 'Dać sprzedawcom Vinted te same narzędzia co profesjonaliści. Proste, szybkie, dostępne.',
     },
     values: {
       title: 'Nasze wartości',
       items: [
-        { icon: 'heart', title: 'Prostota przede wszystkim', desc: 'Narzędzie, które rozumiesz w 30 sekund. Żadnych długich tutoriali, żadnego kryptycznego interfejsu.' },
-        { icon: 'shield', title: 'Pełna przejrzystość', desc: 'Nigdy nie łączymy się z Twoim kontem Vinted. Twoje dane zawsze pozostają Twoje.' },
-        { icon: 'zap', title: 'Konkretne wyniki', desc: 'Każda funkcja istnieje, bo naprawdę poprawia Twoje sprzedaże. Żadnych gadżetów, tylko to, co przydatne.' },
-        { icon: 'users', title: 'Dostępne dla wszystkich', desc: 'Bezpłatny plan na start, uczciwe ceny do wzrostu. Sprzedawanie lepiej nie powinno być drogie.' },
+        { icon: 'heart', title: 'Prostota przede wszystkim', desc: 'Narzędzie, które rozumiesz w 30 sekund.' },
+        { icon: 'shield', title: 'Pełna przejrzystość', desc: 'Nigdy nie łączymy się z Twoim kontem Vinted.' },
+        { icon: 'zap', title: 'Konkretne wyniki', desc: 'Każda funkcja naprawdę poprawia Twoje sprzedaże.' },
+        { icon: 'users', title: 'Dostępne dla wszystkich', desc: 'Bezpłatny plan na start, uczciwe ceny do wzrostu.' },
       ],
     },
     cta: { text: 'Gotowy, by spróbować?', btn: 'Spróbuj za darmo' },
@@ -223,24 +167,24 @@ const T = {
     hero: {
       label: 'Ons verhaal',
       h1: 'Geboren uit de frustratie van verkopen op Vinted',
-      lead: 'Zoals miljoenen mensen begon ik mijn kleding te verkopen op Vinted. En net als velen merkte ik al snel dat ik uren besteedde aan het voorbereiden van elke advertentie: het artikel fotograferen, de juiste prijs opzoeken, een pakkende beschrijving schrijven. Dat alles om een shirt voor 8€ te verkopen.',
+      lead: 'Zoals miljoenen mensen begon ik mijn kleding te verkopen op Vinted. Uren werk voor een shirt van 8€.',
     },
     story: {
       title: 'Van frustratie naar een tool',
-      p1: 'Ik realiseerde me dat het probleem niet de tijd was, maar de tools. Er was niets eenvoudigs en betaalbaars om occasionele verkopers zoals ik te helpen. Grote verkopers hadden hun methoden, maar voor kleine was het improviseren.',
-      p2: "SellerLab AI is geboren uit dit eenvoudige idee: wat als AI in 10 seconden kan doen wat normaal 20 minuten kost? Achtergrond verwijderen, de juiste prijs berekenen, een overtuigende advertentie schrijven. We hebben er maanden aan gewerkt en zijn trots op wat we hebben gebouwd.",
+      p1: 'Het probleem was niet de tijd, maar de tools. Er was niets eenvoudigs voor occasionele verkopers zoals ik.',
+      p2: "SellerLab AI is geboren: wat als AI in 10 seconden kan doen wat normaal 20 minuten kost?",
     },
     mission: {
       title: 'Onze missie',
-      text: 'Vinted-verkopers — of ze nu 5 of 500 artikelen verkopen — dezelfde tools geven als de professionals. Eenvoudig, snel, toegankelijk. Want beter verkopen zou geen uren werk of marketingexpertise mogen vereisen.',
+      text: 'Vinted-verkopers dezelfde tools geven als de professionals. Eenvoudig, snel, toegankelijk.',
     },
     values: {
       title: 'Onze waarden',
       items: [
-        { icon: 'heart', title: 'Eenvoud eerst', desc: 'Een tool die je in 30 seconden begrijpt. Geen 45 minuten durende tutorial, geen cryptische interface.' },
-        { icon: 'shield', title: 'Volledige transparantie', desc: 'We verbinden nooit met je Vinted-account. Je gegevens blijven altijd van jou.' },
-        { icon: 'zap', title: 'Concrete resultaten', desc: 'Elke functie bestaat omdat het je verkopen echt verbetert. Geen gadgets, alleen nuttige dingen.' },
-        { icon: 'users', title: 'Toegankelijk voor iedereen', desc: 'Een gratis plan om te starten, eerlijke prijzen om te groeien. Beter verkopen mag niet duur zijn.' },
+        { icon: 'heart', title: 'Eenvoud eerst', desc: 'Een tool die je in 30 seconden begrijpt.' },
+        { icon: 'shield', title: 'Volledige transparantie', desc: 'We verbinden nooit met je Vinted-account.' },
+        { icon: 'zap', title: 'Concrete resultaten', desc: 'Elke functie verbetert je verkopen echt.' },
+        { icon: 'users', title: 'Toegankelijk voor iedereen', desc: 'Een gratis plan om te starten, eerlijke prijzen om te groeien.' },
       ],
     },
     cta: { text: 'Klaar om het te proberen?', btn: 'Gratis proberen' },
@@ -261,51 +205,63 @@ export default function AboutContent() {
   return (
     <div className="min-h-screen bg-white text-gray-900">
       <SiteHeader />
-      <main className="pt-24 pb-20">
+
+      <main>
         {/* Hero */}
-        <section className="px-6 pb-14">
-          <div className="max-w-3xl mx-auto">
-            <span className="text-xs font-semibold text-indigo-600 uppercase tracking-wider">{page.hero.label}</span>
-            <h1 className="text-3xl sm:text-4xl font-extrabold text-gray-900 mt-3 mb-6 leading-tight">
+        <section className="pt-28 pb-16 px-6 bg-white">
+          <div className="max-w-3xl mx-auto animate-fade-up">
+            <span className="text-indigo-600 text-xs font-bold uppercase tracking-[0.15em] block mb-4">
+              {page.hero.label}
+            </span>
+            <h1 className="font-display font-extrabold text-4xl sm:text-5xl text-gray-900 mb-6 leading-tight">
               {page.hero.h1}
             </h1>
-            <p className="text-lg text-gray-600 leading-relaxed">{page.hero.lead}</p>
+            <p className="text-lg text-gray-500 leading-relaxed">{page.hero.lead}</p>
           </div>
         </section>
 
-        {/* Story */}
-        <section className="bg-gray-50 border-y border-gray-100 px-6 py-14">
+        {/* Histoire */}
+        <section className="bg-gray-50 border-y border-gray-100 px-6 py-16">
           <div className="max-w-3xl mx-auto">
-            <h2 className="text-2xl font-bold text-gray-900 mb-6">{page.story.title}</h2>
-            <p className="text-gray-600 leading-relaxed mb-5">{page.story.p1}</p>
-            <p className="text-gray-600 leading-relaxed">{page.story.p2}</p>
+            <h2 className="font-display font-bold text-2xl sm:text-3xl text-gray-900 mb-6">
+              {page.story.title}
+            </h2>
+            <p className="text-gray-600 leading-relaxed mb-5 text-base">{page.story.p1}</p>
+            <p className="text-gray-600 leading-relaxed text-base">{page.story.p2}</p>
           </div>
         </section>
 
         {/* Mission */}
-        <section className="px-6 py-14">
-          <div className="max-w-3xl mx-auto">
-            <div className="bg-indigo-600 rounded-2xl p-10 text-white">
-              <h2 className="text-2xl font-bold mb-4">{page.mission.title}</h2>
-              <p className="text-indigo-100 leading-relaxed text-lg">{page.mission.text}</p>
+        <section className="relative bg-[#080810] px-6 py-16 overflow-hidden" style={{backgroundImage:'radial-gradient(ellipse 70% 60% at 5% 90%, rgba(99,102,241,0.14) 0%, transparent 60%), radial-gradient(ellipse 50% 40% at 95% 10%, rgba(99,102,241,0.10) 0%, transparent 50%)'}}>
+          <div className="relative z-10 max-w-3xl mx-auto">
+            <div className="border border-white/10 rounded-3xl p-10">
+              <h2 className="font-display font-extrabold text-2xl sm:text-3xl text-white mb-5">
+                {page.mission.title}
+              </h2>
+              <p className="text-gray-300 leading-relaxed text-lg">{page.mission.text}</p>
             </div>
           </div>
         </section>
 
-        {/* Values */}
-        <section className="px-6 pb-14">
+        {/* Valeurs */}
+        <section className="px-6 py-16 bg-white">
           <div className="max-w-5xl mx-auto">
-            <h2 className="text-2xl font-bold text-gray-900 mb-10 text-center">{page.values.title}</h2>
-            <div className="grid sm:grid-cols-2 gap-6">
+            <h2 className="font-display font-bold text-2xl sm:text-3xl text-gray-900 mb-10 text-center">
+              {page.values.title}
+            </h2>
+            <div className="grid sm:grid-cols-2 gap-5">
               {page.values.items.map((value) => {
                 const Icon = VALUE_ICONS[value.icon as keyof typeof VALUE_ICONS]
                 return (
-                  <div key={value.icon} className="flex gap-5 p-6 bg-gray-50 rounded-2xl border border-gray-100">
-                    <div className="w-10 h-10 rounded-xl bg-indigo-100 flex items-center justify-center shrink-0">
-                      <Icon className="w-5 h-5 text-indigo-600" />
+                  <div
+                    key={value.icon}
+                    className="flex gap-5 p-7 bg-gray-50 rounded-2xl border border-gray-100 hover:border-indigo-200 hover:shadow-md transition-all group"
+                  >
+                    <div className="w-11 h-11 rounded-xl bg-indigo-600 flex items-center justify-center shrink-0 group-hover:scale-105 transition-transform">
+                      <Icon className="w-5 h-5 text-white" />
                     </div>
                     <div>
-                      <h3 className="font-bold text-gray-900 mb-1">{value.title}</h3>
+                      <h3 className="font-bold text-gray-900 mb-1.5">{value.title}</h3>
                       <p className="text-sm text-gray-500 leading-relaxed">{value.desc}</p>
                     </div>
                   </div>
@@ -316,18 +272,19 @@ export default function AboutContent() {
         </section>
 
         {/* CTA */}
-        <section className="px-6">
+        <section className="px-6 pb-20 bg-white">
           <div className="max-w-md mx-auto text-center">
-            <p className="text-lg font-semibold text-gray-900 mb-4">{page.cta.text}</p>
+            <p className="text-lg font-semibold text-gray-900 mb-5">{page.cta.text}</p>
             <a
               href="/#inscription"
-              className="inline-block bg-indigo-600 text-white font-semibold px-8 py-3.5 rounded-full hover:bg-indigo-700 transition-colors text-base shadow-lg shadow-indigo-200"
+              className="btn-shimmer inline-block bg-indigo-600 text-white font-semibold px-10 py-4 rounded-full hover:bg-indigo-700 active:scale-95 transition-all text-base shadow-xl shadow-indigo-200/60"
             >
               {page.cta.btn}
             </a>
           </div>
         </section>
       </main>
+
       <SiteFooter />
     </div>
   )
