@@ -21,6 +21,10 @@ export interface BlogPost {
   fr: BlogPostLang
   en: BlogPostLang
   es: BlogPostLang
+  it: BlogPostLang
+  de: BlogPostLang
+  pl: BlogPostLang
+  nl: BlogPostLang
 }
 
 export const posts: BlogPost[] = [
@@ -133,6 +137,146 @@ export const posts: BlogPost[] = [
       ctaBody:
         'Investigar la competencia, evaluar el estado, tener en cuenta la marca y la temporada… es mucho trabajo. SellerLab AI lo hace por ti en segundos. Nuestra calculadora de precios para Vinted analiza el mercado en tiempo real y te sugiere el precio óptimo para cada artículo.',
     },
+    it: {
+      title: 'Come fissare il giusto prezzo su Vinted nel 2026',
+      metaDescription:
+        "Scopri come calcolare il prezzo ideale dei tuoi articoli su Vinted: analisi della concorrenza, impatto del marchio, stato, stagionalità e strategia di negoziazione.",
+      excerpt:
+        "Troppo caro e il tuo articolo non si vende. Troppo basso e perdi soldi. Ecco come trovare il prezzo giusto su Vinted.",
+      readTime: 5,
+      intro:
+        "Fissare il giusto prezzo su Vinted è spesso una delle sfide più difficili per i venditori. Troppo alto e il tuo articolo resta settimane senza compratori. Troppo basso e svendi i tuoi capi senza rendertene conto. La buona notizia è che, con il metodo giusto, trovare il prezzo ideale diventa molto più semplice.",
+      sections: [
+        {
+          title: 'Analizza la concorrenza in tempo reale',
+          body: "Prima di fissare un prezzo, cerca sempre articoli simili al tuo su Vinted. Inserisci il marchio, il tipo di capo e, se possibile, il colore o la taglia nella barra di ricerca. Guarda gli annunci attivi e annota la fascia di prezzi. Se trovi articoli simili tra 15 e 25 €, hai il tuo punto di riferimento di mercato. Questa analisi richiede in genere 5-10 minuti ma è indispensabile per non sbagliare segmento. Più la ricerca è precisa, più il tuo posizionamento sarà accurato.",
+        },
+        {
+          title: 'Il marchio: il fattore n°1 del prezzo',
+          body: "Il marchio è senza dubbio il criterio che influisce di più sul prezzo su Vinted. Un paio di jeans Zara di seconda mano si vende tra 10 e 20 €, mentre un Levi's può raggiungere 40-60 €, e un Acne Studios può superare i 100 €. I marchi di lusso come Chanel o Balenciaga mantengono il 30-50% del loro valore anche di seconda mano. Se possiedi un articolo di un marchio premium, menzionalo chiaramente nel titolo e nella descrizione e posizionati nella fascia alta del range di mercato.",
+        },
+        {
+          title: "Le condizioni dell'articolo: non sottovalutarle",
+          body: "Vinted offre cinque livelli di stato: Nuovo con etichetta, Ottimo stato, Buono stato, Stato accettabile e Nuovo senza etichetta. Ogni livello giustifica una differenza di prezzo significativa. Un articolo 'Nuovo con etichetta' può legittimamente vendersi al 60-70% del prezzo nuovo, mentre uno in 'Buono stato' con leggere tracce d'uso vale circa il 30-40% del prezzo originale. Sii sempre onesto sullo stato reale: gli acquirenti delusi lasciano recensioni negative, e la tua reputazione sulla piattaforma vale più di qualche euro in più.",
+        },
+        {
+          title: 'Pensa alla stagionalità',
+          body: "La domanda su Vinted è fortemente stagionale. I cappotti invernali si vendono bene da settembre a novembre, i vestiti estivi da aprile a giugno, e gli articoli sportivi all'inizio dell'anno. Vendere un cappotto invernale in pieno luglio ti costringerà ad abbassare il prezzo, mentre pubblicarlo a ottobre ti permetterà di chiedere di più. Anticipa questo fenomeno: se hai vestiti invernali da vendere, non pubblicarli in estate. Aspetta la stagione giusta.",
+        },
+        {
+          title: 'Lascia sempre margine per la negoziazione',
+          body: "La cultura della negoziazione è radicata su Vinted. Molti acquirenti faranno un'offerta più bassa prima di comprare. Anticipalo fissando il tuo prezzo iniziale al 10-15% in più rispetto al tuo prezzo minimo accettabile. Così, anche dopo la negoziazione, sarai soddisfatto. Abilitare la spedizione gratuita quando il margine lo permette aiuta: gli annunci con spedizione gratuita ottengono in media il 30% di visualizzazioni in più, accelerando notevolmente le vendite.",
+        },
+      ],
+      ctaTitle: 'Calcola automaticamente il giusto prezzo con SellerLab AI',
+      ctaBody:
+        "Analizzare la concorrenza, valutare le condizioni, tenere conto del marchio e della stagione… è molto lavoro. SellerLab AI lo fa per te in pochi secondi. Il nostro calcolatore di prezzi per Vinted analizza il mercato in tempo reale e ti suggerisce il prezzo ottimale per ogni articolo.",
+    },
+    de: {
+      title: 'Wie du den richtigen Preis auf Vinted festlegst – 2026',
+      metaDescription:
+        'Lerne, wie du den idealen Preis für deine Vinted-Artikel berechnest: Wettbewerbsanalyse, Markeneinfluss, Zustand, Saisonalität und Verhandlungsstrategie.',
+      excerpt:
+        'Zu teuer und dein Artikel verkauft sich nicht. Zu billig und du verlierst Geld. So findest du den richtigen Preis auf Vinted.',
+      readTime: 5,
+      intro:
+        'Den richtigen Preis auf Vinted festzulegen ist oft eine der größten Herausforderungen für Verkäufer. Zu hoch und dein Artikel bleibt wochenlang ohne Käufer. Zu niedrig und du verscherbelst deine Sachen, ohne es zu merken. Die gute Nachricht: Mit dem richtigen Ansatz wird die Preisfindung viel einfacher.',
+      sections: [
+        {
+          title: 'Analysiere die Konkurrenz in Echtzeit',
+          body: "Bevor du einen Preis festlegst, such immer nach ähnlichen Artikeln auf Vinted. Gib Marke, Kleidungstyp und wenn möglich Farbe oder Größe in die Suchleiste ein. Schau dir aktive Angebote an und notiere die Preisspanne. Wenn du ähnliche Artikel zwischen 15 und 25 € findest, hast du deine Marktbenchmark. Diese Analyse dauert in der Regel 5–10 Minuten, ist aber unerlässlich für eine korrekte Positionierung. Je genauer deine Suche, desto präziser dein Preis.",
+        },
+        {
+          title: 'Marke: der wichtigste Preisfaktor',
+          body: "Die Marke ist wohl der größte Einflussfaktor auf den Preis bei Vinted. Eine gebrauchte Zara-Jeans verkauft sich für 10–20 €, während Levi's 40–60 € erreichen kann und Acne Studios über 100 € gehen kann. Luxusmarken wie Chanel oder Balenciaga behalten auch als Secondhand 30–50% ihres Werts. Wenn du ein Premium-Markenartikel besitzt, erwähne die Marke deutlich im Titel und in der Beschreibung und positioniere dich im oberen Bereich der Marktspanne.",
+        },
+        {
+          title: 'Artikelzustand: unterschätze ihn nicht',
+          body: "Vinted bietet fünf Zustandsstufen: Neu mit Etikett, Sehr guter Zustand, Guter Zustand, Befriedigender Zustand und Neu ohne Etikett. Jede Stufe rechtfertigt einen deutlichen Preisunterschied. Ein 'Neu mit Etikett'-Artikel kann legitim zu 60–70% des Neupreises verkauft werden, während ein 'Guter Zustand'-Artikel mit leichten Gebrauchsspuren eher 30–40% des Originalpreises wert ist. Sei immer ehrlich über den tatsächlichen Zustand – enttäuschte Käufer hinterlassen negative Bewertungen, und dein Plattformruf ist mehr wert als ein paar Euro mehr.",
+        },
+        {
+          title: 'Denke an Saisonalität',
+          body: 'Die Nachfrage auf Vinted ist stark saisonal geprägt. Wintermäntel verkaufen sich gut von September bis November, Sommerkleidung von April bis Juni und Sportartikel zu Jahresbeginn. Im Hochsommer einen Wintermantel zu verkaufen zwingt dich, den Preis zu senken, während eine Veröffentlichung im Oktober einen höheren Preis ermöglicht. Plane voraus: Wenn du Winterkleidung zu verkaufen hast, stelle sie nicht im Sommer ein. Warte auf die richtige Saison.',
+        },
+        {
+          title: 'Lass immer Verhandlungsspielraum',
+          body: 'Die Verhandlungskultur ist auf Vinted tief verwurzelt. Viele Käufer werden ein niedrigeres Angebot machen, bevor sie kaufen. Nimm das vorweg, indem du deinen Anfangspreis 10–15% über deinem Mindestpreis ansetzt. So bist du auch nach der Verhandlung zufrieden. Kostenlosen Versand zu aktivieren, wenn deine Marge es erlaubt, hilft ebenfalls – Angebote mit kostenlosem Versand erhalten im Schnitt 30% mehr Aufrufe, was den Verkauf erheblich beschleunigt.',
+        },
+      ],
+      ctaTitle: 'Berechne automatisch den richtigen Preis mit SellerLab AI',
+      ctaBody:
+        'Die Konkurrenz analysieren, den Zustand bewerten, Marke und Saison berücksichtigen… das ist viel Arbeit. SellerLab AI erledigt das in Sekunden für dich. Unser Vinted-Preisrechner analysiert den Markt in Echtzeit und schlägt dir den optimalen Preis für jeden Artikel vor.',
+    },
+    pl: {
+      title: 'Jak ustalić właściwą cenę na Vinted w 2026 roku',
+      metaDescription:
+        'Dowiedz się, jak obliczyć idealną cenę swoich przedmiotów na Vinted: analiza konkurencji, wpływ marki, stan, sezonowość i strategia negocjacji.',
+      excerpt:
+        'Za drogo – przedmiot się nie sprzeda. Za tanio – tracisz pieniądze. Oto jak znaleźć właściwą cenę na Vinted.',
+      readTime: 5,
+      intro:
+        'Ustalenie właściwej ceny na Vinted jest jednym z największych wyzwań dla sprzedawców. Zbyt wysoka – i Twój przedmiot leży tygodniami bez kupca. Zbyt niska – i sprzedajesz poniżej wartości, nie zdając sobie z tego sprawy. Dobra wiadomość: przy odpowiednim podejściu znalezienie idealnej ceny staje się o wiele prostsze.',
+      sections: [
+        {
+          title: 'Analizuj konkurencję w czasie rzeczywistym',
+          body: 'Zanim ustalisz cenę, zawsze wyszukaj podobne przedmioty na Vinted. Wpisz markę, rodzaj odzieży i jeśli to możliwe kolor lub rozmiar w pasek wyszukiwania. Przejrzyj aktywne oferty i zanotuj zakres cen. Jeśli znajdziesz podobne przedmioty między 15 a 25 €, masz swój punkt odniesienia rynkowego. Analiza ta zajmuje zazwyczaj 5–10 minut, ale jest niezbędna, by nie pomylić segmentu. Im precyzyjniejsze wyszukiwanie, tym trafniejsze pozycjonowanie.',
+        },
+        {
+          title: 'Marka: najważniejszy czynnik cenowy',
+          body: "Marka to bez wątpienia kryterium, które najbardziej wpływa na cenę na Vinted. Używane dżinsy Zara sprzedają się za 10–20 €, podczas gdy Levi's może osiągnąć 40–60 €, a Acne Studios przekroczyć 100 €. Marki luksusowe jak Chanel czy Balenciaga zachowują 30–50% swojej wartości nawet z drugiej ręki. Jeśli posiadasz przedmiot premium marki, wyraźnie zaznacz to w tytule i opisie i pozycjonuj się w górnym przedziale rynku.",
+        },
+        {
+          title: 'Stan przedmiotu: nie lekceważ go',
+          body: "Vinted oferuje pięć poziomów stanu: Nowy z metką, Bardzo dobry stan, Dobry stan, Stan zadowalający i Nowy bez metki. Każdy poziom uzasadnia znaczącą różnicę cen. Przedmiot 'Nowy z metką' można sprzedać za 60–70% ceny nowego, podczas gdy 'Dobry stan' z lekkimi śladami użytkowania to raczej 30–40% ceny pierwotnej. Zawsze bądź szczery co do rzeczywistego stanu – rozczarowani kupujący zostawiają negatywne opinie, a Twoja reputacja na platformie jest warta więcej niż kilka dodatkowych euro.",
+        },
+        {
+          title: 'Pomyśl o sezonowości',
+          body: 'Popyt na Vinted jest silnie sezonowy. Płaszcze zimowe sprzedają się dobrze od września do listopada, odzież letnia od kwietnia do czerwca, a artykuły sportowe na początku roku. Sprzedaż zimowego płaszcza w środku lipca zmusi Cię do obniżenia ceny, podczas gdy wystawienie go w październiku pozwoli na wyższą wycenę. Planuj z wyprzedzeniem: jeśli masz zimowe ubrania do sprzedania, nie wystawiaj ich latem. Poczekaj na odpowiedni sezon.',
+        },
+        {
+          title: 'Zawsze zostawiaj miejsce na negocjacje',
+          body: 'Kultura negocjacji jest głęboko zakorzeniona na Vinted. Wielu kupujących złoży niższą ofertę przed zakupem. Uprzedź to, ustalając cenę wyjściową o 10–15% wyżej niż Twoja minimalna cena akceptowalna. Dzięki temu nawet po negocjacjach będziesz zadowolony. Włączenie darmowej wysyłki, gdy pozwala na to Twoja marża, również pomaga – oferty z darmową dostawą mają średnio o 30% więcej wyświetleń, co znacznie przyspiesza sprzedaż.',
+        },
+      ],
+      ctaTitle: 'Oblicz automatycznie właściwą cenę z SellerLab AI',
+      ctaBody:
+        'Analizowanie konkurencji, ocena stanu, uwzględnienie marki i sezonu… to dużo pracy. SellerLab AI robi to za Ciebie w kilka sekund. Nasz kalkulator cen Vinted analizuje rynek w czasie rzeczywistym i sugeruje optymalną cenę dla każdego przedmiotu.',
+    },
+    nl: {
+      title: 'Hoe je de juiste prijs op Vinted instelt in 2026',
+      metaDescription:
+        'Leer hoe je de ideale prijs voor je Vinted-artikelen berekent: concurrentieanalyse, merkinvloed, staat, seizoensinvloed en onderhandelingsstrategie.',
+      excerpt:
+        'Te duur en je artikel verkoopt niet. Te goedkoop en je verliest geld. Zo vind je de juiste prijs op Vinted.',
+      readTime: 5,
+      intro:
+        'De juiste prijs op Vinted bepalen is vaak een van de grootste uitdagingen voor verkopers. Te hoog en je artikel staat weken zonder koper. Te laag en je verkoopt onder de waarde zonder dat je het beseft. Het goede nieuws: met de juiste aanpak wordt de ideale prijs bepalen veel eenvoudiger.',
+      sections: [
+        {
+          title: 'Analyseer de concurrentie in realtime',
+          body: "Zoek altijd naar vergelijkbare artikelen op Vinted voordat je een prijs bepaalt. Typ het merk, het kledingtype en indien mogelijk de kleur of maat in de zoekbalk. Bekijk actieve advertenties en noteer de prijsrange. Als je vergelijkbare artikelen vindt tussen 15 en 25 €, heb je je marktbenchmark. Deze analyse duurt doorgaans 5–10 minuten maar is essentieel om niet in het verkeerde segment te zitten. Hoe specifieker je zoekopdracht, hoe nauwkeuriger je prijsstelling.",
+        },
+        {
+          title: 'Merk: de belangrijkste prijsfactor',
+          body: "Merk is waarschijnlijk de grootste prijsbepalende factor op Vinted. Een tweedehands Zara-spijkerbroek verkoopt voor 10–20 €, terwijl Levi's 40–60 € kan bereiken en Acne Studios boven de 100 € kan uitkomen. Luxemerken als Chanel of Balenciaga behouden zelfs tweedehands 30–50% van hun waarde. Als je een premium merkproduct hebt, vermeld het merk duidelijk in de titel en beschrijving en positioneer jezelf in het hogere segment van de marktrange.",
+        },
+        {
+          title: 'Staat van het artikel: onderschat het niet',
+          body: "Vinted biedt vijf conditieniveaus: Nieuw met label, Zeer goede staat, Goede staat, Voldoende staat en Nieuw zonder label. Elk niveau rechtvaardigt een significant prijsverschil. Een artikel 'Nieuw met label' kan legitiem voor 60–70% van de nieuwprijs verkopen, terwijl een 'Goede staat'-artikel met lichte gebruikssporen eerder 30–40% van de oorspronkelijke prijs waard is. Wees altijd eerlijk over de werkelijke staat – teleurgestelde kopers laten negatieve reviews achter, en je platformreputatie is meer waard dan een paar extra euro's.",
+        },
+        {
+          title: 'Denk aan seizoensinvloeden',
+          body: "De vraag op Vinted is sterk seizoensgebonden. Winterjassen verkopen goed van september tot november, zomerkleding van april tot juni, en sportartikelen aan het begin van het jaar. Een winterjas in volle juli verkopen dwingt je de prijs te verlagen, terwijl plaatsen in oktober een hogere prijs mogelijk maakt. Plan vooruit: als je winterkleding hebt om te verkopen, plaats het dan niet in de zomer. Wacht op het juiste seizoen.",
+        },
+        {
+          title: 'Laat altijd ruimte voor onderhandeling',
+          body: 'Onderhandelingscultuur is diep geworteld op Vinted. Veel kopers doen een lager bod voordat ze kopen. Anticipeer hierop door je startprijs 10–15% boven je minimumprijs te stellen. Zo ben je zelfs na onderhandeling tevreden. Gratis verzending inschakelen als je marge het toelaat helpt ook – advertenties met gratis verzending krijgen gemiddeld 30% meer views, wat de verkoop aanzienlijk versnelt.',
+        },
+      ],
+      ctaTitle: 'Bereken automatisch de juiste prijs met SellerLab AI',
+      ctaBody:
+        'Concurrenten analyseren, staat beoordelen, merk en seizoen meenemen… dat is veel werk. SellerLab AI doet het in seconden voor je. Onze Vinted-prijscalculator analyseert de markt in realtime en stelt de optimale prijs voor elk artikel voor.',
+    },
   },
   {
     slug: 'astuces-photos-vinted',
@@ -161,11 +305,11 @@ export const posts: BlogPost[] = [
           body: "Ne vous contentez pas d'une seule photo de face. Les acheteurs veulent voir l'article sous tous les angles avant de se décider. Photographiez le devant, le dos, les côtés, les détails importants (étiquette de marque, coutures, poches, fermeture éclair), et toute imperfection éventuelle. Vinted vous permet d'ajouter jusqu'à 20 photos par annonce : profitez-en. Plus vous montrez votre article, plus vous rassurez l'acheteur et réduisez le risque de conflit ou de retour. Les annonces avec 5 photos ou plus se vendent en moyenne deux fois plus vite.",
         },
         {
-          title: '4. Photographiez l\'article porté ou à plat',
+          title: "4. Photographiez l'article porté ou à plat",
           body: "Pour les vêtements en particulier, deux approches fonctionnent très bien : la photo portée et la photo à plat. La photo portée permet à l'acheteur de visualiser le rendu sur un corps réel — c'est très rassurant et ça aide à imaginer comment l'article lui ira. La photo à plat sur une surface blanche est plus neutre mais très propre et professionnelle. Idéalement, combinez les deux. Évitez les photos sur cintre si possible : elles aplatissent les vêtements et leur donnent souvent l'air moins attrayant.",
         },
         {
-          title: '5. Supprimez le fond automatiquement avec l\'IA',
+          title: "5. Supprimez le fond automatiquement avec l'IA",
           body: "Même avec les meilleures intentions, il n'est pas toujours possible de trouver un fond parfaitement neutre chez soi. C'est là qu'intervient l'intelligence artificielle. Des outils comme SellerLab AI permettent de supprimer le fond de vos photos en un clic et de le remplacer par un fond blanc professionnel. Résultat : des photos d'une qualité digne d'une boutique professionnelle, même si votre photo originale a été prise dans votre salon encombré. C'est l'astuce la plus efficace pour professionnaliser instantanément toutes vos annonces Vinted.",
         },
       ],
@@ -242,6 +386,146 @@ export const posts: BlogPost[] = [
       ctaTitle: 'Consigue fotos profesionales con SellerLab AI',
       ctaBody:
         'Nuestra herramienta IA elimina el fondo de tus fotos con un clic y te ofrece fondos profesionales. Fotos atractivas que atraen compradores, sin estudio de fotografía ni conocimientos técnicos.',
+    },
+    it: {
+      title: '5 trucchi fotografici per vendere più velocemente su Vinted',
+      metaDescription:
+        "Migliora le tue foto su Vinted con questi 5 consigli: luce naturale, sfondo neutro, angolazioni multiple, mise en scène e rimozione automatica dello sfondo con IA.",
+      excerpt:
+        "Le foto sono la prima cosa che vede un acquirente. Ecco 5 semplici consigli per foto che vendono davvero.",
+      readTime: 4,
+      intro:
+        "Su Vinted, la tua foto è la tua vetrina. In pochi secondi, un acquirente decide se vale la pena cliccare sul tuo annuncio – e quella decisione dipende per l'80% dalla qualità delle tue foto. La buona notizia: non hai bisogno di una fotocamera professionale o di uno studio. Ecco 5 consigli semplici ed efficaci.",
+      sections: [
+        {
+          title: '1. Sfrutta la luce naturale',
+          body: "La luce naturale è la tua migliore alleata per foto accattivanti. Posizionati vicino a una finestra con cielo coperto per una luce diffusa e morbida, senza ombre dure. Evita assolutamente il flash dello smartphone, che crea riflessi indesiderati e distorce i colori reali dell'articolo. Se fotografi con luce solare diretta, evita il sole a picco che sovraespone e sbianchi le zone chiare. La luce del mattino o del tardo pomeriggio è più morbida e lusinghiera. Questo solo consiglio può trasformare radicalmente la qualità dei tuoi annunci.",
+        },
+        {
+          title: '2. Scegli uno sfondo neutro e pulito',
+          body: "Lo sfondo della tua foto può fare la fortuna o rovinare un annuncio. Uno sfondo disordinato – letto disfatto, oggetti sparsi sul pavimento, pareti piene di poster – distrae dall'articolo e dà un'impressione poco professionale. Opta per uno sfondo bianco, beige o grigio chiaro: un lenzuolo bianco ben teso, una parete neutra, o semplicemente un grande foglio di cartoncino sul pavimento. Più è pulito lo sfondo, più l'articolo risalta. Gli annunci con sfondo neutro ottengono in media il 40% di click in più.",
+        },
+        {
+          title: '3. Fotografa da più angolazioni',
+          body: "Non accontentarti di una sola foto frontale. Gli acquirenti vogliono vedere l'articolo da tutte le angolazioni prima di decidere. Fotografa il davanti, il retro, i lati, i dettagli importanti (etichetta di marca, cuciture, tasche, cerniere) e qualsiasi imperfezione. Vinted ti permette di aggiungere fino a 20 foto per annuncio: approfittane. Più mostri l'articolo, più rassicuri l'acquirente e riduci il rischio di controversie o resi. Gli annunci con 5 o più foto si vendono in media due volte più velocemente.",
+        },
+        {
+          title: "4. Fotografa l'articolo indossato o disteso",
+          body: "Per i vestiti in particolare, due approcci funzionano molto bene: la foto indossata e la foto distesa. La foto indossata permette all'acquirente di visualizzare come sta su un corpo reale – è molto rassicurante e aiuta a immaginare come starà. La foto distesa su una superficie bianca è più neutra ma molto pulita e professionale. Idealmente, combina entrambi gli approcci. Evita le foto su gruccia se possibile: appiattiscono i vestiti e li fanno spesso sembrare meno attraenti.",
+        },
+        {
+          title: '5. Rimuovi lo sfondo automaticamente con IA',
+          body: "Anche con le migliori intenzioni, non è sempre possibile trovare uno sfondo perfettamente neutro in casa. È qui che entra in gioco l'intelligenza artificiale. Strumenti come SellerLab AI rimuovono lo sfondo dalle tue foto in un clic e lo sostituiscono con uno sfondo bianco professionale. Risultato: foto di qualità da boutique professionale, anche se la foto originale è stata scattata nel tuo salotto disordinato. È il consiglio più efficace per professionalizzare istantaneamente tutti i tuoi annunci Vinted.",
+        },
+      ],
+      ctaTitle: 'Ottieni foto professionali con SellerLab AI',
+      ctaBody:
+        "Il nostro strumento IA rimuove lo sfondo delle tue foto in un clic e ti propone sfondi professionali. Foto accattivanti che attirano gli acquirenti, senza studio fotografico né competenze tecniche.",
+    },
+    de: {
+      title: '5 Foto-Tipps für schnellere Verkäufe auf Vinted',
+      metaDescription:
+        'Verbessere deine Vinted-Fotos mit diesen 5 einfachen Tipps: natürliches Licht, neutraler Hintergrund, verschiedene Winkel, Styling und automatische KI-Hintergrundentfernung.',
+      excerpt:
+        'Fotos sind das Erste, was ein Käufer sieht. Hier sind 5 einfache Tipps für Fotos, die wirklich verkaufen.',
+      readTime: 4,
+      intro:
+        'Auf Vinted ist dein Foto dein Schaufenster. In wenigen Sekunden entscheidet ein Käufer, ob dein Angebot einen Klick wert ist – und diese Entscheidung basiert zu 80% auf deinen Fotos. Die gute Nachricht: Du brauchst weder eine Profikamera noch ein Studio. Hier sind 5 einfache, effektive Tipps.',
+      sections: [
+        {
+          title: '1. Nutze natürliches Licht',
+          body: 'Natürliches Licht ist dein bester Freund für attraktive Fotos. Stelle dich an einem bedeckten Tag nahe ans Fenster für weiches, diffuses Licht ohne harte Schatten. Vermeide unbedingt den Smartphone-Blitz – er erzeugt unerwünschte Reflexionen und verzerrt die echten Farben des Artikels. Wenn du bei direktem Sonnenlicht fotografierst, meide die Mittagssonne, die überbelichtet und helle Bereiche auswäscht. Morgen- oder spätnachmittägliches Licht ist sanfter und vorteilhafter. Allein dieser Tipp kann die Qualität deiner Angebote radikal verbessern.',
+        },
+        {
+          title: '2. Wähle einen neutralen, sauberen Hintergrund',
+          body: "Der Hintergrund deines Fotos kann ein Angebot machen oder ruinieren. Ein unordentlicher Hintergrund – ungemachtes Bett, Gegenstände auf dem Boden, plakatbedeckte Wände – lenkt vom Artikel ab und wirkt unprofessionell. Wähle einen weißen, beigen oder hellgrauen Hintergrund: ein straff gespanntes weißes Laken, eine neutrale Wand oder ein großes Kartonpapier auf dem Boden. Je sauberer der Hintergrund, desto klarer tritt der Artikel hervor. Angebote mit neutralem Hintergrund erhalten im Schnitt 40% mehr Klicks.",
+        },
+        {
+          title: '3. Fotografiere aus mehreren Winkeln',
+          body: 'Begnüge dich nicht mit einem einzigen Frontfoto. Käufer möchten den Artikel aus allen Winkeln sehen, bevor sie sich entscheiden. Fotografiere Vorder- und Rückseite, Seiten, wichtige Details (Markenaufnäher, Nähte, Taschen, Reißverschlüsse) und eventuelle Mängel. Vinted erlaubt bis zu 20 Fotos pro Angebot – nutze sie. Je mehr du zeigst, desto mehr beruhigst du den Käufer und reduzierst das Risiko von Streitigkeiten oder Rücksendungen. Angebote mit 5 oder mehr Fotos verkaufen sich im Schnitt doppelt so schnell.',
+        },
+        {
+          title: '4. Fotografiere Artikel getragen oder flach abgelegt',
+          body: 'Besonders bei Kleidung funktionieren zwei Ansätze sehr gut: getragene Fotos und Flachaufnahmen. Ein getragenes Foto lässt den Käufer visualisieren, wie der Artikel an einem echten Körper aussieht – das ist sehr beruhigend und hilft sich vorzustellen, wie er passen wird. Eine Flachaufnahme auf weißer Oberfläche ist neutraler, aber sehr sauber und professionell. Idealerweise kombiniere beide Ansätze. Vermeide Kleiderbügelfotos wenn möglich – sie glätten Kleidung und lassen sie oft weniger ansprechend wirken.',
+        },
+        {
+          title: '5. Entferne Hintergründe automatisch mit KI',
+          body: "Selbst mit besten Absichten ist es nicht immer möglich, einen perfekt neutralen Hintergrund zuhause zu finden. Genau hier kommt KI ins Spiel. Tools wie SellerLab AI entfernen den Hintergrund deiner Fotos mit einem Klick und ersetzen ihn durch einen professionellen weißen Hintergrund. Ergebnis: Fotos in Boutique-Qualität, selbst wenn das Originalfoto in einem unordentlichen Wohnzimmer aufgenommen wurde. Das ist der effektivste Tipp, um alle deine Vinted-Angebote sofort zu professionalisieren.",
+        },
+      ],
+      ctaTitle: 'Erhalte professionelle Fotos mit SellerLab AI',
+      ctaBody:
+        'Unser KI-Tool entfernt den Hintergrund deiner Fotos mit einem Klick und bietet professionelle Hintergründe. Attraktive Fotos, die Käufer anziehen – kein Fotostudio oder technische Kenntnisse erforderlich.',
+    },
+    pl: {
+      title: '5 wskazówek fotograficznych, by sprzedawać szybciej na Vinted',
+      metaDescription:
+        'Ulepsz swoje zdjęcia na Vinted dzięki tym 5 wskazówkom: naturalne światło, jednolite tło, wiele kątów, stylizacja i automatyczne usuwanie tła przez AI.',
+      excerpt:
+        'Zdjęcia to pierwsza rzecz, którą widzi kupujący. Oto 5 prostych wskazówek na zdjęcia, które sprzedają.',
+      readTime: 4,
+      intro:
+        'Na Vinted Twoje zdjęcie jest Twoją witryną. W kilka sekund kupujący decyduje, czy warto kliknąć w Twoją ofertę – a ta decyzja w 80% zależy od jakości zdjęć. Dobra wiadomość: nie potrzebujesz profesjonalnego aparatu ani studia. Oto 5 prostych i skutecznych wskazówek.',
+      sections: [
+        {
+          title: '1. Korzystaj z naturalnego światła',
+          body: 'Naturalne światło to Twój najlepszy sprzymierzeniec w robieniu atrakcyjnych zdjęć. Stań przy oknie w pochmurny dzień, by uzyskać miękkie, rozproszone światło bez ostrych cieni. Bezwzględnie unikaj lampy błyskowej smartfona – tworzy niepożądane refleksy i zniekształca prawdziwe kolory artykułu. Jeśli fotografujesz przy bezpośrednim świetle słonecznym, unikaj południa, kiedy ekspozycja jest zbyt mocna. Światło rano lub późnym popołudniem jest łagodniejsze i bardziej pochlebne. Ta jedna wskazówka może radykalnie zmienić jakość Twoich ofert.',
+        },
+        {
+          title: '2. Wybierz neutralne, czyste tło',
+          body: 'Tło zdjęcia może zadecydować o sukcesie lub porażce oferty. Zagracone tło – nieposłane łóżko, rozrzucone przedmioty, ściany pokryte plakatami – odwraca uwagę od artykułu i sprawia nieprofesjonalne wrażenie. Wybierz białe, beżowe lub jasnoszare tło: naciągnięte białe prześcieradło, neutralna ściana lub duży arkusz kartonu na podłodze. Im czystsze tło, tym wyraźniej Twój artykuł się wyróżnia. Oferty z neutralnym tłem mają średnio o 40% więcej kliknięć.',
+        },
+        {
+          title: '3. Fotografuj z wielu kątów',
+          body: 'Nie zadowalaj się jednym zdjęciem z przodu. Kupujący chcą zobaczyć artykuł ze wszystkich stron przed podjęciem decyzji. Fotografuj przód, tył, boki, ważne szczegóły (metka marki, szwy, kieszenie, zamki) i ewentualne wady. Vinted pozwala dodać do 20 zdjęć na ofertę – wykorzystaj to. Im więcej pokazujesz, tym bardziej uspokajasz kupującego i zmniejszasz ryzyko sporów lub zwrotów. Oferty z 5 lub więcej zdjęciami sprzedają się średnio dwa razy szybciej.',
+        },
+        {
+          title: '4. Fotografuj ubranie na sobie lub na płasko',
+          body: 'Szczególnie w przypadku odzieży świetnie sprawdzają się dwa podejścia: zdjęcie na sobie i zdjęcie na płasko. Zdjęcie na sobie pozwala kupującemu wyobrazić sobie, jak ubranie wygląda na prawdziwym ciele – to bardzo uspokajające i pomaga ocenić, jak będzie pasować. Zdjęcie na płasko na białej powierzchni jest bardziej neutralne, ale bardzo czyste i profesjonalne. Idealnie jest połączyć oba podejścia. Unikaj zdjęć na wieszaku, jeśli możesz – spłaszczają ubrania i sprawiają, że wyglądają mniej atrakcyjnie.',
+        },
+        {
+          title: '5. Automatycznie usuń tło za pomocą AI',
+          body: 'Nawet przy najlepszych chęciach nie zawsze można znaleźć idealnie neutralne tło w domu. Właśnie tutaj wkracza sztuczna inteligencja. Narzędzia takie jak SellerLab AI usuwają tło z Twoich zdjęć jednym kliknięciem i zastępują je profesjonalnym białym tłem. Efekt: zdjęcia o jakości profesjonalnego butiku, nawet jeśli oryginalne zdjęcie zostało zrobione w zagraconym salonie. To najskuteczniejsza wskazówka, by natychmiastowo uprofesjonalnić wszystkie Twoje oferty na Vinted.',
+        },
+      ],
+      ctaTitle: 'Uzyskaj profesjonalne zdjęcia z SellerLab AI',
+      ctaBody:
+        'Nasze narzędzie AI usuwa tło ze zdjęć jednym kliknięciem i oferuje profesjonalne tła. Atrakcyjne zdjęcia przyciągające kupujących – bez studia fotograficznego i umiejętności technicznych.',
+    },
+    nl: {
+      title: "5 Fotografie-Tips om Sneller te Verkopen op Vinted",
+      metaDescription:
+        "Verbeter je Vinted-foto's met deze 5 tips: natuurlijk licht, neutrale achtergrond, meerdere hoeken, styling en automatische AI-achtergrondverwijdering.",
+      excerpt:
+        "Foto's zijn het eerste wat een koper ziet. Hier zijn 5 eenvoudige tips voor foto's die echt verkopen.",
+      readTime: 4,
+      intro:
+        "Op Vinted is je foto je etalage. In een paar seconden beslist een koper of jouw advertentie het klikken waard is – en die beslissing is voor 80% gebaseerd op de kwaliteit van je foto's. Het goede nieuws: je hebt geen professionele camera of studio nodig. Hier zijn 5 eenvoudige, effectieve tips.",
+      sections: [
+        {
+          title: '1. Maak optimaal gebruik van natuurlijk licht',
+          body: "Natuurlijk licht is je beste bondgenoot voor aantrekkelijke foto's. Ga op een bewolkte dag bij een raam staan voor zacht, diffuus licht zonder harde schaduwen. Vermijd ten koste van alles je smartphone-flits – die veroorzaakt ongewenste reflecties en vervormt de echte kleuren. Als je in direct zonlicht fotografeert, vermijd dan het middaguur dat overbelicht en heldere gebieden uitwast. Ochtend- of laat middaglicht is zachter en flatterender. Alleen al deze tip kan de kwaliteit van je advertenties radicaal verbeteren.",
+        },
+        {
+          title: '2. Kies een neutrale, strakke achtergrond',
+          body: "De achtergrond van je foto kan een advertentie maken of breken. Een rommelige achtergrond – onopgemaakt bed, spullen op de vloer, muren vol posters – leidt af van het artikel en geeft een onprofessionele indruk. Ga voor een witte, beige of lichtgrijze achtergrond: een strak gespannen wit laken, een neutrale muur of een groot vel karton op de vloer. Hoe schoner de achtergrond, hoe duidelijker het artikel uitkomt. Advertenties met een neutrale achtergrond krijgen gemiddeld 40% meer klikken.",
+        },
+        {
+          title: '3. Fotografeer vanuit meerdere hoeken',
+          body: "Genoeg met één frontale foto. Kopers willen het artikel vanuit alle hoeken zien voordat ze beslissen. Fotografeer voorkant, achterkant, zijkanten, belangrijke details (merklabel, naden, zakken, ritsen) en eventuele gebreken. Vinted staat tot 20 foto's per advertentie toe – gebruik ze. Hoe meer je toont, hoe meer je de koper geruststelt en het risico op geschillen of retourzendingen vermindert. Advertenties met 5 of meer foto's verkopen gemiddeld twee keer zo snel.",
+        },
+        {
+          title: "4. Fotografeer artikelen gedragen of platgelegd",
+          body: "Vooral voor kleding werken twee benaderingen erg goed: gedragen foto's en flat-lay foto's. Een gedragen foto laat de koper zien hoe het kledingstuk op een echt lichaam zit – dat is heel geruststellend en helpt zich voor te stellen hoe het past. Een flat-lay op een wit oppervlak is neutraler maar erg strak en professioneel. Combineer idealiter beide benaderingen. Vermijd foto's op een hanger indien mogelijk – ze maken kleding plat en laten het er vaak minder aantrekkelijk uitzien.",
+        },
+        {
+          title: '5. Verwijder achtergronden automatisch met AI',
+          body: "Zelfs met de beste bedoelingen is het niet altijd mogelijk een perfect neutrale achtergrond thuis te vinden. Dat is waar AI om de hoek komt kijken. Tools zoals SellerLab AI verwijderen de achtergrond van je foto's met één klik en vervangen deze door een professionele witte achtergrond. Resultaat: foto's van professionele boutique-kwaliteit, ook als de originele foto in een rommelige woonkamer werd genomen. Dit is de meest effectieve tip om al je Vinted-advertenties direct te professionaliseren.",
+        },
+      ],
+      ctaTitle: "Krijg professionele foto's met SellerLab AI",
+      ctaBody:
+        "Ons AI-tool verwijdert de achtergrond van je foto's met één klik en biedt professionele achtergronden. Atrakcyjne foto's die kopers aantrekken – geen fotostudio of technische kennis vereist.",
     },
   },
   {
@@ -352,6 +636,146 @@ export const posts: BlogPost[] = [
       ctaTitle: 'Genera tus anuncios de Vinted automáticamente con IA',
       ctaBody:
         'Redactar un buen anuncio lleva tiempo y requiere experiencia. SellerLab AI genera automáticamente un título optimizado y una descripción completa para cada artículo en segundos. Anuncios profesionales, sin esfuerzo.',
+    },
+    it: {
+      title: 'Come scrivere un annuncio Vinted che attira gli acquirenti',
+      metaDescription:
+        "Impara a scrivere annunci Vinted efficaci: titoli ottimizzati con parole chiave, descrizioni complete, stato preciso e consigli per convertire più visitatori in acquirenti.",
+      excerpt:
+        "Un buon annuncio può raddoppiare le tue possibilità di vendita. Ecco come scrivere titoli e descrizioni che convertono.",
+      readTime: 5,
+      intro:
+        "Su Vinted, due annunci per lo stesso articolo possono ottenere risultati molto diversi a seconda di come sono scritti. Un titolo preciso, una descrizione completa e le parole chiave giuste possono raddoppiare la tua visibilità e moltiplicare le possibilità di vendita. Ecco come scrivere annunci Vinted che attirano davvero gli acquirenti.",
+      sections: [
+        {
+          title: 'Scrivi un titolo preciso e descrittivo',
+          body: "Il titolo è la prima cosa che vedono gli acquirenti nei risultati di ricerca. Deve contenere le parole chiave che usano gli acquirenti. Un buon formato: [Marchio] + [Tipo di articolo] + [Caratteristica principale] + [Taglia] + [Stato]. Ad esempio: 'Giacca di jeans Levi's blu taglia M ottimo stato' o 'Vestito midi floreale Zara T38 nuovo con etichetta'. Evita titoli vaghi come 'Bella giacca' o 'Vestito carino': non appaiono nelle ricerche e non informano l'acquirente. Ogni parola conta.",
+        },
+        {
+          title: 'Scrivi una descrizione completa e onesta',
+          body: "Una descrizione vuota genera diffidenza. Gli acquirenti vogliono sapere esattamente cosa stanno comprando. Descrivi l'articolo in dettaglio: il materiale e la composizione (100% cotone, misto lana…), il taglio e lo stile (ampio, aderente, boyfriend…), i colori esatti (blu navy, non solo 'blu'), lo stato reale con eventuali difetti, e le misure precise. Non esitare a contestualizzare: 'Acquistato in negozio Zara nel 2024, indossato due volte, messo da parte per mancanza di spazio.' Questa autenticità rassicura e accelera la decisione di acquisto.",
+        },
+        {
+          title: 'Usa le parole chiave giuste',
+          body: "Vinted funziona come un motore di ricerca: gli acquirenti digitano parole chiave per trovare articoli. Pensa come il tuo potenziale acquirente. Includi il nome del marchio scritto correttamente, il tipo di indumento (jeans, vestito, giacca, maglione, cappotto…), il colore, la taglia e il materiale principale. Se il tuo articolo è vintage o di stilista, menzionalo esplicitamente – questi termini sono molto ricercati. Evita gli errori ortografici: 'Adidas' scritto male non apparirà nelle ricerche per quel marchio.",
+        },
+        {
+          title: 'Specifica lo stato e le misure',
+          body: "Lo stato e le misure sono due informazioni critiche per l'acquirente. Per lo stato, non limitarti a spuntare la casella Vinted – dettaglia nella descrizione: 'Nessun difetto visibile', 'Lieve scolorimento sulla fodera non visibile dall'esterno', o 'Taglia leggermente grande, va bene anche per una 40/42'. Per le misure, non fidarti solo delle taglie indicate sulle etichette – variano enormemente da un marchio all'altro. Fornisci le misure reali: larghezza delle spalle, circonferenza del petto, lunghezza totale.",
+        },
+        {
+          title: 'Sii reattivo e costruisci la tua reputazione',
+          body: "Scrivere l'annuncio è importante, ma il tuo comportamento dopo la pubblicazione lo è altrettanto. Rispondi rapidamente alle domande degli acquirenti, idealmente entro un'ora. Sii cordiale e professionale, anche se la trattativa è serrata. Imballa con cura i tuoi articoli prima della spedizione e invia rapidamente dopo la vendita. Queste buone pratiche si traducono in recensioni positive sul tuo profilo, e su Vinted un profilo con buone valutazioni vende due o tre volte più velocemente di uno senza storico.",
+        },
+      ],
+      ctaTitle: "Genera automaticamente i tuoi annunci Vinted con l'IA",
+      ctaBody:
+        "Scrivere un buon annuncio richiede tempo ed esperienza. SellerLab AI genera automaticamente un titolo ottimizzato e una descrizione completa per ogni articolo in pochi secondi. Annunci professionali, senza sforzo.",
+    },
+    de: {
+      title: 'Wie du eine Vinted-Anzeige schreibst, die Käufer anzieht',
+      metaDescription:
+        'Lerne effektive Vinted-Anzeigen zu schreiben: keyword-optimierte Titel, vollständige Beschreibungen, genaue Zustandsangaben und Tipps, um mehr Besucher in Käufer umzuwandeln.',
+      excerpt:
+        'Eine gut geschriebene Anzeige kann deine Verkaufschancen verdoppeln. So schreibst du Titel und Beschreibungen, die konvertieren.',
+      readTime: 5,
+      intro:
+        'Auf Vinted können zwei Anzeigen für denselben Artikel sehr unterschiedliche Ergebnisse erzielen, je nachdem wie sie geschrieben sind. Ein präziser Titel, eine vollständige Beschreibung und die richtigen Keywords können deine Sichtbarkeit verdoppeln und deine Verkaufschancen vervielfachen. So schreibst du Vinted-Anzeigen, die wirklich Käufer anziehen.',
+      sections: [
+        {
+          title: 'Schreibe einen präzisen, beschreibenden Titel',
+          body: "Der Titel ist das Erste, was Käufer in den Suchergebnissen sehen. Er muss die Keywords enthalten, die Käufer tatsächlich verwenden. Ein gutes Format: [Marke] + [Artikeltyp] + [Hauptmerkmal] + [Größe] + [Zustand]. Zum Beispiel: 'Blaue Levi's Jeansjacke Größe M sehr guter Zustand' oder 'Geblümtes Zara Midi-Kleid Gr. 38 neu mit Etikett'. Vermeide vage Titel wie 'Schöne Jacke' oder 'Tolles Kleid' – sie erscheinen nicht in Suchanfragen und informieren den Käufer nicht. Jedes Wort zählt.",
+        },
+        {
+          title: 'Schreibe eine vollständige, ehrliche Beschreibung',
+          body: "Eine leere Beschreibung erzeugt Misstrauen. Käufer möchten genau wissen, was sie kaufen. Beschreibe deinen Artikel detailliert: das Material und die Zusammensetzung (100% Baumwolle, Wollmischung…), der Schnitt und Stil (oversized, tailliert, boyfriend…), die genauen Farben (marineblau, nicht nur 'blau'), den tatsächlichen Zustand inklusive Mängel, und genaue Maße. Zögere nicht, Kontext hinzuzufügen: 'Im Zara-Shop 2024 gekauft, zweimal getragen, wegen Platzmangel beiseitegelegt.' Diese Ehrlichkeit beruhigt und beschleunigt die Kaufentscheidung.",
+        },
+        {
+          title: 'Verwende die richtigen Keywords',
+          body: "Vinted funktioniert wie eine Suchmaschine: Käufer geben Keywords ein, um Artikel zu finden. Denke wie dein potenzieller Käufer. Füge den richtig geschriebenen Markennamen, den Kleidungstyp (Jeans, Kleid, Jacke, Pullover, Mantel…), die Farbe, Größe und das Hauptmaterial ein. Wenn dein Artikel Vintage oder Designerware ist, erwähne es explizit – diese Begriffe werden stark gesucht. Vermeide Rechtschreibfehler: 'Adidas' falsch geschrieben erscheint nicht in Suchanfragen für diese Marke.",
+        },
+        {
+          title: 'Gib Zustand und Maße genau an',
+          body: "Zustand und Maße sind zwei kritische Informationen für den Käufer. Für den Zustand, hake nicht nur das Vinted-Kästchen ab – erweitere die Beschreibung: 'Keine sichtbaren Mängel', 'Leichte Verfärbung am Futter, von außen nicht sichtbar', oder 'Fällt etwas groß aus, passt auch Größe L/XL'. Verlasse dich bei den Maßen nicht allein auf die Größenangaben der Etiketten – sie variieren stark zwischen Marken. Gib die tatsächlichen Maße des Artikels an: Schulterbreite, Brustumfang, Gesamtlänge.",
+        },
+        {
+          title: 'Sei reaktionsschnell und baue deinen Ruf auf',
+          body: "Deine Anzeige zu schreiben ist wichtig, aber dein Verhalten nach der Veröffentlichung ebenso. Antworte schnell auf Käuferfragen, idealerweise innerhalb einer Stunde. Sei freundlich und professionell, auch wenn die Verhandlung schwierig ist. Verpacke deine Artikel sorgfältig vor dem Versand und schicke sie schnell nach dem Verkauf. Diese guten Praktiken spiegeln sich in positiven Bewertungen auf deinem Profil wider, und auf Vinted verkauft ein Profil mit guten Bewertungen zwei- bis dreimal schneller als eines ohne Verlauf.",
+        },
+      ],
+      ctaTitle: 'Generiere deine Vinted-Anzeigen automatisch mit KI',
+      ctaBody:
+        'Eine gute Anzeige zu schreiben braucht Zeit und Erfahrung. SellerLab AI generiert automatisch einen optimierten Titel und eine vollständige Beschreibung für jeden Artikel in Sekunden. Professionelle Anzeigen, mühelos.',
+    },
+    pl: {
+      title: 'Jak napisać ogłoszenie na Vinted, które przyciąga kupujących',
+      metaDescription:
+        'Naucz się pisać skuteczne ogłoszenia na Vinted: tytuły zoptymalizowane pod słowa kluczowe, pełne opisy, dokładny stan i wskazówki, jak przekształcić przeglądających w kupujących.',
+      excerpt:
+        'Dobrze napisane ogłoszenie może podwoić Twoje szanse na sprzedaż. Oto jak pisać tytuły i opisy, które konwertują.',
+      readTime: 5,
+      intro:
+        'Na Vinted dwa ogłoszenia dla tego samego przedmiotu mogą osiągnąć bardzo różne wyniki w zależności od sposobu ich napisania. Precyzyjny tytuł, kompletny opis i właściwe słowa kluczowe mogą podwoić Twoją widoczność i zwielokrotnić szanse sprzedaży. Oto jak pisać ogłoszenia na Vinted, które naprawdę przyciągają kupujących.',
+      sections: [
+        {
+          title: 'Napisz precyzyjny i opisowy tytuł',
+          body: "Tytuł to pierwsza rzecz, którą kupujący widzą w wynikach wyszukiwania. Musi zawierać słowa kluczowe, których faktycznie używają kupujący. Dobry format: [Marka] + [Rodzaj artykułu] + [Główna cecha] + [Rozmiar] + [Stan]. Na przykład: 'Kurtka jeansowa Levi's niebieska rozmiar M bardzo dobry stan' lub 'Sukienka midi w kwiaty Zara T38 nowa z metką'. Unikaj niejasnych tytułów jak 'Ładna kurtka' czy 'Fajne ubranie' – nie pojawiają się w wyszukiwaniach i nie informują kupującego. Każde słowo ma znaczenie.",
+        },
+        {
+          title: 'Napisz kompletny i szczery opis',
+          body: "Pusty opis budzi nieufność. Kupujący chcą wiedzieć dokładnie, co kupują. Opisz artykuł szczegółowo: materiał i skład (100% bawełna, mieszanka wełny…), krój i styl (luźny, dopasowany, boyfriend…), dokładne kolory (granatowy, nie tylko 'niebieski'), rzeczywisty stan z ewentualnymi wadami i precyzyjne wymiary. Nie wahaj się dodać kontekstu: 'Kupione w sklepie Zara w 2024 roku, noszone dwa razy, odłożone z braku miejsca.' Ta autentyczność uspokaja i przyspiesza decyzję zakupową.",
+        },
+        {
+          title: 'Używaj właściwych słów kluczowych',
+          body: "Vinted działa jak wyszukiwarka: kupujący wpisują słowa kluczowe, by znaleźć artykuły. Myśl jak Twój potencjalny kupujący. Uwzględnij nazwę marki napisaną poprawnie, rodzaj odzieży (dżinsy, sukienka, kurtka, sweter, płaszcz…), kolor, rozmiar i główny materiał. Jeśli Twój artykuł jest vintage lub od projektanta, zaznacz to wyraźnie – te terminy są bardzo wyszukiwane. Unikaj błędów ortograficznych: 'Adidas' błędnie napisany nie pojawi się w wyszukiwaniach tej marki.",
+        },
+        {
+          title: 'Dokładnie określ stan i wymiary',
+          body: "Stan i wymiary to dwie krytyczne informacje dla kupującego. W przypadku stanu nie ograniczaj się do zaznaczenia pola na Vinted – rozwiń to w opisie: 'Brak widocznych wad', 'Lekkie odbarwienie na podszewce niewidoczne od zewnątrz' lub 'Nieco duże, pasuje też na rozmiar L/XL'. W przypadku wymiarów nie polegaj wyłącznie na rozmiarach wskazanych na metkach – bardzo się różnią między markami. Podaj rzeczywiste wymiary artykułu: szerokość ramion, obwód klatki piersiowej, całkowita długość.",
+        },
+        {
+          title: 'Bądź responsywny i buduj swoją reputację',
+          body: 'Pisanie ogłoszenia jest ważne, ale Twoje zachowanie po jego opublikowaniu jest równie istotne. Odpowiadaj szybko na pytania kupujących, najlepiej w ciągu godziny. Bądź przyjazny i profesjonalny, nawet gdy negocjacje są trudne. Starannie pakuj artykuły przed wysyłką i wysyłaj szybko po sprzedaży. Te dobre praktyki przekładają się na pozytywne opinie w Twoim profilu, a na Vinted profil z dobrymi ocenami sprzedaje dwa lub trzy razy szybciej niż profil bez historii.',
+        },
+      ],
+      ctaTitle: 'Automatycznie generuj swoje ogłoszenia Vinted z AI',
+      ctaBody:
+        'Napisanie dobrego ogłoszenia zajmuje czas i wymaga doświadczenia. SellerLab AI automatycznie generuje zoptymalizowany tytuł i kompletny opis dla każdego artykułu w kilka sekund. Profesjonalne ogłoszenia, bez wysiłku.',
+    },
+    nl: {
+      title: 'Hoe je een Vinted-advertentie schrijft die kopers aantrekt',
+      metaDescription:
+        'Leer effectieve Vinted-advertenties te schrijven: zoekwoordgeoptimaliseerde titels, volledige beschrijvingen, nauwkeurige staat en tips om meer bezoekers in kopers te omzetten.',
+      excerpt:
+        'Een goed geschreven advertentie kan je verkoopkansen verdubbelen. Zo schrijf je titels en beschrijvingen die converteren.',
+      readTime: 5,
+      intro:
+        "Op Vinted kunnen twee advertenties voor hetzelfde artikel heel verschillende resultaten opleveren, afhankelijk van hoe ze zijn geschreven. Een precieze titel, een volledige beschrijving en de juiste zoekwoorden kunnen je zichtbaarheid verdubbelen en je verkoopkansen vermenigvuldigen. Zo schrijf je Vinted-advertenties die echt kopers aantrekken.",
+      sections: [
+        {
+          title: 'Schrijf een precieze, beschrijvende titel',
+          body: "De titel is het eerste wat kopers in de zoekresultaten zien. Het moet de zoekwoorden bevatten die kopers daadwerkelijk gebruiken. Een goed formaat: [Merk] + [Artikeltype] + [Hoofdkenmerk] + [Maat] + [Staat]. Bijvoorbeeld: 'Blauwe Levi's spijkerjack maat M zeer goede staat' of 'Bloemenprint Zara midi-jurk maat 38 nieuw met label'. Vermijd vage titels zoals 'Mooie jas' of 'Leuke jurk' – ze verschijnen niet in zoekopdrachten en informeren de koper niet. Elk woord telt.",
+        },
+        {
+          title: 'Schrijf een volledige, eerlijke beschrijving',
+          body: "Een lege beschrijving wekt wantrouwen. Kopers willen precies weten wat ze kopen. Beschrijf je artikel in detail: het materiaal en de samenstelling (100% katoen, wolmix…), de snit en stijl (oversized, strak, boyfriend…), de exacte kleuren (marineblauw, niet alleen 'blauw'), de werkelijke staat inclusief gebreken, en precieze maten. Aarzel niet context toe te voegen: 'Gekocht in Zara-winkel in 2024, twee keer gedragen, opgeruimd wegens plaatsgebrek.' Deze authenticiteit geruststelt en versnelt de aankoopbeslissing.",
+        },
+        {
+          title: 'Gebruik de juiste zoekwoorden',
+          body: "Vinted werkt als een zoekmachine: kopers typen zoekwoorden om artikelen te vinden. Denk als je potentiële koper. Voeg de correct gespelde merknaam toe, het kledingtype (jeans, jurk, jas, trui, mantel…), de kleur, maat en het hoofdmateriaal. Als je artikel vintage of van een ontwerper is, vermeld dit expliciet – deze termen worden veel gezocht. Vermijd spelfouten: 'Adidas' verkeerd geschreven verschijnt niet in zoekopdrachten voor dat merk.",
+        },
+        {
+          title: 'Geef staat en maten nauwkeurig op',
+          body: "Staat en maten zijn twee cruciale informatiestukken voor de koper. Vink voor de staat niet alleen het Vinted-vakje aan – breid uit in de beschrijving: 'Geen zichtbare gebreken', 'Lichte verkleuring op voering niet van buitenaf zichtbaar', of 'Valt iets groot, past ook een maat L/XL'. Vertrouw voor maten niet uitsluitend op de maten op de etiketten – die variëren enorm tussen merken. Geef de werkelijke maten van het artikel: schouderbreedte, borstomtrek, totale lengte.",
+        },
+        {
+          title: 'Wees responsief en bouw je reputatie op',
+          body: "Je advertentie schrijven is belangrijk, maar je gedrag na plaatsing is net zo belangrijk. Reageer snel op kopervragen, bij voorkeur binnen het uur. Wees vriendelijk en professioneel, ook als de onderhandeling moeilijk is. Verpak je artikelen zorgvuldig voor verzending en stuur ze snel na de verkoop. Deze goede praktijken vertalen zich in positieve reviews op je profiel, en op Vinted verkoopt een profiel met goede beoordelingen twee tot drie keer sneller dan een profiel zonder geschiedenis.",
+        },
+      ],
+      ctaTitle: 'Genereer je Vinted-advertenties automatisch met AI',
+      ctaBody:
+        'Een goede advertentie schrijven kost tijd en vraagt ervaring. SellerLab AI genereert automatisch een geoptimaliseerde titel en volledige beschrijving voor elk artikel in seconden. Professionele advertenties, moeiteloos.',
     },
   },
 ]

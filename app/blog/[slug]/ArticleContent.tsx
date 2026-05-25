@@ -8,17 +8,22 @@ import SiteHeader from '@/app/components/SiteHeader'
 import SiteFooter from '@/app/components/SiteFooter'
 import type { Lang } from '@/lib/i18n'
 
+const localeMap: Record<Lang, string> = {
+  fr: 'fr-FR', en: 'en-US', es: 'es-ES', it: 'it-IT', de: 'de-DE', pl: 'pl-PL', nl: 'nl-NL',
+}
+
 function formatDate(date: string, lang: Lang) {
-  return new Date(date).toLocaleDateString(
-    lang === 'fr' ? 'fr-FR' : lang === 'es' ? 'es-ES' : 'en-US',
-    { year: 'numeric', month: 'long', day: 'numeric' }
-  )
+  return new Date(date).toLocaleDateString(localeMap[lang], { year: 'numeric', month: 'long', day: 'numeric' })
 }
 
 const backLabel: Record<Lang, string> = {
   fr: '← Retour au blog',
   en: '← Back to blog',
   es: '← Volver al blog',
+  it: '← Torna al blog',
+  de: '← Zurück zum Blog',
+  pl: '← Wróć do bloga',
+  nl: '← Terug naar blog',
 }
 
 export default function ArticleContent({ slug }: { slug: string }) {

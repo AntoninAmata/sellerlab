@@ -373,8 +373,9 @@ function BlogPreview({ t, lang }: { t: Translations; lang: Lang }) {
         <div className="grid md:grid-cols-3 gap-6">
           {posts.map((post) => {
             const p = post[lang]
+            const localeMap: Record<string, string> = { fr: 'fr-FR', en: 'en-US', es: 'es-ES', it: 'it-IT', de: 'de-DE', pl: 'pl-PL', nl: 'nl-NL' }
             const date = new Date(post.date).toLocaleDateString(
-              lang === 'fr' ? 'fr-FR' : lang === 'es' ? 'es-ES' : 'en-US',
+              localeMap[lang] ?? 'en-US',
               { year: 'numeric', month: 'long', day: 'numeric' }
             )
             return (

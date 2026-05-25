@@ -4,24 +4,13 @@ import { useState, useEffect } from 'react'
 import { useLang } from '@/app/providers'
 
 const T = {
-  fr: {
-    text: 'Nous utilisons des cookies pour améliorer votre expérience et analyser le trafic.',
-    accept: 'Accepter',
-    reject: 'Refuser',
-    privacy: 'Politique de confidentialité',
-  },
-  en: {
-    text: 'We use cookies to improve your experience and analyze traffic.',
-    accept: 'Accept',
-    reject: 'Decline',
-    privacy: 'Privacy Policy',
-  },
-  es: {
-    text: 'Usamos cookies para mejorar tu experiencia y analizar el tráfico.',
-    accept: 'Aceptar',
-    reject: 'Rechazar',
-    privacy: 'Política de privacidad',
-  },
+  fr: { text: 'Nous utilisons des cookies pour améliorer votre expérience et analyser le trafic.', accept: 'Accepter', reject: 'Refuser', privacy: 'Politique de confidentialité' },
+  en: { text: 'We use cookies to improve your experience and analyze traffic.', accept: 'Accept', reject: 'Decline', privacy: 'Privacy Policy' },
+  es: { text: 'Usamos cookies para mejorar tu experiencia y analizar el tráfico.', accept: 'Aceptar', reject: 'Rechazar', privacy: 'Política de privacidad' },
+  it: { text: 'Utilizziamo i cookie per migliorare la tua esperienza e analizzare il traffico.', accept: 'Accetta', reject: 'Rifiuta', privacy: 'Informativa sulla Privacy' },
+  de: { text: 'Wir verwenden Cookies, um deine Erfahrung zu verbessern und den Traffic zu analysieren.', accept: 'Akzeptieren', reject: 'Ablehnen', privacy: 'Datenschutzrichtlinie' },
+  pl: { text: 'Używamy plików cookie, aby poprawić Twoje doświadczenie i analizować ruch.', accept: 'Akceptuj', reject: 'Odrzuć', privacy: 'Polityka Prywatności' },
+  nl: { text: 'We gebruiken cookies om je ervaring te verbeteren en het verkeer te analyseren.', accept: 'Accepteren', reject: 'Weigeren', privacy: 'Privacybeleid' },
 }
 
 export default function CookieBanner() {

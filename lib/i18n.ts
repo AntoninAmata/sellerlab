@@ -1,4 +1,4 @@
-export type Lang = 'fr' | 'es' | 'en'
+export type Lang = 'fr' | 'es' | 'en' | 'it' | 'de' | 'pl' | 'nl'
 
 export interface Plan {
   name: string
@@ -568,4 +568,404 @@ const es: Translations = {
   },
 }
 
-export const translations: Record<Lang, Translations> = { fr, en, es }
+// ─── Italiano ────────────────────────────────────────────────────────────────
+
+const it: Translations = {
+  nav: {
+    features: 'Funzionalità',
+    pricing: 'Prezzi',
+    faq: 'FAQ',
+    cta: 'Inizia gratis',
+    blog: 'Blog',
+    about: 'Chi siamo',
+    contact: 'Contatti',
+  },
+  hero: {
+    badge: "Alimentato dall'IA",
+    h1a: 'Vendi di più.',
+    h1b: 'Lavora meno.',
+    subtitle: 'SellerLab AI ottimizza le tue foto, calcola i tuoi prezzi e scrive i tuoi annunci Vinted in pochi secondi.',
+    cta1: 'Prova gratis',
+    cta2: 'Scopri come funziona',
+  },
+  ui: {
+    before: 'Prima',
+    after: 'Dopo ✓',
+    illustrationCaption: 'Sfondo rimosso automaticamente da SellerLab AI',
+  },
+  socialProof: "Unisciti ai primi venditori Vinted che vendono più velocemente con l'IA",
+  problem: {
+    h2: 'Vinted richiede troppo tempo',
+    subtitle: 'Passi ore sugli annunci senza ottenere risultati?',
+    cards: [
+      { title: 'Foto scadenti = niente vendite', desc: "Uno sfondo disordinato o una foto scura spaventa gli acquirenti prima ancora che leggano l'annuncio." },
+      { title: 'Prezzi troppo bassi = perdita di denaro', desc: 'Senza riferimenti di mercato, si tende a sottovalutare i propri articoli lasciando soldi sul tavolo.' },
+      { title: 'Annunci vuoti = nessun clic', desc: 'Una descrizione scarsa non attira nessuno. Gli acquirenti scorrono senza fermarsi sui tuoi articoli.' },
+    ],
+  },
+  features: {
+    h2: 'Tutto ciò che serve per vendere meglio',
+    items: [
+      { title: 'Foto IA', desc: 'Rimuovi lo sfondo delle tue foto con un clic e scegli tra sfondi professionali per valorizzare i tuoi articoli su Vinted.' },
+      { title: 'Calcolo prezzo intelligente', desc: 'Il nostro calcolatore di prezzi Vinted analizza il mercato in tempo reale e suggerisce il prezzo ottimale per massimizzare le vendite.' },
+      { title: 'Annuncio in 1 clic', desc: "L'IA genera automaticamente un titolo accattivante e una descrizione completa per ogni articolo. Annuncio Vinted automatico in pochi secondi." },
+    ],
+  },
+  howItWorks: {
+    h2: 'Come funziona',
+    steps: [
+      { num: '01', title: 'Carica la foto', desc: 'Scatta una foto del tuo articolo e caricala su SellerLab AI in pochi secondi.' },
+      { num: '02', title: "L'IA analizza e ottimizza", desc: "La nostra IA rimuove lo sfondo, calcola il prezzo ideale e scrive l'annuncio automaticamente." },
+      { num: '03', title: 'Copia e incolla su Vinted', desc: 'Copia il titolo, la descrizione e il prezzo, poi pubblica direttamente su Vinted. Tutto qui.' },
+    ],
+  },
+  pricing: {
+    h2: 'Prezzi semplici e trasparenti',
+    plans: [
+      {
+        name: 'Freemium', price: '0€', period: 'gratis per sempre', badge: null,
+        features: ['5 ottimizzazioni / mese', 'Rimozione sfondo (5/mese)', 'Calcolo prezzo base', 'Supporto community'],
+        cta: 'Inizia gratis', highlight: false,
+      },
+      {
+        name: 'Venditore attivo', price: '9€', period: '/mese', badge: 'Il più popolare',
+        features: ['Ottimizzazioni illimitate', 'Rimozione sfondo illimitata', 'Prezzi intelligenti in tempo reale', 'Generazione annunci IA', 'Supporto via email'],
+        cta: 'Prova 7 giorni gratis', highlight: true,
+      },
+      {
+        name: 'Pro', price: '29€', period: '/mese', badge: null,
+        features: ['Tutto del piano Venditore attivo', 'Gestione multi-account', 'Analisi vendite avanzate', 'Esportazione CSV', 'Supporto prioritario'],
+        cta: 'Contatta le vendite', highlight: false,
+      },
+    ],
+  },
+  faq: {
+    h2: 'Domande frequenti',
+    items: [
+      { q: 'SellerLab AI funziona con Vinted?', a: "Sì, SellerLab AI è progettato specificamente per i venditori Vinted. Analizza le tendenze del mercato Vinted e genera annunci ottimizzati per questa piattaforma." },
+      { q: 'Come calcola SellerLab AI il prezzo dei miei articoli su Vinted?', a: "Il nostro calcolatore analizza migliaia di annunci simili in tempo reale, tenendo conto di marca, condizioni, categoria e domanda attuale per suggerire il prezzo ottimale." },
+      { q: 'I miei dati Vinted sono al sicuro?', a: "Assolutamente. SellerLab AI non si connette mai al tuo account Vinted. Carichi le tue foto e l'IA fa il resto. I tuoi dati non vengono mai condivisi con terzi." },
+      { q: 'Quanto tempo occorre per generare un annuncio Vinted automatico?', a: "Il nostro strumento produce titolo, descrizione e calcolo del prezzo in meno di 10 secondi. Basta copiare e incollare il contenuto direttamente su Vinted." },
+      { q: "SellerLab AI può rimuovere automaticamente lo sfondo dalle mie foto?", a: "Sì, è una delle nostre funzionalità principali. La nostra IA rimuove lo sfondo con un clic e propone sfondi professionali per rendere i tuoi articoli più attraenti su Vinted." },
+      { q: 'Qual è la differenza tra il piano Freemium e il piano Venditore attivo?', a: "Il Freemium è gratuito per sempre con 5 ottimizzazioni al mese. Il piano Venditore attivo (9€/mese) offre ottimizzazioni illimitate, calcolo prezzi in tempo reale e generazione annunci IA senza limiti." },
+    ],
+  },
+  latestPosts: { h2: 'Ultimi articoli', cta: 'Vedi tutti gli articoli' },
+  finalCta: {
+    h2: 'Pronto a vendere di più?',
+    subtitle: "Unisciti ai primi venditori Vinted che vendono grazie all'IA.",
+    cta: 'Inizia gratis',
+  },
+  footer: {
+    copyright: '© 2026 SellerLab AI — Tutti i diritti riservati',
+    links: [
+      { label: 'Blog', href: '/blog' },
+      { label: 'Chi siamo', href: '/about' },
+      { label: 'Contatti', href: '/contact' },
+      { label: 'CGU', href: '/cgu' },
+      { label: 'Privacy', href: '/confidentialite' },
+    ],
+  },
+}
+
+// ─── Deutsch ─────────────────────────────────────────────────────────────────
+
+const de: Translations = {
+  nav: {
+    features: 'Funktionen',
+    pricing: 'Preise',
+    faq: 'FAQ',
+    cta: 'Kostenlos starten',
+    blog: 'Blog',
+    about: 'Über uns',
+    contact: 'Kontakt',
+  },
+  hero: {
+    badge: 'KI-gestützt',
+    h1a: 'Mehr verkaufen.',
+    h1b: 'Weniger arbeiten.',
+    subtitle: 'SellerLab AI optimiert deine Fotos, berechnet deine Preise und schreibt deine Vinted-Anzeigen in Sekunden.',
+    cta1: 'Kostenlos testen',
+    cta2: "So funktioniert's",
+  },
+  ui: {
+    before: 'Vorher',
+    after: 'Nachher ✓',
+    illustrationCaption: 'Hintergrund automatisch entfernt von SellerLab AI',
+  },
+  socialProof: 'Werde Teil der ersten Vinted-Verkäufer, die dank KI schneller verkaufen',
+  problem: {
+    h2: 'Vinted kostet zu viel Zeit',
+    subtitle: 'Verbringst du Stunden mit deinen Anzeigen ohne Ergebnisse?',
+    cards: [
+      { title: 'Schlechte Fotos = keine Verkäufe', desc: 'Ein unordentlicher Hintergrund oder ein dunkles Foto schreckt Käufer ab, bevor sie deine Anzeige lesen.' },
+      { title: 'Preise zu niedrig = Geldverlust', desc: 'Ohne Marktdaten unterschätzt man oft den Wert seiner Artikel und lässt Geld auf dem Tisch liegen.' },
+      { title: 'Leere Anzeigen = keine Klicks', desc: 'Eine schlechte Beschreibung zieht niemanden an. Käufer scrollen an deinen Artikeln vorbei.' },
+    ],
+  },
+  features: {
+    h2: 'Alles, was du brauchst, um besser zu verkaufen',
+    items: [
+      { title: 'KI-Foto', desc: 'Entferne den Hintergrund deiner Fotos mit einem Klick und wähle aus professionellen Hintergründen für deine Vinted-Artikel.' },
+      { title: 'Intelligente Preisberechnung', desc: 'Unser Vinted-Preisrechner analysiert den Markt in Echtzeit und schlägt den optimalen Preis vor, um deine Verkäufe zu maximieren.' },
+      { title: '1-Klick-Anzeige', desc: 'Die KI generiert automatisch einen ansprechenden Titel und eine vollständige Beschreibung. Vinted-Anzeige automatisch in Sekunden.' },
+    ],
+  },
+  howItWorks: {
+    h2: "So funktioniert's",
+    steps: [
+      { num: '01', title: 'Foto hochladen', desc: 'Mache ein Foto von deinem Artikel und lade es in Sekunden bei SellerLab AI hoch.' },
+      { num: '02', title: 'KI analysiert und optimiert', desc: 'Unsere KI entfernt den Hintergrund, berechnet den Idealpreis und schreibt die Anzeige automatisch.' },
+      { num: '03', title: 'Kopieren und in Vinted einfügen', desc: "Kopiere Titel, Beschreibung und Preis, dann veröffentliche direkt auf Vinted. Das war's." },
+    ],
+  },
+  pricing: {
+    h2: 'Einfache und transparente Preise',
+    plans: [
+      {
+        name: 'Freemium', price: '0€', period: 'kostenlos für immer', badge: null,
+        features: ['5 Optimierungen / Monat', 'Hintergrundentfernung (5/Monat)', 'Einfache Preisberechnung', 'Community-Support'],
+        cta: 'Kostenlos starten', highlight: false,
+      },
+      {
+        name: 'Aktiver Verkäufer', price: '9€', period: '/Monat', badge: 'Am beliebtesten',
+        features: ['Unbegrenzte Optimierungen', 'Unbegrenzte Hintergrundentfernung', 'Echtzeit-Intelligentpreise', 'KI-Anzeigengenerierung', 'E-Mail-Support'],
+        cta: '7 Tage kostenlos testen', highlight: true,
+      },
+      {
+        name: 'Pro', price: '29€', period: '/Monat', badge: null,
+        features: ['Alles im Plan Aktiver Verkäufer', 'Multi-Konto-Verwaltung', 'Erweiterte Verkaufsanalysen', 'CSV-Export', 'Prioritätssupport'],
+        cta: 'Vertrieb kontaktieren', highlight: false,
+      },
+    ],
+  },
+  faq: {
+    h2: 'Häufig gestellte Fragen',
+    items: [
+      { q: 'Funktioniert SellerLab AI mit Vinted?', a: 'Ja, SellerLab AI wurde speziell für Vinted-Verkäufer entwickelt. Es analysiert Vinted-Markttrends und generiert optimierte Anzeigen für diese Plattform.' },
+      { q: 'Wie berechnet SellerLab AI den Preis meiner Vinted-Artikel?', a: 'Unser Preisrechner analysiert tausende ähnlicher Anzeigen in Echtzeit. Er berücksichtigt Marke, Zustand, Kategorie und aktuelle Nachfrage, um den optimalen Preis vorzuschlagen.' },
+      { q: 'Sind meine Vinted-Daten sicher?', a: 'Absolut. SellerLab AI verbindet sich niemals mit deinem Vinted-Konto. Du lädst deine Fotos hoch und die KI erledigt den Rest. Deine Daten werden niemals an Dritte weitergegeben.' },
+      { q: 'Wie lange dauert es, eine automatische Vinted-Anzeige zu erstellen?', a: 'Unser automatischer Generator erstellt Titel, Beschreibung und Preiskalkulation in unter 10 Sekunden. Einfach den Inhalt kopieren und direkt in Vinted einfügen.' },
+      { q: 'Kann SellerLab AI den Hintergrund meiner Fotos automatisch entfernen?', a: 'Ja, das ist eine unserer Hauptfunktionen. Unsere KI entfernt den Hintergrund mit einem Klick und bietet professionelle Hintergründe an, um deine Artikel attraktiver zu machen.' },
+      { q: 'Was ist der Unterschied zwischen Freemium und Aktiver Verkäufer?', a: 'Der Freemium-Plan ist für immer kostenlos mit 5 Optimierungen pro Monat. Der Aktiver-Verkäufer-Plan (9€/Monat) bietet unbegrenzte Optimierungen, Echtzeit-Preisberechnung und KI-Anzeigengenerierung ohne Einschränkungen.' },
+    ],
+  },
+  latestPosts: { h2: 'Neueste Artikel', cta: 'Alle Artikel anzeigen' },
+  finalCta: {
+    h2: 'Bereit, mehr zu verkaufen?',
+    subtitle: 'Werde Teil der ersten Vinted-Verkäufer, die dank KI verkaufen.',
+    cta: 'Kostenlos starten',
+  },
+  footer: {
+    copyright: '© 2026 SellerLab AI — Alle Rechte vorbehalten',
+    links: [
+      { label: 'Blog', href: '/blog' },
+      { label: 'Über uns', href: '/about' },
+      { label: 'Kontakt', href: '/contact' },
+      { label: 'AGB', href: '/cgu' },
+      { label: 'Datenschutz', href: '/confidentialite' },
+    ],
+  },
+}
+
+// ─── Polski ───────────────────────────────────────────────────────────────────
+
+const pl: Translations = {
+  nav: {
+    features: 'Funkcje',
+    pricing: 'Cennik',
+    faq: 'FAQ',
+    cta: 'Zacznij za darmo',
+    blog: 'Blog',
+    about: 'O nas',
+    contact: 'Kontakt',
+  },
+  hero: {
+    badge: 'Napędzany przez AI',
+    h1a: 'Sprzedaj więcej.',
+    h1b: 'Pracuj mniej.',
+    subtitle: 'SellerLab AI optymalizuje Twoje zdjęcia, oblicza ceny i pisze ogłoszenia Vinted w kilka sekund.',
+    cta1: 'Wypróbuj za darmo',
+    cta2: 'Jak to działa',
+  },
+  ui: {
+    before: 'Przed',
+    after: 'Po ✓',
+    illustrationCaption: 'Tło automatycznie usunięte przez SellerLab AI',
+  },
+  socialProof: 'Dołącz do pierwszych sprzedawców Vinted, którzy sprzedają szybciej dzięki AI',
+  problem: {
+    h2: 'Vinted pochłania za dużo czasu',
+    subtitle: 'Spędzasz godziny na ogłoszeniach bez rezultatów?',
+    cards: [
+      { title: 'Złe zdjęcia = brak sprzedaży', desc: 'Zagracone tło lub ciemne zdjęcie odstraszy kupujących zanim przeczytają Twoje ogłoszenie.' },
+      { title: 'Zbyt niska cena = strata pieniędzy', desc: 'Bez odniesienia rynkowego często niedoszacowujemy wartości swoich przedmiotów i tracimy pieniądze.' },
+      { title: 'Puste ogłoszenia = brak kliknięć', desc: 'Słaby opis nikogo nie przyciągnie. Kupujący przewijają bez zatrzymania się na Twoich przedmiotach.' },
+    ],
+  },
+  features: {
+    h2: 'Wszystko, czego potrzebujesz, aby sprzedawać lepiej',
+    items: [
+      { title: 'Zdjęcie AI', desc: 'Usuń tło ze zdjęć jednym kliknięciem i wybierz spośród profesjonalnych teł, aby zaprezentować swoje przedmioty na Vinted.' },
+      { title: 'Inteligentny kalkulator cen', desc: 'Nasz kalkulator cen Vinted analizuje rynek w czasie rzeczywistym i sugeruje optymalną cenę, aby zmaksymalizować Twoje sprzedaże.' },
+      { title: 'Ogłoszenie jednym kliknięciem', desc: 'AI automatycznie generuje chwytliwy tytuł i pełny opis dla każdego przedmiotu. Automatyczne ogłoszenie Vinted w kilka sekund.' },
+    ],
+  },
+  howItWorks: {
+    h2: 'Jak to działa',
+    steps: [
+      { num: '01', title: 'Prześlij zdjęcie', desc: 'Zrób zdjęcie swojego przedmiotu i prześlij je do SellerLab AI w kilka sekund.' },
+      { num: '02', title: 'AI analizuje i optymalizuje', desc: 'Nasza AI usuwa tło, oblicza idealną cenę i automatycznie pisze ogłoszenie.' },
+      { num: '03', title: 'Skopiuj i wklej do Vinted', desc: 'Skopiuj tytuł, opis i cenę, a następnie opublikuj bezpośrednio na Vinted. To wszystko.' },
+    ],
+  },
+  pricing: {
+    h2: 'Proste i przejrzyste ceny',
+    plans: [
+      {
+        name: 'Freemium', price: '0€', period: 'za darmo na zawsze', badge: null,
+        features: ['5 optymalizacji / miesiąc', 'Usuwanie tła (5/miesiąc)', 'Podstawowy kalkulator cen', 'Wsparcie społeczności'],
+        cta: 'Zacznij za darmo', highlight: false,
+      },
+      {
+        name: 'Aktywny sprzedawca', price: '9€', period: '/miesiąc', badge: 'Najpopularniejszy',
+        features: ['Nieograniczone optymalizacje', 'Nieograniczone usuwanie tła', 'Inteligentne ceny w czasie rzeczywistym', 'Generowanie ogłoszeń AI', 'Wsparcie e-mail'],
+        cta: 'Wypróbuj 7 dni za darmo', highlight: true,
+      },
+      {
+        name: 'Pro', price: '29€', period: '/miesiąc', badge: null,
+        features: ['Wszystko z planu Aktywny sprzedawca', 'Zarządzanie wieloma kontami', 'Zaawansowana analityka sprzedaży', 'Eksport CSV', 'Wsparcie priorytetowe'],
+        cta: 'Skontaktuj się ze sprzedażą', highlight: false,
+      },
+    ],
+  },
+  faq: {
+    h2: 'Często zadawane pytania',
+    items: [
+      { q: 'Czy SellerLab AI działa z Vinted?', a: 'Tak, SellerLab AI jest zaprojektowany specjalnie dla sprzedawców Vinted. Analizuje trendy rynkowe Vinted i generuje ogłoszenia zoptymalizowane dla tej platformy.' },
+      { q: 'Jak SellerLab AI oblicza cenę moich przedmiotów na Vinted?', a: 'Nasz kalkulator analizuje tysiące podobnych ogłoszeń w czasie rzeczywistym. Bierze pod uwagę markę, stan, kategorię i bieżący popyt, aby zaproponować optymalną cenę.' },
+      { q: 'Czy moje dane Vinted są bezpieczne?', a: 'Absolutnie. SellerLab AI nigdy nie łączy się z Twoim kontem Vinted. Po prostu przesyłasz zdjęcia, a AI robi resztę. Twoje dane nigdy nie są udostępniane osobom trzecim.' },
+      { q: 'Jak długo trwa wygenerowanie automatycznego ogłoszenia Vinted?', a: 'Nasz generator tworzy tytuł, opis i obliczenie ceny w mniej niż 10 sekund. Wystarczy skopiować treść i wkleić bezpośrednio do Vinted.' },
+      { q: 'Czy SellerLab AI może automatycznie usunąć tło z moich zdjęć?', a: 'Tak, to jedna z naszych flagowych funkcji. Nasza AI usuwa tło jednym kliknięciem i proponuje profesjonalne tła, aby Twoje przedmioty były bardziej atrakcyjne na Vinted.' },
+      { q: 'Jaka jest różnica między planem Freemium a Aktywny sprzedawca?', a: 'Plan Freemium jest bezpłatny na zawsze z 5 optymalizacjami miesięcznie. Plan Aktywny sprzedawca (9€/miesiąc) oferuje nieograniczone optymalizacje, kalkulator cen w czasie rzeczywistym i generowanie ogłoszeń AI bez ograniczeń.' },
+    ],
+  },
+  latestPosts: { h2: 'Najnowsze artykuły', cta: 'Zobacz wszystkie artykuły' },
+  finalCta: {
+    h2: 'Gotowy sprzedawać więcej?',
+    subtitle: 'Dołącz do pierwszych sprzedawców Vinted, którzy sprzedają dzięki AI.',
+    cta: 'Zacznij za darmo',
+  },
+  footer: {
+    copyright: '© 2026 SellerLab AI — Wszelkie prawa zastrzeżone',
+    links: [
+      { label: 'Blog', href: '/blog' },
+      { label: 'O nas', href: '/about' },
+      { label: 'Kontakt', href: '/contact' },
+      { label: 'Regulamin', href: '/cgu' },
+      { label: 'Prywatność', href: '/confidentialite' },
+    ],
+  },
+}
+
+// ─── Nederlands ──────────────────────────────────────────────────────────────
+
+const nl: Translations = {
+  nav: {
+    features: 'Functies',
+    pricing: 'Prijzen',
+    faq: 'FAQ',
+    cta: 'Gratis starten',
+    blog: 'Blog',
+    about: 'Over ons',
+    contact: 'Contact',
+  },
+  hero: {
+    badge: 'Aangedreven door AI',
+    h1a: 'Meer verkopen.',
+    h1b: 'Minder werken.',
+    subtitle: "SellerLab AI optimaliseert je foto's, berekent je prijzen en schrijft je Vinted-advertenties in seconden.",
+    cta1: 'Gratis proberen',
+    cta2: 'Zie hoe het werkt',
+  },
+  ui: {
+    before: 'Voor',
+    after: 'Na ✓',
+    illustrationCaption: 'Achtergrond automatisch verwijderd door SellerLab AI',
+  },
+  socialProof: 'Sluit je aan bij de eerste Vinted-verkopers die sneller verkopen dankzij AI',
+  problem: {
+    h2: 'Vinted kost te veel tijd',
+    subtitle: 'Besteed je uren aan advertenties zonder resultaat?',
+    cards: [
+      { title: "Slechte foto's = geen verkoop", desc: 'Een rommelige achtergrond of een donkere foto schrikt kopers af voordat ze je advertentie lezen.' },
+      { title: 'Prijs te laag = geldverlies', desc: 'Zonder marktgegevens onderschatten verkopers vaak de waarde van hun artikelen en laten geld liggen.' },
+      { title: 'Lege advertenties = geen klikken', desc: 'Een slechte beschrijving trekt niemand aan. Kopers scrollen langs je artikelen zonder te stoppen.' },
+    ],
+  },
+  features: {
+    h2: 'Alles wat je nodig hebt om beter te verkopen',
+    items: [
+      { title: 'AI Foto', desc: "Verwijder de achtergrond van je foto's met één klik en kies uit professionele achtergronden om je Vinted-artikelen te presenteren." },
+      { title: 'Slimme prijscalculator', desc: 'Onze Vinted-prijscalculator analyseert de markt in realtime en stelt de optimale prijs voor om je verkoop te maximaliseren.' },
+      { title: '1-klik advertentie', desc: 'AI genereert automatisch een pakkende titel en volledige beschrijving voor elk artikel. Automatische Vinted-advertentie in seconden.' },
+    ],
+  },
+  howItWorks: {
+    h2: 'Hoe het werkt',
+    steps: [
+      { num: '01', title: 'Foto uploaden', desc: 'Maak een foto van je artikel en upload het in seconden naar SellerLab AI.' },
+      { num: '02', title: 'AI analyseert en optimaliseert', desc: 'Onze AI verwijdert de achtergrond, berekent de ideale prijs en schrijft de advertentie automatisch.' },
+      { num: '03', title: 'Kopiëren en plakken in Vinted', desc: 'Kopieer de titel, beschrijving en prijs, en publiceer direct op Vinted. Dat is het.' },
+    ],
+  },
+  pricing: {
+    h2: 'Eenvoudige en transparante prijzen',
+    plans: [
+      {
+        name: 'Freemium', price: '0€', period: 'voor altijd gratis', badge: null,
+        features: ['5 optimalisaties / maand', 'Achtergrondverwijdering (5/maand)', 'Eenvoudige prijscalculator', 'Community-ondersteuning'],
+        cta: 'Gratis starten', highlight: false,
+      },
+      {
+        name: 'Actieve verkoper', price: '9€', period: '/maand', badge: 'Meest populair',
+        features: ['Onbeperkte optimalisaties', 'Onbeperkte achtergrondverwijdering', 'Realtime slimme prijzen', 'AI-advertentiegeneratie', 'E-mailondersteuning'],
+        cta: '7 dagen gratis proberen', highlight: true,
+      },
+      {
+        name: 'Pro', price: '29€', period: '/maand', badge: null,
+        features: ['Alles in Actieve verkoper', 'Multi-accountbeheer', 'Geavanceerde verkoopanalyse', 'CSV-export', 'Prioriteitsondersteuning'],
+        cta: 'Contact verkoop', highlight: false,
+      },
+    ],
+  },
+  faq: {
+    h2: 'Veelgestelde vragen',
+    items: [
+      { q: 'Werkt SellerLab AI met Vinted?', a: 'Ja, SellerLab AI is speciaal gebouwd voor Vinted-verkopers. Het analyseert Vinted-markttrends en genereert geoptimaliseerde advertenties voor dit platform.' },
+      { q: 'Hoe berekent SellerLab AI de prijs van mijn Vinted-artikelen?', a: 'Onze calculator analyseert duizenden vergelijkbare advertenties in realtime. Hij houdt rekening met merk, staat, categorie en huidige vraag om de optimale prijs voor te stellen.' },
+      { q: "Zijn mijn Vinted-gegevens veilig?", a: "Absoluut. SellerLab AI verbindt nooit met je Vinted-account. Je uploadt je foto's en de AI doet de rest. Je gegevens worden nooit gedeeld met derden." },
+      { q: 'Hoe lang duurt het om een automatische Vinted-advertentie te genereren?', a: 'Onze generator produceert een titel, beschrijving en prijsberekening in minder dan 10 seconden. Kopieer de inhoud gewoon direct in Vinted.' },
+      { q: "Kan SellerLab AI de achtergrond van mijn foto's automatisch verwijderen?", a: 'Ja, dat is een van onze kernfuncties. Onze AI verwijdert de achtergrond met één klik en biedt professionele achtergronden aan om je artikelen aantrekkelijker te maken op Vinted.' },
+      { q: 'Wat is het verschil tussen Freemium en Actieve verkoper?', a: 'Het Freemium-plan is voor altijd gratis met 5 optimalisaties per maand. Het Actieve-verkoper-plan (9€/maand) biedt onbeperkte optimalisaties, realtime Vinted-prijsberekening en AI-advertentiegeneratie zonder beperkingen.' },
+    ],
+  },
+  latestPosts: { h2: 'Laatste artikelen', cta: 'Bekijk alle artikelen' },
+  finalCta: {
+    h2: 'Klaar om meer te verkopen?',
+    subtitle: 'Sluit je aan bij de eerste Vinted-verkopers die verkopen dankzij AI.',
+    cta: 'Gratis starten',
+  },
+  footer: {
+    copyright: '© 2026 SellerLab AI — Alle rechten voorbehouden',
+    links: [
+      { label: 'Blog', href: '/blog' },
+      { label: 'Over ons', href: '/about' },
+      { label: 'Contact', href: '/contact' },
+      { label: 'Voorwaarden', href: '/cgu' },
+      { label: 'Privacy', href: '/confidentialite' },
+    ],
+  },
+}
+
+export const translations: Record<Lang, Translations> = { fr, en, es, it, de, pl, nl }

@@ -7,23 +7,28 @@ import SiteHeader from '@/app/components/SiteHeader'
 import SiteFooter from '@/app/components/SiteFooter'
 import Link from 'next/link'
 
-const T = {
-  fr: { h1: 'Blog', subtitle: 'Conseils pour vendre mieux sur Vinted' },
-  en: { h1: 'Blog', subtitle: 'Tips to sell better on Vinted' },
-  es: { h1: 'Blog', subtitle: 'Consejos para vender mejor en Vinted' },
+const T: Record<Lang, { h1: string; subtitle: string; read: string; ctaH: string; ctaP: string }> = {
+  fr: { h1: 'Blog', subtitle: 'Conseils pour vendre mieux sur Vinted', read: "Lire l'article →", ctaH: 'Prêt à vendre plus vite ?', ctaP: "Essayez SellerLab AI gratuitement dès aujourd'hui." },
+  en: { h1: 'Blog', subtitle: 'Tips to sell better on Vinted', read: 'Read article →', ctaH: 'Ready to sell faster?', ctaP: 'Try SellerLab AI for free today.' },
+  es: { h1: 'Blog', subtitle: 'Consejos para vender mejor en Vinted', read: 'Leer el artículo →', ctaH: '¿Listo para vender más rápido?', ctaP: 'Prueba SellerLab AI gratis hoy.' },
+  it: { h1: 'Blog', subtitle: 'Consigli per vendere meglio su Vinted', read: "Leggi l'articolo →", ctaH: 'Pronto a vendere più velocemente?', ctaP: 'Prova SellerLab AI gratis oggi.' },
+  de: { h1: 'Blog', subtitle: 'Tipps für bessere Verkäufe auf Vinted', read: 'Artikel lesen →', ctaH: 'Bereit, schneller zu verkaufen?', ctaP: 'Probiere SellerLab AI kostenlos aus.' },
+  pl: { h1: 'Blog', subtitle: 'Wskazówki, jak lepiej sprzedawać na Vinted', read: 'Czytaj artykuł →', ctaH: 'Gotowy sprzedawać szybciej?', ctaP: 'Wypróbuj SellerLab AI za darmo już dziś.' },
+  nl: { h1: 'Blog', subtitle: 'Tips om beter te verkopen op Vinted', read: 'Lees artikel →', ctaH: 'Klaar om sneller te verkopen?', ctaP: 'Probeer SellerLab AI vandaag gratis.' },
+}
+
+const localeMap: Record<Lang, string> = {
+  fr: 'fr-FR', en: 'en-US', es: 'es-ES', it: 'it-IT', de: 'de-DE', pl: 'pl-PL', nl: 'nl-NL',
 }
 
 function formatDate(date: string, lang: Lang) {
-  return new Date(date).toLocaleDateString(
-    lang === 'fr' ? 'fr-FR' : lang === 'es' ? 'es-ES' : 'en-US',
-    { year: 'numeric', month: 'long', day: 'numeric' }
-  )
+  return new Date(date).toLocaleDateString(localeMap[lang], { year: 'numeric', month: 'long', day: 'numeric' })
 }
 
 export default function BlogContent() {
   const { lang } = useLang()
   const t = translations[lang]
-  const page = T[lang]
+  const page = T[lang as Lang]
 
   return (
     <div className="min-h-screen bg-white text-gray-900">
@@ -54,7 +59,7 @@ export default function BlogContent() {
                     </h2>
                     <p className="text-sm text-gray-500 leading-relaxed flex-1">{p.excerpt}</p>
                     <div className="mt-4 text-sm font-semibold text-indigo-600 group-hover:text-indigo-800 transition-colors">
-                      {lang === 'fr' ? 'Lire l\'article →' : lang === 'es' ? 'Leer el artículo →' : 'Read article →'}
+                      {page.read}
                     </div>
                   </div>
                 </Link>
@@ -64,10 +69,10 @@ export default function BlogContent() {
 
           <div className="mt-16 text-center bg-indigo-50 rounded-2xl p-10 border border-indigo-100">
             <p className="text-indigo-800 font-semibold text-lg mb-2">
-              {lang === 'fr' ? 'Prêt à vendre plus vite ?' : lang === 'es' ? '¿Listo para vender más rápido?' : 'Ready to sell faster?'}
+              {page.ctaH}
             </p>
             <p className="text-indigo-600 text-sm mb-6">
-              {lang === 'fr' ? "Essayez SellerLab AI gratuitement dès aujourd'hui." : lang === 'es' ? 'Prueba SellerLab AI gratis hoy.' : 'Try SellerLab AI for free today.'}
+              {page.ctaP}
             </p>
             <a
               href="/#inscription"

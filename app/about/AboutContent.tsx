@@ -141,6 +141,110 @@ const T = {
       btn: 'Probar gratis',
     },
   },
+  it: {
+    hero: {
+      label: 'La nostra storia',
+      h1: 'Nati dalla frustrazione di vendere su Vinted',
+      lead: "Come milioni di persone, ho iniziato a vendere i miei vestiti su Vinted. E come molti, mi sono ritrovato a passare ore a preparare ogni annuncio: fotografare l'articolo, cercare il prezzo giusto, scrivere una descrizione accattivante. Tutto questo per vendere una camicia a 8€.",
+    },
+    story: {
+      title: 'Dalla frustrazione allo strumento',
+      p1: "Mi sono reso conto che il problema non era il tempo, ma gli strumenti. Non esisteva nulla di semplice e accessibile per aiutare i venditori occasionali come me. I grandi venditori avevano i loro metodi, ma per i piccoli era tutto improvvisato.",
+      p2: "SellerLab AI è nato da questa semplice idea: e se l'IA potesse fare in 10 secondi quello che normalmente richiede 20 minuti? Rimuovere lo sfondo di una foto, calcolare il prezzo giusto, scrivere un annuncio efficace. Ci abbiamo lavorato per mesi e siamo orgogliosi di quello che abbiamo costruito.",
+    },
+    mission: {
+      title: 'La nostra missione',
+      text: "Dare ai venditori Vinted — che vendano 5 articoli o 500 — gli stessi strumenti dei professionisti. Semplici, veloci, accessibili. Perché vendere meglio non dovrebbe richiedere ore di lavoro o competenze di marketing.",
+    },
+    values: {
+      title: 'I nostri valori',
+      items: [
+        { icon: 'heart', title: 'Semplicità prima di tutto', desc: 'Uno strumento che si capisce in 30 secondi. Nessun tutorial infinito, nessuna interfaccia criptica.' },
+        { icon: 'shield', title: 'Trasparenza totale', desc: 'Non ci connettiamo mai al tuo account Vinted. I tuoi dati restano tuoi. Sempre.' },
+        { icon: 'zap', title: 'Risultati concreti', desc: 'Ogni funzionalità esiste perché migliora davvero le tue vendite. Niente orpelli, solo utilità.' },
+        { icon: 'users', title: 'Accessibile a tutti', desc: 'Un piano gratuito per iniziare, prezzi onesti per crescere. Vendere meglio non dovrebbe costare caro.' },
+      ],
+    },
+    cta: { text: 'Pronto a provarlo?', btn: 'Prova gratis' },
+  },
+  de: {
+    hero: {
+      label: 'Unsere Geschichte',
+      h1: 'Entstanden aus der Frustration über den Verkauf auf Vinted',
+      lead: "Wie Millionen von Menschen habe ich angefangen, meine Kleidung auf Vinted zu verkaufen. Und wie viele andere fand ich mich schnell dabei wieder, Stunden damit zu verbringen, jedes Angebot vorzubereiten: den Artikel fotografieren, den richtigen Preis recherchieren, eine ansprechende Beschreibung schreiben. Alles für ein Hemd für 8€.",
+    },
+    story: {
+      title: 'Von der Frustration zum Werkzeug',
+      p1: "Ich erkannte, dass das Problem nicht die Zeit war, sondern die Werkzeuge. Es gab nichts Einfaches und Erschwingliches, um Gelegenheitsverkäufern wie mir zu helfen. Große Verkäufer hatten ihre Methoden, aber für kleine war es reines Improvisieren.",
+      p2: "SellerLab AI entstand aus dieser einfachen Idee: Was wäre, wenn KI in 10 Sekunden das schafft, was normalerweise 20 Minuten dauert? Hintergrund entfernen, den richtigen Preis berechnen, ein überzeugendes Angebot schreiben. Wir haben monatelang daran gearbeitet und sind stolz auf das, was wir aufgebaut haben.",
+    },
+    mission: {
+      title: 'Unsere Mission',
+      text: "Vinted-Verkäufern — ob sie 5 oder 500 Artikel verkaufen — dieselben Werkzeuge wie den Profis zu geben. Einfach, schnell, zugänglich. Denn besser verkaufen sollte keine stundenlange Arbeit oder Marketing-Expertise erfordern.",
+    },
+    values: {
+      title: 'Unsere Werte',
+      items: [
+        { icon: 'heart', title: 'Einfachheit zuerst', desc: 'Ein Tool, das du in 30 Sekunden verstehst. Kein 45-Minuten-Tutorial, keine kryptische Oberfläche.' },
+        { icon: 'shield', title: 'Vollständige Transparenz', desc: 'Wir verbinden uns nie mit deinem Vinted-Konto. Deine Daten gehören dir. Immer.' },
+        { icon: 'zap', title: 'Konkrete Ergebnisse', desc: 'Jede Funktion existiert, weil sie deine Verkäufe wirklich verbessert. Keine Spielereien, nur Nützliches.' },
+        { icon: 'users', title: 'Für alle zugänglich', desc: 'Ein kostenloser Plan zum Starten, faire Preise zum Wachsen. Besser verkaufen sollte nicht teuer sein.' },
+      ],
+    },
+    cta: { text: 'Bereit, es auszuprobieren?', btn: 'Kostenlos testen' },
+  },
+  pl: {
+    hero: {
+      label: 'Nasza historia',
+      h1: 'Zrodzeni z frustracji sprzedawania na Vinted',
+      lead: 'Jak miliony ludzi, zacząłem sprzedawać ubrania na Vinted. I jak wielu, szybko odkryłem, że spędzam godziny na przygotowaniu każdego ogłoszenia: fotografowanie artykułu, szukanie właściwej ceny, pisanie przyciągającego opisu. Wszystko to, żeby sprzedać koszulę za 8€.',
+    },
+    story: {
+      title: 'Od frustracji do narzędzia',
+      p1: 'Zdałem sobie sprawę, że problem nie leżał w czasie, lecz w narzędziach. Nie istniało nic prostego i przystępnego, co pomagałoby okazjonalnym sprzedawcom takim jak ja. Duzi sprzedawcy mieli swoje metody, ale dla małych było to improwizowanie.',
+      p2: 'SellerLab AI narodził się z tego prostego pomysłu: a co jeśli AI mogłoby w 10 sekund zrobić to, co normalnie zajmuje 20 minut? Usunąć tło zdjęcia, obliczyć właściwą cenę, napisać przekonujące ogłoszenie. Pracowaliśmy nad tym przez miesiące i jesteśmy dumni z tego, co zbudowaliśmy.',
+    },
+    mission: {
+      title: 'Nasza misja',
+      text: 'Dać sprzedawcom Vinted — niezależnie czy sprzedają 5 czy 500 artykułów — te same narzędzia co profesjonaliści. Proste, szybkie, dostępne. Bo sprzedawanie lepiej nie powinno wymagać godzin pracy ani wiedzy marketingowej.',
+    },
+    values: {
+      title: 'Nasze wartości',
+      items: [
+        { icon: 'heart', title: 'Prostota przede wszystkim', desc: 'Narzędzie, które rozumiesz w 30 sekund. Żadnych długich tutoriali, żadnego kryptycznego interfejsu.' },
+        { icon: 'shield', title: 'Pełna przejrzystość', desc: 'Nigdy nie łączymy się z Twoim kontem Vinted. Twoje dane zawsze pozostają Twoje.' },
+        { icon: 'zap', title: 'Konkretne wyniki', desc: 'Każda funkcja istnieje, bo naprawdę poprawia Twoje sprzedaże. Żadnych gadżetów, tylko to, co przydatne.' },
+        { icon: 'users', title: 'Dostępne dla wszystkich', desc: 'Bezpłatny plan na start, uczciwe ceny do wzrostu. Sprzedawanie lepiej nie powinno być drogie.' },
+      ],
+    },
+    cta: { text: 'Gotowy, by spróbować?', btn: 'Spróbuj za darmo' },
+  },
+  nl: {
+    hero: {
+      label: 'Ons verhaal',
+      h1: 'Geboren uit de frustratie van verkopen op Vinted',
+      lead: 'Zoals miljoenen mensen begon ik mijn kleding te verkopen op Vinted. En net als velen merkte ik al snel dat ik uren besteedde aan het voorbereiden van elke advertentie: het artikel fotograferen, de juiste prijs opzoeken, een pakkende beschrijving schrijven. Dat alles om een shirt voor 8€ te verkopen.',
+    },
+    story: {
+      title: 'Van frustratie naar een tool',
+      p1: 'Ik realiseerde me dat het probleem niet de tijd was, maar de tools. Er was niets eenvoudigs en betaalbaars om occasionele verkopers zoals ik te helpen. Grote verkopers hadden hun methoden, maar voor kleine was het improviseren.',
+      p2: "SellerLab AI is geboren uit dit eenvoudige idee: wat als AI in 10 seconden kan doen wat normaal 20 minuten kost? Achtergrond verwijderen, de juiste prijs berekenen, een overtuigende advertentie schrijven. We hebben er maanden aan gewerkt en zijn trots op wat we hebben gebouwd.",
+    },
+    mission: {
+      title: 'Onze missie',
+      text: 'Vinted-verkopers — of ze nu 5 of 500 artikelen verkopen — dezelfde tools geven als de professionals. Eenvoudig, snel, toegankelijk. Want beter verkopen zou geen uren werk of marketingexpertise mogen vereisen.',
+    },
+    values: {
+      title: 'Onze waarden',
+      items: [
+        { icon: 'heart', title: 'Eenvoud eerst', desc: 'Een tool die je in 30 seconden begrijpt. Geen 45 minuten durende tutorial, geen cryptische interface.' },
+        { icon: 'shield', title: 'Volledige transparantie', desc: 'We verbinden nooit met je Vinted-account. Je gegevens blijven altijd van jou.' },
+        { icon: 'zap', title: 'Concrete resultaten', desc: 'Elke functie bestaat omdat het je verkopen echt verbetert. Geen gadgets, alleen nuttige dingen.' },
+        { icon: 'users', title: 'Toegankelijk voor iedereen', desc: 'Een gratis plan om te starten, eerlijke prijzen om te groeien. Beter verkopen mag niet duur zijn.' },
+      ],
+    },
+    cta: { text: 'Klaar om het te proberen?', btn: 'Gratis proberen' },
+  },
 }
 
 const VALUE_ICONS = {

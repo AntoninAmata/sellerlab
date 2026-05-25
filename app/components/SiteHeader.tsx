@@ -4,6 +4,16 @@ import Link from 'next/link'
 import { useLang } from '@/app/providers'
 import { translations, type Lang } from '@/lib/i18n'
 
+const LANGS: { code: Lang; label: string }[] = [
+  { code: 'fr', label: 'FR' },
+  { code: 'en', label: 'EN' },
+  { code: 'es', label: 'ES' },
+  { code: 'it', label: 'IT' },
+  { code: 'de', label: 'DE' },
+  { code: 'pl', label: 'PL' },
+  { code: 'nl', label: 'NL' },
+]
+
 export default function SiteHeader() {
   const { lang, setLang } = useLang()
   const t = translations[lang]
@@ -26,19 +36,16 @@ export default function SiteHeader() {
         </nav>
 
         <div className="flex items-center gap-3 shrink-0">
-          <div className="hidden sm:flex items-center text-xs font-semibold">
-            {(['fr', 'es', 'en'] as Lang[]).map((l, i) => (
-              <span key={l} className="flex items-center">
-                {i > 0 && <span className="mx-1.5 text-gray-200">|</span>}
-                <button
-                  onClick={() => setLang(l)}
-                  className={`transition-colors ${lang === l ? 'text-indigo-600' : 'text-gray-400 hover:text-gray-600'}`}
-                >
-                  {l.toUpperCase()}
-                </button>
-              </span>
+          <select
+            value={lang}
+            onChange={(e) => setLang(e.target.value as Lang)}
+            aria-label="Choisir la langue"
+            className="hidden sm:block text-xs font-semibold bg-transparent border border-gray-200 rounded-full px-3 py-1.5 text-gray-600 hover:border-indigo-300 focus:outline-none focus:ring-1 focus:ring-indigo-300 cursor-pointer"
+          >
+            {LANGS.map((l) => (
+              <option key={l.code} value={l.code}>{l.label}</option>
             ))}
-          </div>
+          </select>
           <a
             href="/#inscription"
             className="bg-indigo-600 text-white text-sm font-semibold px-5 py-2 rounded-full hover:bg-indigo-700 active:bg-indigo-800 transition-colors"
