@@ -6,6 +6,20 @@ import {
   GripVertical, AlertTriangle, Check,
 } from 'lucide-react'
 import type { PhotoSlot } from '../types'
+import type { Lang } from '@/lib/i18n'
+import { useLang } from '@/app/providers'
+
+/* ─── Labels des slots — 7 langues ───────────────────────────────────────── */
+
+const SLOT_LABELS: Record<Lang, string[]> = {
+  fr: ['Photo recto (cintre/à plat)', 'Photo verso (cintre/à plat)', 'Photo portée 1',     'Photo portée 2',     'Photo portée 3',   'Photo portée 4',   'Étiquette marque', 'Étiquette taille', 'Étiquette compo.', 'Défaut / détail'   ],
+  en: ['Front photo (flat/hanger)',   'Back photo (flat/hanger)', 'Worn — front 1',     'Worn — front 2',     'Worn — side',      'Worn — back',      'Brand label',      'Size label',       'Care label',       'Flaw / detail'     ],
+  es: ['Foto frontal (plano/percha)', 'Foto trasera (plano/percha)', 'Puesto frente 1',    'Puesto frente 2',    'Puesto lateral',   'Puesto espalda',   'Etiqueta marca',   'Etiqueta talla',   'Etiqueta compos.', 'Defecto / detalle' ],
+  de: ['Vorderfoto (flach/Bügel)',    'Rückseite (flach/Bügel)',   'Getragen vorne 1',   'Getragen vorne 2',   'Getragen seitl.',  'Getragen hinten',  'Markenetikett',    'Größenetikett',    'Pflegeetikett',    'Mangel / Detail'   ],
+  it: ['Foto fronte (piano/gruccia)', 'Foto retro (piano/gruccia)', 'Indossato fronte 1', 'Indossato fronte 2', 'Indossato lat.',   'Indossato retro',  'Etich. marca',     'Etich. taglia',    'Etich. composiz.', 'Difetto / dett.'   ],
+  nl: ['Voorkant (plat/hanger)',      'Achterkant (plat/hanger)',  'Gedragen voor 1',    'Gedragen voor 2',    'Gedragen zijkant', 'Gedragen rug',     'Merklabel',        'Maatlabel',        'Samenst. label',   'Gebrek / detail'   ],
+  pl: ['Przód (płasko/wieszak)',      'Tył (płasko/wieszak)',      'Ubrane przód 1',     'Ubrane przód 2',     'Ubrane bok',       'Ubrane tył',       'Etykieta marki',   'Etykieta rozm.',   'Etykieta skład',   'Wada / detal'      ],
+}
 
 /* ─── 5 fonds disponibles ─────────────────────────────────────────────────── */
 
@@ -45,7 +59,7 @@ const BACKGROUNDS = [
 /* ─── Définition des 10 slots ─────────────────────────────────────────────── */
 
 const SLOT_DEFS = [
-  { id: 0, label: 'Photo principale', badge: 'required',    type: 'garment', bgRemoval: 'free' },
+  { id: 0, label: 'Photo recto — à plat ou sur cintre', badge: 'required',    type: 'garment', bgRemoval: 'free' },
   { id: 1, label: 'Photo verso',      badge: 'recommended', type: 'garment', bgRemoval: 'pro'  },
   { id: 2, label: 'Photo portée 1',  badge: 'recommended', type: 'garment', bgRemoval: 'pro'  },
   { id: 3, label: 'Photo portée 2',  badge: 'recommended', type: 'garment', bgRemoval: 'pro'  },
@@ -69,6 +83,7 @@ interface Props {
 /* ─── Composant principal ─────────────────────────────────────────────────── */
 
 export default function PhotoUploadStep({ slots, setSlots }: Props) {
+  const { lang } = useLang()
   const [dragOverId, setDragOverId]       = useState<number | null>(null)
   const [isClassifying, setIsClassifying] = useState(false)
   const [classifiedCount, setClassifiedCount] = useState<number | null>(null)
@@ -351,6 +366,7 @@ export default function PhotoUploadStep({ slots, setSlots }: Props) {
               isDragOver={dragOverId === def.id}
               dragSourceId={dragSourceId}
               bgStyle={selectedBgStyle}
+              displayLabel={SLOT_LABELS[lang]?.[def.id] ?? def.label}
               onFileSelected={(file) => loadFileInSlot(file, def.id)}
               onSwap={swapSlots}
               onClear={() => clearSlot(def.id)}
@@ -415,6 +431,7 @@ export default function PhotoUploadStep({ slots, setSlots }: Props) {
               slot={slots[def.id]}
               isDragOver={dragOverId === def.id}
               dragSourceId={dragSourceId}
+              displayLabel={SLOT_LABELS[lang]?.[def.id] ?? def.label}
               onFileSelected={(file) => loadFileInSlot(file, def.id)}
               onSwap={swapSlots}
               onClear={() => clearSlot(def.id)}
@@ -440,6 +457,7 @@ interface SlotCardProps {
   isDragOver: boolean
   dragSourceId: React.MutableRefObject<number | null>
   bgStyle?: React.CSSProperties
+  displayLabel: string
   onFileSelected: (file: File) => void
   onSwap: (sourceId: number, targetId: number) => void
   onClear: () => void
@@ -447,7 +465,7 @@ interface SlotCardProps {
 }
 
 function SlotCard({
-  def, slot, isDragOver, dragSourceId, bgStyle,
+  def, slot, isDragOver, dragSourceId, bgStyle, displayLabel,
   onFileSelected, onSwap, onClear, onDragOverChange,
 }: SlotCardProps) {
   const inputRef = useRef<HTMLInputElement>(null)
@@ -515,8 +533,9 @@ function SlotCard({
             : <Camera className="w-5 h-5 text-gray-300 group-hover:text-indigo-300 transition-colors" />
           }
           <span className="text-[10px] font-semibold text-gray-400 text-center leading-tight px-1">
-            {def.label}
+            {displayLabel}
           </span>
+
           <span className={`text-[9px] font-bold px-1.5 py-0.5 rounded-full ${BADGE[def.badge].cls}`}>
             {BADGE[def.badge].label}
           </span>
@@ -549,7 +568,7 @@ function SlotCard({
         >
           <img
             src={displayUrl}
-            alt={def.label}
+            alt={displayLabel}
             className={`w-full h-full ${hasBg ? 'object-contain p-1' : 'object-cover'}`}
             draggable={false}
           />
@@ -558,7 +577,7 @@ function SlotCard({
           <div className="absolute inset-0 bg-black/0 group-hover:bg-black/20 transition-colors" />
           <div className="absolute top-1.5 inset-x-1.5 flex justify-between items-start opacity-0 group-hover:opacity-100 transition-opacity">
             <span className="bg-black/60 text-white text-[9px] font-semibold px-1.5 py-0.5 rounded backdrop-blur-sm leading-tight">
-              {def.label}
+              {displayLabel}
             </span>
             <button
               onClick={(e) => { e.stopPropagation(); onClear() }}
