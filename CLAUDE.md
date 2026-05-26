@@ -24,24 +24,37 @@ SaaS pour vendeurs Vinted (et autres plateformes à terme).
 - Build : 0 erreur TypeScript, 13 pages générées ✅
 
 ## Design (redesign complet effectué)
+
+### Polices — SPÉCIFICATIONS EXACTES ✅
+- Une seule famille de police : Plus Jakarta Sans (Google Fonts)
+- Weights chargés : 400 (corps), 600 (semi-bold), 800 (extrabold)
+- Dans layout.tsx racine : const plusJakarta = Plus_Jakarta_Sans({ subsets: ['latin'], weight: ['400','600','800'], variable: '--font-display' })
+- Sur <html> : className={plusJakarta.variable}
+- Dans tailwind.config : fontFamily: { display: ['var(--font-display)'] }
+- Dans globals.css : body { font-family: var(--font-display) }
+- Logo et titres h1/h2/h3 : className="font-display font-extrabold"
+- Sous-titres : className="font-display font-semibold"
+- Corps de texte : Plus Jakarta Sans 400 par défaut
+- S'applique à TOUTES les pages via layout racine — landing ET /app
+
+### Autres specs design
 - Couleur principale : indigo #6366F1
 - Alternance blanc / noir profond #080810 (sections Problème + CTA)
-- Police display : Syne ExtraBold (titres) + DM Sans (corps)
-- Typographie massive : clamp(2.8rem → 5.5rem) dans le Hero
-- Fond Hero : grille de points .dot-grid (architectural, pas de violet générique)
+- Typographie massive hero : clamp(2.8rem, 5vw, 5.5rem)
+- Fond Hero : grille de points .dot-grid (architectural)
 - Mesh de profondeur .mesh-dark sur sections sombres
 - Numéros décoratifs 01/02/03 sur les cards fonctionnalités
 - Animations : fade-up séquentiel Hero, hover -translate-y-1 cards, shimmer boutons, accordéon FAQ
 - Chip "fond supprimé ✓" flottant sur illustration Avant/Après
-- Header : transparent au sommet, blanc/blur au scroll
+- Header landing : transparent au sommet, blanc/blur au scroll
 - Menu hamburger mobile avec sélecteur langue en pills
 - Article blog : introduction encadrée bordure indigo gauche
 - Icônes Lucide React
 - Social proof ⭐ 4.8/5
-- Textes toujours en noir foncé #111827 (jamais gris clair sur fond blanc)
+- Textes toujours en noir foncé #111827
 - Bouton CTA principal : fond indigo #6366F1 plein + texte blanc
-- Sections 'Comment ça marche' et CTA email : même fond gris clair #F9FAFB
-- Supprimé : ligne 'Fait avec ❤️ par Antonin — Espagne' dans le footer (trop similaire à Clemz)
+- Sections 'Comment ça marche' et CTA email : fond gris clair #F9FAFB
+- Supprimé : ligne 'Fait avec ❤️ par Antonin' dans le footer
 
 ## 3 Formules tarifaires
 - Freemium 0€ : publicités AdSense, 5 photos/mois, 5 calculs prix, 3 annonces
@@ -95,7 +108,31 @@ SaaS pour vendeurs Vinted (et autres plateformes à terme).
 - Landing page + blog + pages légales ✅
 - Redesign complet (Syne + DM Sans, sections sombres, animations) ✅
 - Multilingue 7 langues (FR/ES/EN/DE/IT/NL/PL) ✅
-- Flux /app : Photo IA + Reconnaissance + Calcul prix + Génération annonce 🔄
+- Flux /app : Étape 1 photos construite ✅ — Étapes 2-5 à construire 🔄
+
+## Fichiers créés — Page /app
+- app/app/page.tsx ✅ — Page principale avec stepper 5 étapes
+- app/app/types.ts ✅ — Types TypeScript (PhotoSlot, SlotStatus)
+- app/app/components/PhotoUploadStep.tsx ✅ — Composant Step 1 (494 lignes)
+- app/api/remove-bg/route.ts ✅ — Suppression fond via HuggingFace briaai/RMBG-1.4
+- app/api/classify-photos/route.ts ✅ — Classification photos via Claude Haiku Vision
+
+## Variables d'environnement (.env.local)
+- ANTHROPIC_API_KEY=sk-ant-... ✅ configurée
+- HUGGINGFACE_API_KEY=hf_... ✅ configurée
+
+## Étape 1 — Ce qui est construit
+- 10 slots (0-5 vêtement + 6-9 étiquettes/détails)
+- Labels génériques avant reconnaissance IA
+- Upload individuel (clic ou drag & drop par slot)
+- Upload multiple + classification IA automatique (Claude Haiku Vision)
+- Drag & drop entre slots pour corriger classification
+- Suppression fond slot 0 (gratuit) via HuggingFace
+- Overlay 🔒 Pro sur slots 1-5
+- Pas de suppression fond sur slots 6-9
+- Stepper 5 étapes — étapes 2-5 verrouillées
+- Build propre ✅ — 16 pages, 0 erreur TypeScript
+- Serveur dev opérationnel sur localhost:3000
 
 ### Phase 2
 - Message auto favoris (lien pré-rempli + message IA)

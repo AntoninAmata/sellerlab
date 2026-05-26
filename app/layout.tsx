@@ -1,24 +1,16 @@
 import type { Metadata } from 'next'
-import { Syne, DM_Sans } from 'next/font/google'
+import { Plus_Jakarta_Sans } from 'next/font/google'
 import './globals.css'
 import { LanguageProvider } from './providers'
 import CookieBanner from './components/CookieBanner'
 
 /* ─── Polices ────────────────────────────────────────────────────────────── */
 
-/* Police display forte : Syne ExtraBold pour les titres */
-const syne = Syne({
-  variable: '--font-display',
+/* Police unique : Plus Jakarta Sans — 400 corps / 600 semi-bold / 800 titres */
+const plusJakartaSans = Plus_Jakarta_Sans({
+  variable: '--font-jakarta',
   subsets: ['latin'],
-  weight: ['500', '600', '700', '800'],
-  display: 'swap',
-})
-
-/* Police body raffinée : DM Sans pour les textes courants */
-const dmSans = DM_Sans({
-  variable: '--font-body',
-  subsets: ['latin'],
-  weight: ['300', '400', '500', '600'],
+  weight: ['400', '600', '800'],
   display: 'swap',
 })
 
@@ -64,7 +56,7 @@ export default function RootLayout({
   return (
     <html
       lang="fr"
-      className={`${syne.variable} ${dmSans.variable} h-full scroll-smooth antialiased`}
+      className={`${plusJakartaSans.variable} h-full scroll-smooth antialiased`}
     >
       <body className="min-h-full flex flex-col bg-white text-gray-900">
         <LanguageProvider>

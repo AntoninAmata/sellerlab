@@ -2,8 +2,8 @@ import { NextRequest, NextResponse } from 'next/server'
 import Anthropic from '@anthropic-ai/sdk'
 
 const SLOT_DESCRIPTIONS = [
-  '0: face/avant du vêtement (sur cintre, à plat, ou posé — vue frontale)',
-  '1: dos/verso du vêtement (vue de dos)',
+  '0: vue frontale du vêtement sur cintre, suspendu ou posé à plat — vêtement NON PORTÉ, aucune personne visible',
+  '1: vue de dos du vêtement sur cintre, suspendu ou posé à plat — vêtement NON PORTÉ',
   '2: porté de face (personne portant le vêtement, vue de face)',
   '3: porté 3/4 ou diagonal (personne portant le vêtement, angle diagonal)',
   '4: porté de profil (personne portant le vêtement, vue latérale)',
@@ -57,7 +57,7 @@ export async function POST(request: NextRequest) {
               },
               {
                 type: 'text',
-                text: `Quel type de vue de vêtement correspond à cette image ?\n${SLOT_DESCRIPTIONS.join('\n')}\n\nRéponds uniquement avec le chiffre (0 à 9).`,
+                text: `Quel type de vue de vêtement correspond à cette image ?\n${SLOT_DESCRIPTIONS.join('\n')}\n\nRÈGLE SLOT 0 : attribue le slot 0 UNIQUEMENT si le vêtement est sur cintre, suspendu ou posé à plat sans personne. Si une personne porte le vêtement face caméra → slot 2. Slot 0 est réservé aux photos où aucune personne n'est visible.\n\nRéponds uniquement avec le chiffre (0 à 9).`,
               },
             ],
           },
