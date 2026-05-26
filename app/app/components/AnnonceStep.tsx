@@ -5,7 +5,7 @@ import {
   Loader2, RefreshCw, AlertCircle, FileText,
   Copy, Check, Pencil, X,
 } from 'lucide-react'
-import type { RecognitionResult, PriceResult } from '../types'
+import type { RecognitionResult } from '../types'
 import { useLang } from '@/app/providers'
 
 /* ─── Props ──────────────────────────────────────────────────────────────── */
@@ -17,7 +17,6 @@ interface AnnonceResult {
 
 interface Props {
   recognition: RecognitionResult | null
-  pricing: PriceResult | null
   result: AnnonceResult | null
   setResult: (r: AnnonceResult) => void
 }
@@ -26,7 +25,6 @@ interface Props {
 
 function useGenerate(
   recognition: RecognitionResult | null,
-  pricing: PriceResult | null,
   result: AnnonceResult | null,
   setResult: (r: AnnonceResult) => void,
   lang: string,
@@ -36,7 +34,7 @@ function useGenerate(
   const ranRef = useRef(false)
 
   const run = useCallback(async () => {
-    if (!recognition || !pricing) return
+    if (!recognition) return
     setLoading(true)
     setError(null)
 
@@ -56,7 +54,6 @@ function useGenerate(
           style:         recognition.style.value,
           motif:         recognition.motif.value,
           defauts:       recognition.defauts.value,
-          prixSuggere:   pricing.prixSuggere,
           lang,
         }),
       })
@@ -68,14 +65,14 @@ function useGenerate(
     } finally {
       setLoading(false)
     }
-  }, [recognition, pricing, setResult, lang])
+  }, [recognition, setResult, lang])
 
   useEffect(() => {
-    if (!ranRef.current && !result && recognition && pricing) {
+    if (!ranRef.current && !result && recognition) {
       ranRef.current = true
       run()
     }
-  }, [run, result, recognition, pricing])
+  }, [run, result, recognition])
 
   return { loading, error, retry: run }
 }
@@ -176,9 +173,9 @@ function EditableField({ label, value, onChange, multiline, maxLength, hint }: E
 
 /* ─── Composant principal ────────────────────────────────────────────────── */
 
-export default function AnnonceStep({ recognition, pricing, result, setResult }: Props) {
+export default function AnnonceStep({ recognition, result, setResult }: Props) {
   const { lang } = useLang()
-  const { loading, error, retry } = useGenerate(recognition, pricing, result, setResult, lang)
+  const { loading, error, retry } = useGenerate(recognition, result, setResult, lang)
 
   function updateTitre(v: string) {
     if (!result) return
@@ -231,14 +228,14 @@ export default function AnnonceStep({ recognition, pricing, result, setResult }:
   }
 
   /* ── Prérequis manquants ── */
-  if (!recognition || !pricing) {
+  if (!recognition) {
     return (
       <div className="flex flex-col items-center justify-center py-24 text-center gap-4">
         <div className="w-16 h-16 rounded-2xl bg-gray-50 flex items-center justify-center">
           <FileText className="w-7 h-7 text-gray-400" />
         </div>
         <p className="text-gray-400 text-sm max-w-xs">
-          Complétez les étapes 2 et 3 pour générer votre annonce.
+          Complétez l'étape 2 pour générer votre annonce.
         </p>
       </div>
     )

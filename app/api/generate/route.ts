@@ -15,7 +15,7 @@ export interface GenerateRequest {
   style: string
   motif: string
   defauts: string
-  prixSuggere: number
+  prixSuggere?: number
   lang: string
 }
 
@@ -53,7 +53,7 @@ Article :
 - Style : ${style}
 - Motif : ${motif}
 ${defauts ? `- Défauts : ${defauts}` : ''}
-- Prix : ${prixSuggere}€
+${prixSuggere ? `- Prix : ${prixSuggere}€` : ''}
 
 CONTRAINTES STRICTES :
 - Langue : ${langLabel[lang] ?? 'français'}

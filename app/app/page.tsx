@@ -15,8 +15,8 @@ import type { PhotoSlot, RecognitionResult, PriceResult } from './types'
 const STEPS = [
   { num: 1, label: 'Photos',          shortLabel: 'Photos',  Icon: Camera   },
   { num: 2, label: 'Reconnaissance',  shortLabel: 'Reconn.', Icon: ScanLine },
-  { num: 3, label: 'Prix',            shortLabel: 'Prix',    Icon: Tag      },
-  { num: 4, label: 'Annonce',         shortLabel: 'Annonce', Icon: FileText },
+  { num: 3, label: 'Annonce',         shortLabel: 'Annonce', Icon: FileText },
+  { num: 4, label: 'Prix',            shortLabel: 'Prix',    Icon: Tag      },
   { num: 5, label: 'Export',          shortLabel: 'Export',  Icon: Send     },
 ] as const
 
@@ -53,8 +53,8 @@ export default function AppPage() {
   function canContinue(): boolean {
     if (step === 1) return mainPhotoReady
     if (step === 2) return recognitionResult !== null
-    if (step === 3) return pricingResult !== null
-    if (step === 4) return annonceResult !== null
+    if (step === 3) return annonceResult !== null
+    if (step === 4) return pricingResult !== null
     return true
   }
 
@@ -145,19 +145,18 @@ export default function AppPage() {
         )}
 
         {step === 3 && (
-          <PricingStep
+          <AnnonceStep
             recognition={recognitionResult}
-            result={pricingResult}
-            setResult={setPricingResult}
+            result={annonceResult}
+            setResult={setAnnonceResult}
           />
         )}
 
         {step === 4 && (
-          <AnnonceStep
+          <PricingStep
             recognition={recognitionResult}
-            pricing={pricingResult}
-            result={annonceResult}
-            setResult={setAnnonceResult}
+            result={pricingResult}
+            setResult={setPricingResult}
           />
         )}
 
