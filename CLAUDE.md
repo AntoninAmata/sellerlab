@@ -38,6 +38,10 @@ SaaS pour vendeurs Vinted (et autres plateformes à terme).
 - Article blog : introduction encadrée bordure indigo gauche
 - Icônes Lucide React
 - Social proof ⭐ 4.8/5
+- Textes toujours en noir foncé #111827 (jamais gris clair sur fond blanc)
+- Bouton CTA principal : fond indigo #6366F1 plein + texte blanc
+- Sections 'Comment ça marche' et CTA email : même fond gris clair #F9FAFB
+- Supprimé : ligne 'Fait avec ❤️ par Antonin — Espagne' dans le footer (trop similaire à Clemz)
 
 ## 3 Formules tarifaires
 - Freemium 0€ : publicités AdSense, 5 photos/mois, 5 calculs prix, 3 annonces
@@ -80,8 +84,8 @@ SaaS pour vendeurs Vinted (et autres plateformes à terme).
 - À ajouter : Allemand (de), Italien (it), Néerlandais (nl), Polonais (pl)
 - Fallback : anglais si langue non disponible
 - Intégration via système i18n Next.js
-- Fichiers à créer : i18n/de.json, i18n/it.json, i18n/nl.json, i18n/pl.json
-- Pour chaque nouvelle langue : mettre à jour fichiers i18n + prompts Claude
+- Fichiers i18n déjà créés : i18n/de.json, i18n/it.json, i18n/nl.json, i18n/pl.json ✅
+- Pour chaque nouvelle langue future : mettre à jour fichiers i18n + prompts Claude
 
 ---
 
@@ -190,7 +194,35 @@ Acier, Acrylique, Alpaga, Argent, Bambou, Bois, Cachemire, Caoutchouc, Carton, C
 - Recherche prix moyens Vinted même type d'article
 - Suggestion prix de vente + explication courte du raisonnement
 - Marge de négociation suggérée
-- Calcul marge nette après frais Vinted
+- Pas de frais vendeur sur Vinted (frais à charge de l'acheteur) — ne pas afficher de frais vendeur
+- Calcul marge optionnel (pour revendeurs uniquement) = Prix de vente - Prix d'achat
+
+États officiels Vinted (descriptions exactes) :
+- Neuf avec étiquette : article neuf, jamais porté/utilisé avec étiquettes ou dans son emballage d'origine
+- Neuf sans étiquette : article neuf, jamais porté/utilisé, sans étiquettes ni emballage d'origine
+- Très bon état : article très peu porté/utilisé qui peut présenter de légères imperfections
+- Bon état : article porté/utilisé quelques fois, présentant des imperfections et des signes d'usure
+- Satisfaisant : article porté/utilisé plusieurs fois, présentant des imperfections et des signes d'usure
+
+Logique de calcul du prix (si utilisateur fournit le prix d'achat neuf) :
+- Neuf avec étiquette : 60-70% du prix neuf
+- Neuf sans étiquette : 50-60% du prix neuf
+- Très bon état : 35-45% du prix neuf
+- Bon état : 25-35% du prix neuf
+- Satisfaisant : 15-25% du prix neuf
+→ Ce calcul est la base, ensuite affiné par les prix moyens Vinted du marché
+→ Si prix d'achat neuf non fourni : calcul basé uniquement sur les prix Vinted
+
+Niveau de confiance selon la marque :
+- Élevée (marque connue) : prix trouvé sur site marque + données Vinted abondantes → résultat direct
+- Moyenne (marque peu connue) : données partielles → avertissement orange + bouton "Préciser"
+- Inconnue : aucune donnée → avertissement rouge + formulaire obligatoire
+
+Formulaire de précision (affiché si confiance moyenne ou faible) :
+- Prix d'achat neuf (champ libre — base principale du calcul)
+- État exact de l'article (si non détecté sur photo)
+- Plateforme d'achat originale (boutique officielle / Zalando / ASOS / Shein / Vinted / Autre)
+- Article rare ou édition limitée (Non / Collaboration / Édition limitée / Vintage)
 
 ### Étape 4 — Génération de l'annonce
 - Titre optimisé Vinted (max 60 caractères)
@@ -221,7 +253,7 @@ Acier, Acrylique, Alpaga, Argent, Bambou, Bois, Cachemire, Caoutchouc, Carton, C
 - app/api/generate/route.ts : génération annonce (clé API côté serveur uniquement)
 - app/api/remove-bg/route.ts : suppression fond
 - app/app/page.tsx : page principale flux en étapes
-- i18n/de.json, i18n/it.json, i18n/nl.json, i18n/pl.json : 4 langues à ajouter
+- i18n/de.json, i18n/it.json, i18n/nl.json, i18n/pl.json : ✅ déjà créés
 
 ---
 
