@@ -37,19 +37,40 @@ function ConfidenceBadge({ confidence }: { confidence: Confidence }) {
   )
 }
 
-/* ─── Conversion photo → base64 ─────────────────────────────────────────── */
+/* ─── Redimensionnement + conversion base64 (max 1024px, <3 Mo) ─────────── */
 
-async function fileToBase64(file: File): Promise<{ base64: string; mediaType: string }> {
+async function resizeAndEncode(file: File, maxPx = 1024): Promise<{ base64: string; mediaType: string }> {
   return new Promise((resolve, reject) => {
-    const reader = new FileReader()
-    reader.onload = () => {
-      const dataUrl = reader.result as string
-      const [header, base64] = dataUrl.split(',')
-      const mediaType = header.match(/:(.*?);/)?.[1] ?? 'image/jpeg'
-      resolve({ base64, mediaType })
+    const img = new Image()
+    const objectUrl = URL.createObjectURL(file)
+
+    img.onload = () => {
+      URL.revokeObjectURL(objectUrl)
+      const scale = Math.min(1, maxPx / Math.max(img.width, img.height))
+      const w = Math.round(img.width * scale)
+      const h = Math.round(img.height * scale)
+
+      const canvas = document.createElement('canvas')
+      canvas.width  = w
+      canvas.height = h
+      canvas.getContext('2d')!.drawImage(img, 0, 0, w, h)
+
+      canvas.toBlob(blob => {
+        if (!blob) { reject(new Error('canvas toBlob failed')); return }
+        const reader = new FileReader()
+        reader.onload = () => {
+          const dataUrl = reader.result as string
+          const [header, b64] = dataUrl.split(',')
+          const mediaType = header.match(/:(.*?);/)?.[1] ?? 'image/jpeg'
+          resolve({ base64: b64, mediaType })
+        }
+        reader.onerror = reject
+        reader.readAsDataURL(blob)
+      }, 'image/jpeg', 0.85)
     }
-    reader.onerror = reject
-    reader.readAsDataURL(file)
+
+    img.onerror = reject
+    img.src = objectUrl
   })
 }
 
@@ -78,13 +99,12 @@ function useRecognition(slots: PhotoSlot[], result: RecognitionResult | null, se
       const images = await Promise.all(
         filled.map(async (slot) => {
           if (slot.id === 0 && slot.processedUrl) {
-            /* Convertit l'URL blob en file-like */
             const res = await fetch(slot.processedUrl)
             const blob = await res.blob()
             const f = new File([blob], 'slot0.png', { type: blob.type })
-            return fileToBase64(f)
+            return resizeAndEncode(f)
           }
-          return fileToBase64(slot.file!)
+          return resizeAndEncode(slot.file!)
         })
       )
 
