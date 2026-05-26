@@ -4,7 +4,8 @@ import { useState } from 'react'
 import Link from 'next/link'
 import { Camera, ScanLine, Tag, FileText, Send, ArrowLeft, ChevronRight } from 'lucide-react'
 import PhotoUploadStep from './components/PhotoUploadStep'
-import type { PhotoSlot } from './types'
+import RecognitionStep from './components/RecognitionStep'
+import type { PhotoSlot, RecognitionResult } from './types'
 
 /* ─── Étapes du stepper ───────────────────────────────────────────────────── */
 
@@ -33,6 +34,7 @@ function makeSlots(): PhotoSlot[] {
 export default function AppPage() {
   const [step, setStep] = useState(1)
   const [slots, setSlots] = useState<PhotoSlot[]>(makeSlots)
+  const [recognitionResult, setRecognitionResult] = useState<RecognitionResult | null>(null)
 
   const mainPhotoReady = slots[0].file !== null && slots[0].status !== 'uploading' && slots[0].status !== 'processing-bg'
 
@@ -122,8 +124,16 @@ export default function AppPage() {
       <main className="flex-1 max-w-5xl w-full mx-auto px-4 sm:px-6 py-8">
         {step === 1 && <PhotoUploadStep slots={slots} setSlots={setSlots} />}
 
-        {/* Étapes 2–5 : placeholder en attendant le développement */}
-        {step > 1 && (
+        {step === 2 && (
+          <RecognitionStep
+            slots={slots}
+            result={recognitionResult}
+            setResult={setRecognitionResult}
+          />
+        )}
+
+        {/* Étapes 3–5 : placeholder en attendant le développement */}
+        {step > 2 && (
           <div className="flex flex-col items-center justify-center py-20 text-center">
             <div className="w-14 h-14 rounded-2xl bg-indigo-50 flex items-center justify-center mb-5">
               {(() => { const { Icon } = STEPS[step - 1]; return <Icon className="w-6 h-6 text-indigo-600" /> })()}
