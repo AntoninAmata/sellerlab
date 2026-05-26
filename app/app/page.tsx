@@ -5,7 +5,10 @@ import Link from 'next/link'
 import { Camera, ScanLine, Tag, FileText, Send, ArrowLeft, ChevronRight } from 'lucide-react'
 import PhotoUploadStep from './components/PhotoUploadStep'
 import RecognitionStep from './components/RecognitionStep'
-import type { PhotoSlot, RecognitionResult } from './types'
+import PricingStep from './components/PricingStep'
+import AnnonceStep from './components/AnnonceStep'
+import ExportStep from './components/ExportStep'
+import type { PhotoSlot, RecognitionResult, PriceResult } from './types'
 
 /* ─── Étapes du stepper ───────────────────────────────────────────────────── */
 
@@ -16,6 +19,10 @@ const STEPS = [
   { num: 4, label: 'Annonce',         shortLabel: 'Annonce', Icon: FileText },
   { num: 5, label: 'Export',          shortLabel: 'Export',  Icon: Send     },
 ] as const
+
+/* ─── Résultat annonce ────────────────────────────────────────────────────── */
+
+interface AnnonceResult { titre: string; description: string }
 
 /* ─── État initial des 10 slots ───────────────────────────────────────────── */
 
@@ -35,8 +42,21 @@ export default function AppPage() {
   const [step, setStep] = useState(1)
   const [slots, setSlots] = useState<PhotoSlot[]>(makeSlots)
   const [recognitionResult, setRecognitionResult] = useState<RecognitionResult | null>(null)
+  const [pricingResult, setPricingResult] = useState<PriceResult | null>(null)
+  const [annonceResult, setAnnonceResult] = useState<AnnonceResult | null>(null)
 
-  const mainPhotoReady = slots[0].file !== null && slots[0].status !== 'uploading' && slots[0].status !== 'processing-bg'
+  const mainPhotoReady = slots[0].file !== null
+    && slots[0].status !== 'uploading'
+    && slots[0].status !== 'processing-bg'
+
+  /* ── Condition pour avancer selon l'étape active ── */
+  function canContinue(): boolean {
+    if (step === 1) return mainPhotoReady
+    if (step === 2) return recognitionResult !== null
+    if (step === 3) return pricingResult !== null
+    if (step === 4) return annonceResult !== null
+    return true
+  }
 
   return (
     <div className="min-h-screen bg-gray-50 flex flex-col">
@@ -74,10 +94,7 @@ export default function AppPage() {
 
               return (
                 <li key={s.num} className="flex items-center gap-1 sm:gap-2 flex-1 min-w-0">
-                  {/* Cercle numéro */}
-                  <div
-                    className={`flex items-center gap-1.5 min-w-0 ${isLocked ? 'opacity-35' : ''}`}
-                  >
+                  <div className={`flex items-center gap-1.5 min-w-0 ${isLocked ? 'opacity-35' : ''}`}>
                     <div
                       className={`w-7 h-7 rounded-full flex items-center justify-center shrink-0 text-xs font-extrabold transition-all ${
                         isActive
@@ -89,29 +106,22 @@ export default function AppPage() {
                     >
                       {isDone ? '✓' : s.num}
                     </div>
-                    <span
-                      className={`text-xs font-semibold hidden sm:block truncate transition-colors ${
-                        isActive ? 'text-indigo-600' : 'text-gray-400'
-                      }`}
-                    >
+                    <span className={`text-xs font-semibold hidden sm:block truncate transition-colors ${
+                      isActive ? 'text-indigo-600' : 'text-gray-400'
+                    }`}>
                       {s.label}
                     </span>
-                    <span
-                      className={`text-[10px] font-semibold sm:hidden truncate transition-colors ${
-                        isActive ? 'text-indigo-600' : 'text-gray-400'
-                      }`}
-                    >
+                    <span className={`text-[10px] font-semibold sm:hidden truncate transition-colors ${
+                      isActive ? 'text-indigo-600' : 'text-gray-400'
+                    }`}>
                       {s.shortLabel}
                     </span>
                   </div>
 
-                  {/* Trait de connexion */}
                   {i < STEPS.length - 1 && (
-                    <div
-                      className={`flex-1 h-px transition-colors ${
-                        s.num < step ? 'bg-green-300' : 'bg-gray-100'
-                      }`}
-                    />
+                    <div className={`flex-1 h-px transition-colors ${
+                      s.num < step ? 'bg-green-300' : 'bg-gray-100'
+                    }`} />
                   )}
                 </li>
               )
@@ -122,7 +132,9 @@ export default function AppPage() {
 
       {/* ── Contenu de l'étape ── */}
       <main className="flex-1 max-w-5xl w-full mx-auto px-4 sm:px-6 py-8">
-        {step === 1 && <PhotoUploadStep slots={slots} setSlots={setSlots} />}
+        {step === 1 && (
+          <PhotoUploadStep slots={slots} setSlots={setSlots} />
+        )}
 
         {step === 2 && (
           <RecognitionStep
@@ -132,19 +144,30 @@ export default function AppPage() {
           />
         )}
 
-        {/* Étapes 3–5 : placeholder en attendant le développement */}
-        {step > 2 && (
-          <div className="flex flex-col items-center justify-center py-20 text-center">
-            <div className="w-14 h-14 rounded-2xl bg-indigo-50 flex items-center justify-center mb-5">
-              {(() => { const { Icon } = STEPS[step - 1]; return <Icon className="w-6 h-6 text-indigo-600" /> })()}
-            </div>
-            <h2 className="font-display font-extrabold text-2xl text-gray-900 mb-2">
-              {STEPS[step - 1].label}
-            </h2>
-            <p className="text-gray-400 text-sm max-w-xs">
-              Cette étape sera disponible prochainement.
-            </p>
-          </div>
+        {step === 3 && (
+          <PricingStep
+            recognition={recognitionResult}
+            result={pricingResult}
+            setResult={setPricingResult}
+          />
+        )}
+
+        {step === 4 && (
+          <AnnonceStep
+            recognition={recognitionResult}
+            pricing={pricingResult}
+            result={annonceResult}
+            setResult={setAnnonceResult}
+          />
+        )}
+
+        {step === 5 && (
+          <ExportStep
+            slots={slots}
+            recognition={recognitionResult}
+            pricing={pricingResult}
+            annonce={annonceResult}
+          />
         )}
       </main>
 
@@ -161,21 +184,32 @@ export default function AppPage() {
             Précédent
           </button>
 
-          {/* Indicateur photo principale */}
           {step === 1 && !mainPhotoReady && (
             <p className="text-xs text-gray-400 hidden sm:block">
               Ajoutez au moins la photo principale pour continuer
             </p>
           )}
 
-          <button
-            onClick={() => setStep((s) => Math.min(STEPS.length, s + 1))}
-            disabled={step === 1 && !mainPhotoReady}
-            className="btn-shimmer flex items-center gap-2 bg-indigo-600 text-white font-semibold px-6 py-2.5 rounded-full hover:bg-indigo-700 disabled:opacity-40 disabled:pointer-events-none active:scale-95 transition-all text-sm shadow-md shadow-indigo-200/60"
-          >
-            {step === STEPS.length ? 'Terminer' : 'Continuer'}
-            <ChevronRight className="w-4 h-4" />
-          </button>
+          {step < STEPS.length && (
+            <button
+              onClick={() => setStep((s) => Math.min(STEPS.length, s + 1))}
+              disabled={!canContinue()}
+              className="btn-shimmer flex items-center gap-2 bg-indigo-600 text-white font-semibold px-6 py-2.5 rounded-full hover:bg-indigo-700 disabled:opacity-40 disabled:pointer-events-none active:scale-95 transition-all text-sm shadow-md shadow-indigo-200/60"
+            >
+              Continuer
+              <ChevronRight className="w-4 h-4" />
+            </button>
+          )}
+
+          {step === STEPS.length && (
+            <Link
+              href="/"
+              className="btn-shimmer flex items-center gap-2 bg-green-600 text-white font-semibold px-6 py-2.5 rounded-full hover:bg-green-700 active:scale-95 transition-all text-sm shadow-md shadow-green-200/60"
+            >
+              Terminer
+              <ChevronRight className="w-4 h-4" />
+            </Link>
+          )}
         </div>
       </div>
     </div>

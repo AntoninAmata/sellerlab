@@ -31,3 +31,21 @@ export interface RecognitionResult {
   motif:        RecognitionField<string>
   defauts:      RecognitionField<string>
 }
+
+/* ─── Étape 3 — Calcul du prix ──────────────────────────────────────────── */
+
+export interface PriceResult {
+  prixSuggere: number
+  prixMin: number
+  prixMax: number
+  prixNeufEstime?: number | null
+  raisonnement: string
+  margeNeg: number
+  confidence: 'high' | 'medium' | 'low'
+}
+
+export interface PricePrecisions {
+  prixAchatNeuf?: number
+  plateforme?: string
+  rarete?: string
+}
