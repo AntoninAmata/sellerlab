@@ -34,7 +34,7 @@ CONTRAINTES STRICTES :
 - États autorisés : ${CONDITIONS.map(c => c.label).join(', ')}
 - Styles autorisés : ${STYLES.join(', ')}
 - Motifs autorisés : ${PATTERNS.join(', ')}
-- Genres autorisés : Femme, Homme, Enfant, Mixte
+- Genres autorisés : Femme, Homme, Enfant, Mixte, Maison, Électronique, Beauté, Sport
 - Maximum 2 couleurs
 - Maximum 3 matières
 
@@ -58,7 +58,7 @@ IMPORTANT pour les chaussures : retourner le numéro EU tel qu'il est marqué su
 Réponds UNIQUEMENT avec ce JSON (sans markdown, sans texte avant ou après) :
 {
   "marque": { "value": "string — marque lisible sur étiquette ou logo visible, sinon vide", "confidence": "high|medium|low" },
-  "genre": { "value": "Femme|Homme|Enfant|Mixte", "confidence": "high|medium|low" },
+  "genre": { "value": "Femme|Homme|Enfant|Mixte|Maison|Électronique|Beauté|Sport", "confidence": "high|medium|low" },
   "categorie": { "value": "string — catégorie principale (ex: Robes, Pulls, Jeans...)", "confidence": "high|medium|low" },
   "sousCategorie": { "value": "string — sous-catégorie précise (ex: Robes longues, Jeans skinny...)", "confidence": "high|medium|low" },
   "taille": { "value": "string — taille lisible sur étiquette ou déduite selon le système approprié, sinon vide", "confidence": "high|medium|low" },

@@ -3,7 +3,7 @@
 import { useCallback, useEffect, useRef, useState } from 'react'
 import {
   Loader2, RefreshCw, AlertCircle, AlertTriangle,
-  Tag, TrendingUp, Euro, CheckCircle2, Info, X,
+  Tag, TrendingUp, Euro, CheckCircle2, Info, X, ChevronDown,
 } from 'lucide-react'
 import type { RecognitionResult, PriceResult, PricePrecisions } from '../types'
 
@@ -85,21 +85,16 @@ function ConfidenceBanner({ confidence }: { confidence: 'high' | 'medium' | 'low
   )
 }
 
-/* ─── Métrique de marché ─────────────────────────────────────────────────── */
+/* ─── Mini-métrique de marché (compact, grille 2x2) ─────────────────────── */
 
-function MarketMetric({ label, value, source }: { label: string; value: string | null; source?: string | null }) {
+function MiniMetric({ label, value }: { label: string; value: string | null }) {
   return (
-    <div className="bg-gray-50 rounded-xl p-4 flex flex-col gap-1">
-      <p className="text-[10px] font-bold text-gray-400 uppercase tracking-widest">{label}</p>
+    <div className="bg-gray-50 rounded-lg p-2.5">
+      <p className="text-[9px] font-bold text-gray-400 uppercase tracking-widest leading-tight mb-0.5">{label}</p>
       {value !== null ? (
-        <>
-          <p className="text-lg font-display font-extrabold text-gray-900">{value}</p>
-          {source && <p className="text-[10px] text-gray-400">{source}</p>}
-        </>
+        <p className="text-sm font-display font-extrabold text-gray-900 leading-tight">{value}</p>
       ) : (
-        <span className="text-xs font-semibold text-gray-300 bg-gray-100 px-2 py-0.5 rounded-full w-fit">
-          non disponible
-        </span>
+        <span className="text-[9px] font-semibold text-gray-300">—</span>
       )}
     </div>
   )
@@ -110,11 +105,12 @@ function MarketMetric({ label, value, source }: { label: string; value: string |
 export default function PricingStep({ recognition, result, setResult }: Props) {
   const { loading, error, retry } = usePricing(recognition, result, setResult)
 
-  /* ── État local du bloc "Trouver mon prix" ── */
+  /* ── État local du bloc interactif ── */
   const [prixAchat, setPrixAchat]       = useState('')
   const [plateforme, setPlateforme]     = useState('')
   const [rarete, setRarete]             = useState('')
   const [showMargin, setShowMargin]     = useState(false)
+  const [showPrecisions, setShowPrecisions] = useState(false)
   const [sliderVal, setSliderVal]       = useState<number | null>(null)
   const [prixMini, setPrixMini]         = useState('')
 
@@ -255,167 +251,50 @@ export default function PricingStep({ recognition, result, setResult }: Props) {
       <div className="space-y-5">
 
         {/* ═══════════════════════════════════════════════════════════════ */}
-        {/* BLOC 1 — PRIX RECOMMANDÉ                                       */}
+        {/* BLOC 1 — compact                                               */}
         {/* ═══════════════════════════════════════════════════════════════ */}
-        <div className="bg-white rounded-2xl border border-gray-100 shadow-sm p-6 space-y-4">
-
-          {/* Bannière de confiance */}
+        <div className="bg-white rounded-2xl border border-gray-100 shadow-sm p-5 space-y-4">
           <ConfidenceBanner confidence={result.confidence} />
 
-          {/* Prix en très grand */}
-          <div className="text-center py-4">
-            <p className="text-xs font-bold text-gray-400 uppercase tracking-widest mb-3">
-              Prix de vente suggéré
-            </p>
-            <div className="flex items-baseline justify-center gap-2">
-              <span className="font-display font-extrabold text-6xl text-gray-900 leading-none">
-                {result.prixSuggere}
-              </span>
-              <span className="text-3xl font-bold text-gray-300">€</span>
+          <div className="flex flex-col sm:flex-row items-start gap-5">
+            {/* Gauche : prix + raisonnement */}
+            <div className="flex-1 min-w-0">
+              <p className="text-[10px] font-bold text-gray-400 uppercase tracking-widest mb-1">Prix de vente suggéré</p>
+              <div className="flex items-baseline gap-1.5 mb-3">
+                <span className="font-display font-extrabold text-5xl text-gray-900 leading-none">{result.prixSuggere}</span>
+                <span className="text-2xl font-bold text-gray-300">€</span>
+              </div>
+              <div className="flex items-start gap-2 p-3 bg-gray-50 rounded-xl">
+                <TrendingUp className="w-3.5 h-3.5 text-indigo-500 shrink-0 mt-0.5" />
+                <p className="text-xs text-gray-600 leading-relaxed">{result.raisonnement}</p>
+              </div>
             </div>
-          </div>
 
-          {/* Raisonnement court */}
-          <div className="flex items-start gap-3 p-3.5 bg-gray-50 rounded-xl">
-            <TrendingUp className="w-4 h-4 text-indigo-500 shrink-0 mt-0.5" />
-            <p className="text-sm text-gray-600 leading-relaxed">{result.raisonnement}</p>
-          </div>
-        </div>
-
-        {/* ═══════════════════════════════════════════════════════════════ */}
-        {/* BLOC 2 — ANALYSE DU MARCHÉ                                     */}
-        {/* ═══════════════════════════════════════════════════════════════ */}
-        <div className="bg-white rounded-2xl border border-gray-100 shadow-sm p-6">
-          <div className="flex items-center justify-between mb-4">
-            <h3 className="text-sm font-bold text-gray-700">Analyse du marché</h3>
-            <span className="text-[10px] text-gray-400 font-medium">
-              Données issues de recherches web en temps réel
-            </span>
-          </div>
-
-          {/* Grid 4 métriques */}
-          <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 mb-4">
-            <MarketMetric
-              label="Prix neuf marque"
-              value={marche.prixNeufMarque !== null ? `${marche.prixNeufMarque}€` : null}
-              source={marche.sourcePrixNeuf}
-            />
-            <MarketMetric
-              label="Médiane Vinted"
-              value={marche.prixMedianVinted !== null ? `${marche.prixMedianVinted}€` : null}
-            />
-            <MarketMetric
-              label="Fourchette Vinted"
-              value={
-                marche.prixMinVinted !== null && marche.prixMaxVinted !== null
-                  ? `${marche.prixMinVinted}€ – ${marche.prixMaxVinted}€`
-                  : null
-              }
-            />
-            <MarketMetric
-              label="Annonces similaires"
-              value={marche.nbAnnonces !== null ? String(marche.nbAnnonces) : null}
-            />
-          </div>
-
-          {/* Délai de vente estimé */}
-          {marche.delaiVente && (
-            <div className="flex items-center gap-2 text-xs text-gray-500 mt-2">
-              <span className="font-semibold">Délai de vente estimé :</span>
-              <span className="font-bold text-indigo-600">{marche.delaiVente}</span>
-            </div>
-          )}
-        </div>
-
-        {/* ═══════════════════════════════════════════════════════════════ */}
-        {/* BLOC 3 — TROUVER MON PRIX                                      */}
-        {/* ═══════════════════════════════════════════════════════════════ */}
-        <div className="bg-white rounded-2xl border border-gray-100 shadow-sm p-6 space-y-6">
-          <h3 className="text-sm font-bold text-gray-700">Trouver mon prix</h3>
-
-          {/* ── Sous-section A : Prix d'achat ── */}
-          <div className="space-y-4">
-            <p className="text-xs font-bold text-gray-400 uppercase tracking-widest">
-              Préciser le prix d&apos;achat
-            </p>
-
-            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-              {/* Prix d'achat neuf */}
-              <div>
-                <label className="text-xs font-semibold text-gray-600 uppercase tracking-wide block mb-1.5">
-                  Prix d&apos;achat neuf (€)
-                </label>
-                <div className="relative">
-                  <input
-                    type="number"
-                    min="0"
-                    step="0.01"
-                    value={prixAchat}
-                    onChange={e => setPrixAchat(e.target.value)}
-                    placeholder="Ex: 49.99"
-                    className={`${inputCls} pr-8`}
-                  />
-                  <Euro className="absolute right-3 top-1/2 -translate-y-1/2 w-3.5 h-3.5 text-gray-300" />
+            {/* Droite : métriques marché compactes */}
+            <div className="w-full sm:w-52 shrink-0 space-y-2">
+              <p className="text-[10px] font-bold text-gray-400 uppercase tracking-widest">Analyse marché</p>
+              <div className="grid grid-cols-2 gap-2">
+                <MiniMetric label="Prix neuf" value={marche.prixNeufMarque !== null ? `${marche.prixNeufMarque}€` : null} />
+                <MiniMetric label="Médiane Vinted" value={marche.prixMedianVinted !== null ? `${marche.prixMedianVinted}€` : null} />
+                <MiniMetric label="Fourchette" value={marche.prixMinVinted !== null && marche.prixMaxVinted !== null ? `${marche.prixMinVinted}–${marche.prixMaxVinted}€` : null} />
+                <MiniMetric label="Annonces" value={marche.nbAnnonces !== null ? String(marche.nbAnnonces) : null} />
+              </div>
+              {marche.delaiVente && (
+                <div className="flex items-center gap-1.5 text-[10px] text-gray-500 mt-1">
+                  <span>Délai estimé :</span>
+                  <span className="font-bold text-indigo-600">{marche.delaiVente}</span>
                 </div>
-              </div>
-
-              {/* Plateforme */}
-              <div>
-                <label className="text-xs font-semibold text-gray-600 uppercase tracking-wide block mb-1.5">
-                  Acheté chez
-                </label>
-                <select
-                  value={plateforme}
-                  onChange={e => setPlateforme(e.target.value)}
-                  className={inputCls}
-                >
-                  <option value="">— Choisir —</option>
-                  <option value="Boutique officielle">Boutique officielle</option>
-                  <option value="Zalando">Zalando</option>
-                  <option value="ASOS">ASOS</option>
-                  <option value="Shein">Shein</option>
-                  <option value="Vinted">Vinted</option>
-                  <option value="Depop">Depop</option>
-                  <option value="Vestiaire Collective">Vestiaire Collective</option>
-                  <option value="Autre">Autre</option>
-                </select>
-              </div>
+              )}
             </div>
-
-            {/* Rareté */}
-            <div>
-              <label className="text-xs font-semibold text-gray-600 uppercase tracking-wide block mb-1.5">
-                Article rare ou édition limitée ?
-              </label>
-              <div className="grid grid-cols-2 sm:grid-cols-4 gap-2">
-                {['Non', 'Collaboration', 'Édition limitée', 'Vintage'].map(r => (
-                  <button
-                    key={r}
-                    type="button"
-                    onClick={() => setRarete(rarete === r ? '' : r)}
-                    className={`py-2 px-3 rounded-xl text-xs font-semibold border transition-all ${
-                      rarete === r
-                        ? 'bg-indigo-600 text-white border-indigo-600'
-                        : 'bg-white text-gray-600 border-gray-200 hover:border-indigo-300 hover:text-indigo-600'
-                    }`}
-                  >
-                    {r}
-                  </button>
-                ))}
-              </div>
-            </div>
-
-            <button
-              onClick={handleRecalculate}
-              disabled={loading}
-              className="w-full flex items-center justify-center gap-2 bg-indigo-600 text-white text-sm font-semibold py-3 rounded-xl hover:bg-indigo-700 disabled:opacity-50 transition-colors"
-            >
-              {loading ? <Loader2 className="w-4 h-4 animate-spin" /> : <RefreshCw className="w-4 h-4" />}
-              Recalculer avec ces informations
-            </button>
           </div>
+        </div>
 
-          {/* ── Sous-section B : Slider prix final ── */}
+        {/* ═══════════════════════════════════════════════════════════════ */}
+        {/* BLOC 2 — interactif                                            */}
+        {/* ═══════════════════════════════════════════════════════════════ */}
+        <div className="bg-white rounded-2xl border border-gray-100 shadow-sm p-5 space-y-5">
+
+          {/* ── Slider prix ── */}
           <div className="space-y-3">
             <p className="text-xs font-bold text-gray-400 uppercase tracking-widest">
               Ajuster le prix
@@ -429,7 +308,6 @@ export default function PricingStep({ recognition, result, setResult }: Props) {
 
             {/* Frise colorée + slider */}
             <div className="relative">
-              {/* Gradient de fond : vert → orange → rouge */}
               <div
                 className="absolute top-1/2 -translate-y-1/2 h-2 w-full rounded-full pointer-events-none"
                 style={{ background: 'linear-gradient(to right, #22c55e, #f97316, #ef4444)' }}
@@ -461,7 +339,7 @@ export default function PricingStep({ recognition, result, setResult }: Props) {
             </div>
           </div>
 
-          {/* ── Sous-section C : Marge de négociation ── */}
+          {/* ── Prix minimum à accepter ── */}
           <div className="space-y-3">
             <p className="text-xs font-bold text-gray-400 uppercase tracking-widest">
               Prix minimum à accepter
@@ -489,7 +367,97 @@ export default function PricingStep({ recognition, result, setResult }: Props) {
             )}
           </div>
 
-          {/* ── Sous-section D : Marge revendeur (toggle) ── */}
+          {/* ── Toggle accordion précisions ── */}
+          <div className="border-t border-gray-50 pt-4">
+            <button
+              onClick={() => setShowPrecisions(!showPrecisions)}
+              className="flex items-center justify-between w-full text-sm font-semibold text-gray-500 hover:text-gray-700"
+            >
+              <span>Préciser le prix d&apos;achat</span>
+              <ChevronDown className={`w-4 h-4 transition-transform ${showPrecisions ? 'rotate-180' : ''}`} />
+            </button>
+            {showPrecisions && (
+              <div className="mt-4 space-y-4">
+
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                  {/* Prix d'achat neuf */}
+                  <div>
+                    <label className="text-xs font-semibold text-gray-600 uppercase tracking-wide block mb-1.5">
+                      Prix d&apos;achat neuf (€)
+                    </label>
+                    <div className="relative">
+                      <input
+                        type="number"
+                        min="0"
+                        step="0.01"
+                        value={prixAchat}
+                        onChange={e => setPrixAchat(e.target.value)}
+                        placeholder="Ex: 49.99"
+                        className={`${inputCls} pr-8`}
+                      />
+                      <Euro className="absolute right-3 top-1/2 -translate-y-1/2 w-3.5 h-3.5 text-gray-300" />
+                    </div>
+                  </div>
+
+                  {/* Plateforme */}
+                  <div>
+                    <label className="text-xs font-semibold text-gray-600 uppercase tracking-wide block mb-1.5">
+                      Acheté chez
+                    </label>
+                    <select
+                      value={plateforme}
+                      onChange={e => setPlateforme(e.target.value)}
+                      className={inputCls}
+                    >
+                      <option value="">— Choisir —</option>
+                      <option value="Boutique officielle">Boutique officielle</option>
+                      <option value="Zalando">Zalando</option>
+                      <option value="ASOS">ASOS</option>
+                      <option value="Shein">Shein</option>
+                      <option value="Vinted">Vinted</option>
+                      <option value="Depop">Depop</option>
+                      <option value="Vestiaire Collective">Vestiaire Collective</option>
+                      <option value="Autre">Autre</option>
+                    </select>
+                  </div>
+                </div>
+
+                {/* Rareté */}
+                <div>
+                  <label className="text-xs font-semibold text-gray-600 uppercase tracking-wide block mb-1.5">
+                    Article rare ou édition limitée ?
+                  </label>
+                  <div className="grid grid-cols-2 sm:grid-cols-4 gap-2">
+                    {['Non', 'Collaboration', 'Édition limitée', 'Vintage'].map(r => (
+                      <button
+                        key={r}
+                        type="button"
+                        onClick={() => setRarete(rarete === r ? '' : r)}
+                        className={`py-2 px-3 rounded-xl text-xs font-semibold border transition-all ${
+                          rarete === r
+                            ? 'bg-indigo-600 text-white border-indigo-600'
+                            : 'bg-white text-gray-600 border-gray-200 hover:border-indigo-300 hover:text-indigo-600'
+                        }`}
+                      >
+                        {r}
+                      </button>
+                    ))}
+                  </div>
+                </div>
+
+                <button
+                  onClick={handleRecalculate}
+                  disabled={loading}
+                  className="w-full flex items-center justify-center gap-2 bg-indigo-600 text-white text-sm font-semibold py-3 rounded-xl hover:bg-indigo-700 disabled:opacity-50 transition-colors"
+                >
+                  {loading ? <Loader2 className="w-4 h-4 animate-spin" /> : <RefreshCw className="w-4 h-4" />}
+                  Recalculer avec ces informations
+                </button>
+              </div>
+            )}
+          </div>
+
+          {/* ── Toggle revendeur ── */}
           <div className="border-t border-gray-50 pt-4">
             <button
               type="button"

@@ -184,6 +184,7 @@ function useGenerate(
   result: GenerateResult | null,
   setResult: (r: GenerateResult) => void,
   lang: string,
+  prixAchatNeuf?: number,
 ) {
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState<string | null>(null)
@@ -210,6 +211,7 @@ function useGenerate(
           style:         recognition.style.value,
           motif:         recognition.motif.value,
           defauts:       recognition.defauts.value,
+          prixAchatNeuf: prixAchatNeuf !== undefined ? prixAchatNeuf : undefined,
           lang,
         }),
       })
@@ -221,7 +223,7 @@ function useGenerate(
     } finally {
       setLoading(false)
     }
-  }, [recognition, setResult, lang])
+  }, [recognition, setResult, lang, prixAchatNeuf])
 
   useEffect(() => {
     if (!ranRef.current && !result && recognition) {
@@ -262,7 +264,17 @@ function CopyButton({ text, label }: { text: string; label?: string }) {
 export default function AnnonceStep({ recognition, result, setResult }: Props) {
   const { lang } = useLang()
   const t = UI[lang] ?? UI.fr
-  const { loading, error, retry } = useGenerate(recognition, result, setResult, lang)
+
+  /* Prix d'achat neuf optionnel */
+  const [prixAchatNeuf, setPrixAchatNeuf] = useState('')
+
+  const { loading, error, retry } = useGenerate(
+    recognition,
+    result,
+    setResult,
+    lang,
+    prixAchatNeuf ? parseFloat(prixAchatNeuf) : undefined,
+  )
 
   /* Onglet actif : 'fr' ou 'en' — si langue utilisateur = 'en', forcer 'en' */
   const [activeTab, setActiveTab] = useState<'fr' | 'en'>(lang === 'en' ? 'en' : 'fr')
@@ -419,105 +431,6 @@ export default function AnnonceStep({ recognition, result, setResult }: Props) {
 
       <div className="space-y-4">
 
-        {/* ── Bandeau informations manquantes ── */}
-        {infosManquantes.length > 0 && (
-          <div className="flex items-start gap-3 p-4 bg-orange-50 border border-orange-200 rounded-2xl">
-            <AlertTriangle className="w-4 h-4 text-orange-500 shrink-0 mt-0.5" />
-            <div>
-              <p className="text-sm font-semibold text-orange-700 mb-1">{t.missingInfo}</p>
-              <div className="flex flex-wrap gap-1.5">
-                {infosManquantes.map(info => (
-                  <span key={info} className="text-xs bg-orange-100 text-orange-700 px-2 py-0.5 rounded-full font-medium">
-                    {info}
-                  </span>
-                ))}
-              </div>
-            </div>
-          </div>
-        )}
-
-        {/* ── Titre éditable ── */}
-        <div className="bg-white rounded-2xl border border-gray-100 shadow-sm overflow-hidden">
-          <div className="flex items-center justify-between px-5 py-3 border-b border-gray-50">
-            <div className="flex items-center gap-2">
-              <span className="text-xs font-bold text-gray-400 uppercase tracking-widest">Titre</span>
-              <span className="text-[10px] text-gray-300">{t.titleHint}</span>
-              <span className={`text-[10px] font-semibold ${result.titre.length > 60 ? 'text-red-500' : 'text-gray-300'}`}>
-                {result.titre.length}/60
-              </span>
-            </div>
-            <CopyButton text={result.titre} />
-          </div>
-          <div className="px-5 py-4">
-            <input
-              type="text"
-              value={result.titre}
-              onChange={e => updateTitre(e.target.value)}
-              maxLength={70}
-              className="w-full text-sm font-semibold text-gray-900 bg-gray-50 rounded-xl px-3 py-2.5 border border-gray-200 focus:outline-none focus:ring-2 focus:ring-indigo-100 focus:border-indigo-400 transition-colors"
-            />
-          </div>
-        </div>
-
-        {/* ── Onglets FR / EN + description ── */}
-        <div className="bg-white rounded-2xl border border-gray-100 shadow-sm overflow-hidden">
-          {/* En-tête avec onglets */}
-          <div className="flex items-center justify-between px-5 py-3 border-b border-gray-50">
-            <div className="flex gap-1">
-              {/* Onglet FR : masqué si utilisateur anglophone */}
-              {lang !== 'en' && (
-                <button
-                  onClick={() => setActiveTab('fr')}
-                  className={`px-3 py-1.5 rounded-lg text-xs font-semibold transition-all ${
-                    activeTab === 'fr'
-                      ? 'bg-indigo-600 text-white'
-                      : 'text-gray-400 hover:text-gray-600 hover:bg-gray-50'
-                  }`}
-                >
-                  {t.tabFr}
-                </button>
-              )}
-              <button
-                onClick={() => setActiveTab('en')}
-                className={`px-3 py-1.5 rounded-lg text-xs font-semibold transition-all ${
-                  activeTab === 'en'
-                    ? 'bg-indigo-600 text-white'
-                    : 'text-gray-400 hover:text-gray-600 hover:bg-gray-50'
-                }`}
-              >
-                {t.tabEn}
-              </button>
-            </div>
-            <div className="flex items-center gap-2">
-              <CopyButton text={descActive} />
-              <button
-                onClick={() => {/* toggle edit inline — géré via textarea */}}
-                className="flex items-center gap-1 text-xs font-semibold px-2.5 py-1.5 rounded-full border border-gray-200 text-gray-400 hover:border-indigo-300 hover:text-indigo-600 transition-all"
-              >
-                <Pencil className="w-3 h-3" />
-                Modifier
-              </button>
-            </div>
-          </div>
-          {/* Corps — textarea éditable */}
-          <div className="px-5 py-4">
-            <textarea
-              value={descActive}
-              onChange={e => updateDesc(e.target.value)}
-              rows={8}
-              className="w-full text-sm text-gray-800 leading-relaxed bg-gray-50 rounded-xl p-3 border border-gray-200 focus:outline-none focus:ring-2 focus:ring-indigo-100 focus:border-indigo-400 resize-none transition-colors"
-            />
-          </div>
-          {/* Équivalences de tailles si disponibles */}
-          {result.tailleEquivalences && (
-            <div className="px-5 pb-4">
-              <span className="text-[11px] text-indigo-600 font-semibold bg-indigo-50 px-2.5 py-1 rounded-full">
-                📏 {result.tailleEquivalences}
-              </span>
-            </div>
-          )}
-        </div>
-
         {/* ── Tags SEO ── */}
         <div className="bg-white rounded-2xl border border-gray-100 shadow-sm p-5">
           <p className="text-xs font-bold text-gray-400 uppercase tracking-widest mb-3">
@@ -588,6 +501,131 @@ export default function AnnonceStep({ recognition, result, setResult }: Props) {
               Ajouter
             </button>
           </div>
+        </div>
+
+        {/* ── Bandeau informations manquantes ── */}
+        {infosManquantes.length > 0 && (
+          <div className="flex items-start gap-3 p-4 bg-orange-50 border border-orange-200 rounded-2xl">
+            <AlertTriangle className="w-4 h-4 text-orange-500 shrink-0 mt-0.5" />
+            <div>
+              <p className="text-sm font-semibold text-orange-700 mb-1">{t.missingInfo}</p>
+              <div className="flex flex-wrap gap-1.5">
+                {infosManquantes.map(info => (
+                  <span key={info} className="text-xs bg-orange-100 text-orange-700 px-2 py-0.5 rounded-full font-medium">
+                    {info}
+                  </span>
+                ))}
+              </div>
+            </div>
+          </div>
+        )}
+
+        {/* ── Titre éditable ── */}
+        <div className="bg-white rounded-2xl border border-gray-100 shadow-sm overflow-hidden">
+          <div className="flex items-center justify-between px-5 py-3 border-b border-gray-50">
+            <div className="flex items-center gap-2">
+              <span className="text-xs font-bold text-gray-400 uppercase tracking-widest">Titre</span>
+              <span className="text-[10px] text-gray-300">{t.titleHint}</span>
+              <span className={`text-[10px] font-semibold ${result.titre.length > 60 ? 'text-red-500' : 'text-gray-300'}`}>
+                {result.titre.length}/60
+              </span>
+            </div>
+            <CopyButton text={result.titre} />
+          </div>
+          <div className="px-5 py-4">
+            <input
+              type="text"
+              value={result.titre}
+              onChange={e => updateTitre(e.target.value)}
+              maxLength={70}
+              className="w-full text-sm font-semibold text-gray-900 bg-gray-50 rounded-xl px-3 py-2.5 border border-gray-200 focus:outline-none focus:ring-2 focus:ring-indigo-100 focus:border-indigo-400 transition-colors"
+            />
+          </div>
+        </div>
+
+        {/* ── Champ prix d'achat neuf optionnel ── */}
+        <div className="bg-white rounded-2xl border border-gray-100 shadow-sm overflow-hidden">
+          <div className="px-5 py-3.5 flex items-center gap-3">
+            <span className="text-xs font-bold text-gray-400 uppercase tracking-widest shrink-0">
+              Prix neuf (optionnel)
+            </span>
+            <div className="flex-1 flex items-center gap-2">
+              <input
+                type="number"
+                min="0"
+                step="0.01"
+                value={prixAchatNeuf}
+                onChange={e => setPrixAchatNeuf(e.target.value)}
+                placeholder="Ex: 49.90"
+                className="flex-1 text-sm rounded-xl border border-gray-200 px-3 py-2 focus:outline-none focus:ring-2 focus:ring-indigo-100 focus:border-indigo-400 transition-colors"
+              />
+              <span className="text-xs text-gray-400 shrink-0">€</span>
+            </div>
+            {prixAchatNeuf && (
+              <span className="text-[10px] text-green-600 font-semibold bg-green-50 px-2 py-0.5 rounded-full shrink-0">
+                Sera inclus
+              </span>
+            )}
+          </div>
+        </div>
+
+        {/* ── Onglets FR / EN + description ── */}
+        <div className="bg-white rounded-2xl border border-gray-100 shadow-sm overflow-hidden">
+          {/* En-tête avec onglets */}
+          <div className="flex items-center justify-between px-5 py-3 border-b border-gray-50">
+            <div className="flex gap-1">
+              {/* Onglet FR : masqué si utilisateur anglophone */}
+              {lang !== 'en' && (
+                <button
+                  onClick={() => setActiveTab('fr')}
+                  className={`px-3 py-1.5 rounded-lg text-xs font-semibold transition-all ${
+                    activeTab === 'fr'
+                      ? 'bg-indigo-600 text-white'
+                      : 'text-gray-400 hover:text-gray-600 hover:bg-gray-50'
+                  }`}
+                >
+                  {t.tabFr}
+                </button>
+              )}
+              <button
+                onClick={() => setActiveTab('en')}
+                className={`px-3 py-1.5 rounded-lg text-xs font-semibold transition-all ${
+                  activeTab === 'en'
+                    ? 'bg-indigo-600 text-white'
+                    : 'text-gray-400 hover:text-gray-600 hover:bg-gray-50'
+                }`}
+              >
+                {t.tabEn}
+              </button>
+            </div>
+            <div className="flex items-center gap-2">
+              <CopyButton text={descActive} />
+              <button
+                onClick={() => {/* toggle edit inline — géré via textarea */}}
+                className="flex items-center gap-1 text-xs font-semibold px-2.5 py-1.5 rounded-full border border-gray-200 text-gray-400 hover:border-indigo-300 hover:text-indigo-600 transition-all"
+              >
+                <Pencil className="w-3 h-3" />
+                Modifier
+              </button>
+            </div>
+          </div>
+          {/* Corps — textarea éditable */}
+          <div className="px-5 py-4">
+            <textarea
+              value={descActive}
+              onChange={e => updateDesc(e.target.value)}
+              rows={8}
+              className="w-full text-sm text-gray-800 leading-relaxed bg-gray-50 rounded-xl p-3 border border-gray-200 focus:outline-none focus:ring-2 focus:ring-indigo-100 focus:border-indigo-400 resize-none transition-colors"
+            />
+          </div>
+          {/* Équivalences de tailles si disponibles */}
+          {result.tailleEquivalences && (
+            <div className="px-5 pb-4">
+              <span className="text-[11px] text-indigo-600 font-semibold bg-indigo-50 px-2.5 py-1 rounded-full">
+                📏 {result.tailleEquivalences}
+              </span>
+            </div>
+          )}
         </div>
 
         {/* ── Bloc dimensions (toggle) ── */}

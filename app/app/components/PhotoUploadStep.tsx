@@ -456,6 +456,21 @@ export default function PhotoUploadStep({ slots, setSlots }: Props) {
             <p className="text-[10px] font-bold text-indigo-400 uppercase tracking-widest mb-2">
               Fond de la photo principale
             </p>
+
+            {/* Prévisualisation fond en temps réel */}
+            {slots[0].preview && (
+              <div
+                className="w-full h-28 rounded-xl overflow-hidden mb-3 relative"
+                style={BACKGROUNDS[selectedBg].style}
+              >
+                <img
+                  src={slots[0].processedUrl ?? slots[0].preview}
+                  alt="Prévisualisation"
+                  className="w-full h-full object-contain"
+                />
+              </div>
+            )}
+
             <div className="flex gap-3 flex-wrap">
               {BACKGROUNDS.map((bg) => (
                 <button
@@ -502,18 +517,18 @@ export default function PhotoUploadStep({ slots, setSlots }: Props) {
         </div>
       )}
 
-      {/* ── Grille Vêtement (slots 0–5) ── */}
+      {/* ── Section 1 : Cintre / À plat (slots 0–1) ── */}
       <div>
         <div className="flex items-center justify-between mb-3">
           <p className="text-xs font-bold text-gray-400 uppercase tracking-widest">
-            Vêtement · 6 photos
+            Cintre / À plat · 2 photos
           </p>
           {filledCount > 0 && (
             <p className="text-xs text-gray-400 font-medium">{filledCount}/10 remplis</p>
           )}
         </div>
-        <div className="grid grid-cols-3 sm:grid-cols-6 gap-2.5">
-          {SLOT_DEFS.slice(0, 6).map((def) => (
+        <div className="grid grid-cols-2 sm:grid-cols-2 gap-2.5">
+          {SLOT_DEFS.slice(0, 2).map((def) => (
             <SlotCard
               key={def.id}
               def={def}
@@ -573,7 +588,31 @@ export default function PhotoUploadStep({ slots, setSlots }: Props) {
         </div>
       )}
 
-      {/* ── Grille Étiquettes & détails (slots 6–9) ── */}
+      {/* ── Section 2 : Photos portées (slots 2–5) ── */}
+      <div>
+        <p className="text-xs font-bold text-gray-400 uppercase tracking-widest mb-3">
+          Photos portées · 4 photos
+        </p>
+        <div className="grid grid-cols-2 sm:grid-cols-4 gap-2.5">
+          {SLOT_DEFS.slice(2, 6).map((def) => (
+            <SlotCard
+              key={def.id}
+              def={def}
+              slot={slots[def.id]}
+              isDragOver={dragOverId === def.id}
+              dragSourceId={dragSourceId}
+              bgStyle={selectedBgStyle}
+              displayLabel={SLOT_LABELS[lang]?.[def.id] ?? def.label}
+              onFileSelected={(file) => loadFileInSlot(file, def.id)}
+              onSwap={swapSlots}
+              onClear={() => clearSlot(def.id)}
+              onDragOverChange={(over) => setDragOverId(over ? def.id : null)}
+            />
+          ))}
+        </div>
+      </div>
+
+      {/* ── Section 3 : Étiquettes & détails (slots 6–9) ── */}
       <div>
         <p className="text-xs font-bold text-gray-400 uppercase tracking-widest mb-3">
           Étiquettes & détails · 4 photos

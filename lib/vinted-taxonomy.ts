@@ -1,6 +1,6 @@
 /* ─── Taxonomie Vinted — données exactes de l'interface ─────────────────── */
 
-export type Genre = 'Femme' | 'Homme' | 'Enfant' | 'Mixte'
+export type Genre = 'Femme' | 'Homme' | 'Enfant' | 'Mixte' | 'Maison' | 'Électronique' | 'Beauté' | 'Sport'
 
 export interface SubCategory {
   name: string
@@ -23,8 +23,6 @@ export type SizeSystem =
   | 'one_size'
   | 'none'
 
-/* ─── Catégories par genre ───────────────────────────────────────────────── */
-
 export const CATEGORIES: Record<Genre, Category[]> = {
   Femme: [
     {
@@ -32,9 +30,8 @@ export const CATEGORIES: Record<Genre, Category[]> = {
       subCategories: [
         { name: 'T-shirts', sizeSystem: 'letters' },
         { name: 'Tops & Débardeurs', sizeSystem: 'letters' },
-        { name: 'Chemisiers', sizeSystem: 'eu_femme' },
-        { name: 'Pulls', sizeSystem: 'letters' },
-        { name: 'Sweats & Hoodies', sizeSystem: 'letters' },
+        { name: 'Chemisiers & Blouses', sizeSystem: 'eu_femme' },
+        { name: 'Pulls & Sweatshirts', sizeSystem: 'letters' },
         { name: 'Cardigans', sizeSystem: 'letters' },
       ],
     },
@@ -63,6 +60,7 @@ export const CATEGORIES: Record<Genre, Category[]> = {
         { name: 'Leggings', sizeSystem: 'letters' },
         { name: 'Shorts & Bermudas', sizeSystem: 'eu_femme' },
         { name: 'Combinaisons', sizeSystem: 'eu_femme' },
+        { name: 'Joggings', sizeSystem: 'letters' },
       ],
     },
     {
@@ -74,6 +72,7 @@ export const CATEGORIES: Record<Genre, Category[]> = {
         { name: 'Doudounes', sizeSystem: 'letters' },
         { name: 'Parkas', sizeSystem: 'letters' },
         { name: 'Vestes en cuir', sizeSystem: 'eu_femme' },
+        { name: 'Bombers', sizeSystem: 'letters' },
       ],
     },
     {
@@ -85,6 +84,7 @@ export const CATEGORIES: Record<Genre, Category[]> = {
         { name: 'Escarpins & Talons', sizeSystem: 'pointures' },
         { name: 'Ballerines & Mocassins', sizeSystem: 'pointures' },
         { name: 'Chaussures plates', sizeSystem: 'pointures' },
+        { name: 'Chaussures sport', sizeSystem: 'pointures' },
       ],
     },
     {
@@ -95,6 +95,7 @@ export const CATEGORIES: Record<Genre, Category[]> = {
         { name: 'Sacs bandoulière', sizeSystem: 'one_size' },
         { name: 'Pochettes & Clutches', sizeSystem: 'one_size' },
         { name: 'Tote bags', sizeSystem: 'one_size' },
+        { name: 'Sacs de voyage', sizeSystem: 'one_size' },
         { name: 'Valises & Bagages', sizeSystem: 'one_size' },
       ],
     },
@@ -105,9 +106,28 @@ export const CATEGORIES: Record<Genre, Category[]> = {
         { name: 'Ceintures', sizeSystem: 'one_size' },
         { name: 'Chapeaux & Bonnets', sizeSystem: 'one_size' },
         { name: 'Gants & Mitaines', sizeSystem: 'one_size' },
-        { name: 'Bijoux', sizeSystem: 'one_size' },
-        { name: 'Montres', sizeSystem: 'one_size' },
-        { name: 'Lunettes', sizeSystem: 'one_size' },
+        { name: 'Lunettes de soleil', sizeSystem: 'one_size' },
+        { name: 'Collants & Chaussettes', sizeSystem: 'one_size' },
+        { name: 'Cravates & Nœuds papillon', sizeSystem: 'one_size' },
+      ],
+    },
+    {
+      name: 'Bijoux',
+      subCategories: [
+        { name: 'Colliers & Pendentifs', sizeSystem: 'one_size' },
+        { name: 'Bagues', sizeSystem: 'one_size' },
+        { name: 'Boucles d\'oreilles', sizeSystem: 'one_size' },
+        { name: 'Bracelets', sizeSystem: 'one_size' },
+        { name: 'Brooches & Épingles', sizeSystem: 'one_size' },
+        { name: 'Parures', sizeSystem: 'one_size' },
+      ],
+    },
+    {
+      name: 'Montres',
+      subCategories: [
+        { name: 'Montres classiques', sizeSystem: 'one_size' },
+        { name: 'Montres sport', sizeSystem: 'one_size' },
+        { name: 'Montres connectées', sizeSystem: 'one_size' },
       ],
     },
     {
@@ -117,6 +137,7 @@ export const CATEGORIES: Record<Genre, Category[]> = {
         { name: 'Maillots 1 pièce', sizeSystem: 'eu_femme' },
         { name: 'Bas de maillot', sizeSystem: 'eu_femme' },
         { name: 'Hauts de maillot', sizeSystem: 'eu_femme' },
+        { name: 'Pareos & Sarongs', sizeSystem: 'one_size' },
       ],
     },
     {
@@ -126,6 +147,8 @@ export const CATEGORIES: Record<Genre, Category[]> = {
         { name: 'Leggings & Shorts sport', sizeSystem: 'letters' },
         { name: 'Vestes & Sweats sport', sizeSystem: 'letters' },
         { name: 'Chaussures sport', sizeSystem: 'pointures' },
+        { name: 'Maillots de sport', sizeSystem: 'letters' },
+        { name: 'Tenues yoga & pilates', sizeSystem: 'letters' },
       ],
     },
     {
@@ -133,7 +156,17 @@ export const CATEGORIES: Record<Genre, Category[]> = {
       subCategories: [
         { name: 'Soutiens-gorge', sizeSystem: 'none' },
         { name: 'Culottes & Strings', sizeSystem: 'letters' },
+        { name: 'Body', sizeSystem: 'letters' },
         { name: 'Pyjamas & Nuisettes', sizeSystem: 'letters' },
+        { name: 'Chaussettes & Collants', sizeSystem: 'one_size' },
+      ],
+    },
+    {
+      name: 'Maternité',
+      subCategories: [
+        { name: 'Hauts maternité', sizeSystem: 'letters' },
+        { name: 'Pantalons maternité', sizeSystem: 'eu_femme' },
+        { name: 'Robes maternité', sizeSystem: 'eu_femme' },
       ],
     },
   ],
@@ -145,9 +178,9 @@ export const CATEGORIES: Record<Genre, Category[]> = {
         { name: 'T-shirts', sizeSystem: 'letters' },
         { name: 'Polos', sizeSystem: 'letters' },
         { name: 'Chemises', sizeSystem: 'eu_homme' },
-        { name: 'Pulls', sizeSystem: 'letters' },
-        { name: 'Sweats & Hoodies', sizeSystem: 'letters' },
+        { name: 'Pulls & Sweatshirts', sizeSystem: 'letters' },
         { name: 'Débardeurs', sizeSystem: 'letters' },
+        { name: 'Costumes & Vestes de costume', sizeSystem: 'eu_homme' },
       ],
     },
     {
@@ -178,7 +211,8 @@ export const CATEGORIES: Record<Genre, Category[]> = {
         { name: 'Bottes & Bottines', sizeSystem: 'pointures' },
         { name: 'Mocassins & Derbies', sizeSystem: 'pointures' },
         { name: 'Sandales', sizeSystem: 'pointures' },
-        { name: 'Chaussures de sport', sizeSystem: 'pointures' },
+        { name: 'Chaussures sport', sizeSystem: 'pointures' },
+        { name: 'Chaussures habillées', sizeSystem: 'pointures' },
       ],
     },
     {
@@ -187,8 +221,19 @@ export const CATEGORIES: Record<Genre, Category[]> = {
         { name: 'Écharpes & Foulards', sizeSystem: 'one_size' },
         { name: 'Ceintures', sizeSystem: 'one_size' },
         { name: 'Chapeaux & Bonnets', sizeSystem: 'one_size' },
-        { name: 'Bijoux & Montres', sizeSystem: 'one_size' },
-        { name: 'Lunettes', sizeSystem: 'one_size' },
+        { name: 'Cravates & Nœuds papillon', sizeSystem: 'one_size' },
+        { name: 'Lunettes de soleil', sizeSystem: 'one_size' },
+        { name: 'Gants', sizeSystem: 'one_size' },
+      ],
+    },
+    {
+      name: 'Bijoux & Montres',
+      subCategories: [
+        { name: 'Montres', sizeSystem: 'one_size' },
+        { name: 'Bracelets', sizeSystem: 'one_size' },
+        { name: 'Colliers', sizeSystem: 'one_size' },
+        { name: 'Bagues', sizeSystem: 'one_size' },
+        { name: 'Boucles d\'oreilles', sizeSystem: 'one_size' },
       ],
     },
     {
@@ -197,6 +242,22 @@ export const CATEGORIES: Record<Genre, Category[]> = {
         { name: 'Sacs à dos', sizeSystem: 'one_size' },
         { name: 'Sacs bandoulière', sizeSystem: 'one_size' },
         { name: 'Sacs de voyage', sizeSystem: 'one_size' },
+        { name: 'Porte-monnaie & Portefeuilles', sizeSystem: 'one_size' },
+      ],
+    },
+    {
+      name: 'Sous-vêtements & Pyjamas',
+      subCategories: [
+        { name: 'Boxers & Slips', sizeSystem: 'letters' },
+        { name: 'Pyjamas', sizeSystem: 'letters' },
+        { name: 'Chaussettes', sizeSystem: 'one_size' },
+      ],
+    },
+    {
+      name: 'Maillots de bain',
+      subCategories: [
+        { name: 'Shorts de bain', sizeSystem: 'letters' },
+        { name: 'Slips de bain', sizeSystem: 'letters' },
       ],
     },
     {
@@ -205,7 +266,9 @@ export const CATEGORIES: Record<Genre, Category[]> = {
         { name: 'T-shirts sport', sizeSystem: 'letters' },
         { name: 'Shorts sport', sizeSystem: 'letters' },
         { name: 'Vestes sport', sizeSystem: 'letters' },
+        { name: 'Joggings sport', sizeSystem: 'letters' },
         { name: 'Chaussures sport', sizeSystem: 'pointures' },
+        { name: 'Maillots & Équipement', sizeSystem: 'letters' },
       ],
     },
   ],
@@ -218,8 +281,10 @@ export const CATEGORIES: Record<Genre, Category[]> = {
         { name: 'Hauts & T-shirts', sizeSystem: 'enfant_cm' },
         { name: 'Pantalons & Leggings', sizeSystem: 'enfant_cm' },
         { name: 'Robes & Jupes', sizeSystem: 'enfant_cm' },
+        { name: 'Pyjamas & Gigoteuses', sizeSystem: 'enfant_cm' },
         { name: 'Manteaux & Doudounes', sizeSystem: 'enfant_cm' },
-        { name: 'Chaussures', sizeSystem: 'pointures' },
+        { name: 'Chaussures bébé', sizeSystem: 'pointures' },
+        { name: 'Accessoires bébé', sizeSystem: 'one_size' },
       ],
     },
     {
@@ -231,6 +296,8 @@ export const CATEGORIES: Record<Genre, Category[]> = {
         { name: 'Pulls & Sweats', sizeSystem: 'enfant_age' },
         { name: 'Vestes & Manteaux', sizeSystem: 'enfant_age' },
         { name: 'Chaussures', sizeSystem: 'pointures' },
+        { name: 'Accessoires & Bijoux', sizeSystem: 'one_size' },
+        { name: 'Sport', sizeSystem: 'enfant_age' },
       ],
     },
     {
@@ -242,6 +309,17 @@ export const CATEGORIES: Record<Genre, Category[]> = {
         { name: 'Shorts', sizeSystem: 'enfant_age' },
         { name: 'Vestes & Manteaux', sizeSystem: 'enfant_age' },
         { name: 'Chaussures', sizeSystem: 'pointures' },
+        { name: 'Accessoires', sizeSystem: 'one_size' },
+        { name: 'Sport', sizeSystem: 'enfant_age' },
+      ],
+    },
+    {
+      name: 'Enfant Mixte',
+      subCategories: [
+        { name: 'T-shirts unisexe', sizeSystem: 'enfant_age' },
+        { name: 'Pyjamas', sizeSystem: 'enfant_age' },
+        { name: 'Chaussures', sizeSystem: 'pointures' },
+        { name: 'Accessoires', sizeSystem: 'one_size' },
       ],
     },
   ],
@@ -252,27 +330,214 @@ export const CATEGORIES: Record<Genre, Category[]> = {
       subCategories: [
         { name: 'T-shirts', sizeSystem: 'letters' },
         { name: 'Sweats & Hoodies', sizeSystem: 'letters' },
+        { name: 'Vestes', sizeSystem: 'letters' },
+        { name: 'Pantalons & Joggings', sizeSystem: 'letters' },
         { name: 'Baskets', sizeSystem: 'pointures' },
+        { name: 'Accessoires', sizeSystem: 'one_size' },
+      ],
+    },
+  ],
+
+  Maison: [
+    {
+      name: 'Meubles',
+      subCategories: [
+        { name: 'Canapés & Fauteuils', sizeSystem: 'none' },
+        { name: 'Tables & Bureaux', sizeSystem: 'none' },
+        { name: 'Lits & Cadres de lit', sizeSystem: 'none' },
+        { name: 'Rangements & Étagères', sizeSystem: 'none' },
+        { name: 'Chaises', sizeSystem: 'none' },
+      ],
+    },
+    {
+      name: 'Déco & Objets',
+      subCategories: [
+        { name: 'Coussins & Plaids', sizeSystem: 'none' },
+        { name: 'Bougies & Parfums d\'ambiance', sizeSystem: 'none' },
+        { name: 'Cadres & Tableaux', sizeSystem: 'none' },
+        { name: 'Vases & Céramiques', sizeSystem: 'none' },
+        { name: 'Miroirs', sizeSystem: 'none' },
+        { name: 'Horloges', sizeSystem: 'none' },
+      ],
+    },
+    {
+      name: 'Linge de maison',
+      subCategories: [
+        { name: 'Draps & Parures de lit', sizeSystem: 'none' },
+        { name: 'Couvre-lits & Couettes', sizeSystem: 'none' },
+        { name: 'Serviettes & Peignoirs', sizeSystem: 'none' },
+        { name: 'Nappes & Torchons', sizeSystem: 'none' },
+      ],
+    },
+    {
+      name: 'Cuisine',
+      subCategories: [
+        { name: 'Vaisselle', sizeSystem: 'none' },
+        { name: 'Ustensiles & Accessoires', sizeSystem: 'none' },
+        { name: 'Cafetières & Appareils', sizeSystem: 'none' },
+        { name: 'Verres & Tasses', sizeSystem: 'none' },
+      ],
+    },
+    {
+      name: 'Jardin & Extérieur',
+      subCategories: [
+        { name: 'Mobilier de jardin', sizeSystem: 'none' },
+        { name: 'Plantes & Accessoires', sizeSystem: 'none' },
+        { name: 'Déco extérieure', sizeSystem: 'none' },
+      ],
+    },
+  ],
+
+  Électronique: [
+    {
+      name: 'Téléphones & Tablettes',
+      subCategories: [
+        { name: 'Smartphones', sizeSystem: 'none' },
+        { name: 'Tablettes', sizeSystem: 'none' },
+        { name: 'Coques & Accessoires', sizeSystem: 'none' },
+      ],
+    },
+    {
+      name: 'Informatique',
+      subCategories: [
+        { name: 'Ordinateurs portables', sizeSystem: 'none' },
+        { name: 'Ordinateurs de bureau', sizeSystem: 'none' },
+        { name: 'Accessoires informatique', sizeSystem: 'none' },
+      ],
+    },
+    {
+      name: 'Jeux vidéo & Consoles',
+      subCategories: [
+        { name: 'Consoles', sizeSystem: 'none' },
+        { name: 'Jeux vidéo', sizeSystem: 'none' },
+        { name: 'Accessoires gaming', sizeSystem: 'none' },
+      ],
+    },
+    {
+      name: 'Audio & Musique',
+      subCategories: [
+        { name: 'Écouteurs & Casques', sizeSystem: 'none' },
+        { name: 'Enceintes', sizeSystem: 'none' },
+        { name: 'Instruments de musique', sizeSystem: 'none' },
+      ],
+    },
+    {
+      name: 'Photo & Vidéo',
+      subCategories: [
+        { name: 'Appareils photo', sizeSystem: 'none' },
+        { name: 'Caméras', sizeSystem: 'none' },
+        { name: 'Accessoires photo', sizeSystem: 'none' },
+      ],
+    },
+  ],
+
+  Beauté: [
+    {
+      name: 'Parfums',
+      subCategories: [
+        { name: 'Parfums femme', sizeSystem: 'none' },
+        { name: 'Parfums homme', sizeSystem: 'none' },
+        { name: 'Eaux de toilette', sizeSystem: 'none' },
+      ],
+    },
+    {
+      name: 'Soins & Skincare',
+      subCategories: [
+        { name: 'Soins visage', sizeSystem: 'none' },
+        { name: 'Soins corps', sizeSystem: 'none' },
+        { name: 'Soins cheveux', sizeSystem: 'none' },
+      ],
+    },
+    {
+      name: 'Maquillage',
+      subCategories: [
+        { name: 'Teint', sizeSystem: 'none' },
+        { name: 'Yeux', sizeSystem: 'none' },
+        { name: 'Lèvres', sizeSystem: 'none' },
+        { name: 'Ongles', sizeSystem: 'none' },
+      ],
+    },
+    {
+      name: 'Coiffure & Accessoires',
+      subCategories: [
+        { name: 'Accessoires cheveux', sizeSystem: 'one_size' },
+        { name: 'Outils coiffure', sizeSystem: 'none' },
+      ],
+    },
+  ],
+
+  Sport: [
+    {
+      name: 'Running & Athlétisme',
+      subCategories: [
+        { name: 'Chaussures running', sizeSystem: 'pointures' },
+        { name: 'Tenues running', sizeSystem: 'letters' },
+        { name: 'Accessoires running', sizeSystem: 'one_size' },
+      ],
+    },
+    {
+      name: 'Football & Sports collectifs',
+      subCategories: [
+        { name: 'Maillots', sizeSystem: 'letters' },
+        { name: 'Shorts & Survêtements', sizeSystem: 'letters' },
+        { name: 'Chaussures football', sizeSystem: 'pointures' },
+        { name: 'Équipement & Accessoires', sizeSystem: 'one_size' },
+      ],
+    },
+    {
+      name: 'Tennis & Raquettes',
+      subCategories: [
+        { name: 'Raquettes', sizeSystem: 'none' },
+        { name: 'Chaussures tennis', sizeSystem: 'pointures' },
+        { name: 'Tenues tennis', sizeSystem: 'letters' },
+      ],
+    },
+    {
+      name: 'Ski & Sports d\'hiver',
+      subCategories: [
+        { name: 'Vestes de ski', sizeSystem: 'letters' },
+        { name: 'Pantalons de ski', sizeSystem: 'letters' },
+        { name: 'Accessoires ski', sizeSystem: 'one_size' },
+      ],
+    },
+    {
+      name: 'Fitness & Musculation',
+      subCategories: [
+        { name: 'Tenues fitness', sizeSystem: 'letters' },
+        { name: 'Équipement musculation', sizeSystem: 'none' },
+        { name: 'Chaussures fitness', sizeSystem: 'pointures' },
+      ],
+    },
+    {
+      name: 'Sports aquatiques',
+      subCategories: [
+        { name: 'Maillots de bain sport', sizeSystem: 'letters' },
+        { name: 'Combinaisons', sizeSystem: 'letters' },
+        { name: 'Accessoires natation', sizeSystem: 'one_size' },
+      ],
+    },
+    {
+      name: 'Vélo & Cyclisme',
+      subCategories: [
+        { name: 'Tenues vélo', sizeSystem: 'letters' },
+        { name: 'Casques', sizeSystem: 'one_size' },
+        { name: 'Accessoires vélo', sizeSystem: 'none' },
       ],
     },
   ],
 }
 
-/* ─── Tailles par système ────────────────────────────────────────────────── */
-
 export const SIZES: Record<SizeSystem, string[]> = {
   letters:    ['XS', 'S', 'M', 'L', 'XL', 'XXL', 'XXXL'],
-  eu_femme:   ['34', '36', '38', '40', '42', '44', '46', '48'],
+  eu_femme:   ['32', '34', '36', '38', '40', '42', '44', '46', '48', '50'],
   eu_homme:   ['44', '46', '48', '50', '52', '54', '56'],
   jeans:      ['28', '30', '32', '34', '36', '38', '40', '42'],
   pointures:  ['35', '36', '37', '38', '39', '40', '41', '42', '43', '44', '45', '46', '47', '48'],
   enfant_age: ['0-3 mois', '3-6 mois', '6-9 mois', '9-12 mois', '12-18 mois', '18-24 mois', '2 ans', '3 ans', '4 ans', '5 ans', '6 ans', '7 ans', '8 ans', '9 ans', '10 ans', '11 ans', '12 ans', '13 ans', '14 ans'],
-  enfant_cm:  ['56', '62', '68', '74', '80', '86', '92', '98', '104', '110', '116', '122', '128', '134', '140', '146', '152', '158', '164'],
+  enfant_cm:  ['50', '56', '62', '68', '74', '80', '86', '92', '98', '104', '110', '116', '122', '128', '134', '140', '146', '152', '158', '164'],
   one_size:   ['Taille unique'],
   none:       [],
 }
-
-/* ─── Couleurs exactes Vinted (ordre interface) ─────────────────────────── */
 
 export const COLORS: string[] = [
   'Noir', 'Gris', 'Blanc', 'Crème', 'Beige', 'Abricot', 'Orange', 'Corail',
@@ -280,8 +545,6 @@ export const COLORS: string[] = [
   'Bleu', 'Marine', 'Turquoise', 'Menthe', 'Vert', 'Vert foncé', 'Kaki',
   'Marron', 'Moutarde', 'Jaune', 'Argenté', 'Doré', 'Multicolore', 'Transparence',
 ]
-
-/* ─── Matières exactes Vinted (ordre alphabétique interface) ────────────── */
 
 export const MATERIALS: string[] = [
   'Acier', 'Acrylique', 'Alpaga', 'Argent', 'Bambou', 'Bois', 'Cachemire',
@@ -294,8 +557,6 @@ export const MATERIALS: string[] = [
   'Velours côtelé', 'Verre', 'Viscose', 'Élasthanne',
 ]
 
-/* ─── États officiels Vinted ─────────────────────────────────────────────── */
-
 export const CONDITIONS = [
   { id: 'new_tags',    label: 'Neuf avec étiquette',   desc: 'Jamais porté/utilisé, étiquettes ou emballage d\'origine' },
   { id: 'new_no_tags', label: 'Neuf sans étiquette',   desc: 'Jamais porté/utilisé, sans étiquettes ni emballage' },
@@ -306,14 +567,10 @@ export const CONDITIONS = [
 
 export type ConditionId = typeof CONDITIONS[number]['id']
 
-/* ─── Styles ─────────────────────────────────────────────────────────────── */
-
 export const STYLES: string[] = [
   'Casual', 'Classique', 'Sportif', 'Chic & Élégant', 'Bohème', 'Streetwear',
   'Vintage', 'Romantique', 'Minimaliste', 'Rock', 'Preppy', 'Gothique',
 ]
-
-/* ─── Motifs ─────────────────────────────────────────────────────────────── */
 
 export const PATTERNS: string[] = [
   'Uni', 'Rayures', 'Carreaux', 'Fleurs', 'Pois', 'Animal print',

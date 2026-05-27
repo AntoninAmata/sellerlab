@@ -344,11 +344,20 @@ export default function RecognitionStep({ slots, result, setResult }: Props) {
             <Field label="Genre" confidence={result.genre.confidence} required>
               <select
                 value={result.genre.value}
-                onChange={e => update('genre', e.target.value)}
+                onChange={e => {
+                  if (!result) return
+                  setResult({
+                    ...result,
+                    genre: { value: e.target.value, confidence: 'manual' },
+                    categorie: { value: '', confidence: 'manual' },
+                    sousCategorie: { value: '', confidence: 'manual' },
+                    taille: { value: '', confidence: 'manual' },
+                  })
+                }}
                 className={inputCls(result.genre.confidence)}
               >
                 <option value="">— Choisir —</option>
-                {(['Femme', 'Homme', 'Enfant', 'Mixte'] as const).map(g => (
+                {(['Femme', 'Homme', 'Enfant', 'Mixte', 'Maison', 'Électronique', 'Beauté', 'Sport'] as const).map(g => (
                   <option key={g} value={g}>{g}</option>
                 ))}
               </select>
@@ -361,8 +370,13 @@ export default function RecognitionStep({ slots, result, setResult }: Props) {
               <select
                 value={result.categorie.value}
                 onChange={e => {
-                  update('categorie', e.target.value)
-                  update('sousCategorie', '')
+                  if (!result) return
+                  setResult({
+                    ...result,
+                    categorie: { value: e.target.value, confidence: 'manual' },
+                    sousCategorie: { value: '', confidence: 'manual' },
+                    taille: { value: '', confidence: 'manual' },
+                  })
                 }}
                 className={inputCls(result.categorie.confidence)}
               >
@@ -377,7 +391,14 @@ export default function RecognitionStep({ slots, result, setResult }: Props) {
             <Field label="Sous-catégorie" confidence={result.sousCategorie.confidence}>
               <select
                 value={result.sousCategorie.value}
-                onChange={e => update('sousCategorie', e.target.value)}
+                onChange={e => {
+                  if (!result) return
+                  setResult({
+                    ...result,
+                    sousCategorie: { value: e.target.value, confidence: 'manual' },
+                    taille: { value: '', confidence: 'manual' },
+                  })
+                }}
                 disabled={subCats.length === 0}
                 className={inputCls(result.sousCategorie.confidence)}
               >
