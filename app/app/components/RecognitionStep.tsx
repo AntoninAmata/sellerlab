@@ -5,7 +5,7 @@ import {
   Loader2, RefreshCw, CheckCircle2, AlertTriangle,
   XCircle, Pencil, AlertCircle, ScanLine,
 } from 'lucide-react'
-import type { PhotoSlot, RecognitionResult, Confidence } from '../types'
+import type { PhotoSlot, RecognitionResult, RecognitionField, Confidence } from '../types'
 import {
   CATEGORIES, SIZES, COLORS, MATERIALS, CONDITIONS, STYLES, PATTERNS,
 } from '@/lib/vinted-taxonomy'
@@ -74,6 +74,33 @@ async function resizeAndEncode(file: File, maxPx = 1024): Promise<{ base64: stri
   })
 }
 
+/* ─── Normalisation des niveaux de confiance ─────────────────────────────── */
+/* Garantit qu'un champ vide ne peut jamais avoir confidence "high" ou "medium" */
+
+function normalizeConfidence(result: RecognitionResult): RecognitionResult {
+  function fix<T>(field: RecognitionField<T>): RecognitionField<T> {
+    const empty = Array.isArray(field.value)
+      ? (field.value as unknown[]).length === 0
+      : !field.value
+    if (empty && field.confidence !== 'manual') return { value: field.value, confidence: 'low' }
+    return field
+  }
+  return {
+    marque:        fix(result.marque),
+    genre:         fix(result.genre),
+    categorie:     fix(result.categorie),
+    sousCategorie: fix(result.sousCategorie),
+    taille:        fix(result.taille),
+    tailleSysteme: fix(result.tailleSysteme),
+    etat:          fix(result.etat),
+    couleurs:      fix(result.couleurs),
+    matieres:      fix(result.matieres),
+    style:         fix(result.style),
+    motif:         fix(result.motif),
+    defauts:       fix(result.defauts),
+  }
+}
+
 /* ─── Hook appel API reconnaissance ─────────────────────────────────────── */
 
 function useRecognition(slots: PhotoSlot[], result: RecognitionResult | null, setResult: (r: RecognitionResult) => void) {
@@ -116,7 +143,8 @@ function useRecognition(slots: PhotoSlot[], result: RecognitionResult | null, se
 
       if (!res.ok) throw new Error('Erreur serveur')
       const data: RecognitionResult = await res.json()
-      setResult(data)
+      /* Normalise les niveaux de confiance avant de stocker le résultat */
+      setResult(normalizeConfidence(data))
     } catch {
       setError('L\'analyse a échoué. Vérifiez votre connexion et réessayez.')
     } finally {

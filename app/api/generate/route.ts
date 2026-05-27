@@ -1,5 +1,6 @@
 import Anthropic from '@anthropic-ai/sdk'
 import { NextRequest, NextResponse } from 'next/server'
+import type { GenerateResult } from '@/app/app/types'
 
 const client = new Anthropic()
 
@@ -19,12 +20,8 @@ export interface GenerateRequest {
   lang: string
 }
 
-export interface GenerateResult {
-  titre: string
-  description: string
-}
-
 /* ─── POST /api/generate ─────────────────────────────────────────────────── */
+/* Génère titre + descriptions FR/EN + tags SEO au format structuré            */
 
 export async function POST(req: NextRequest) {
   try {
@@ -35,46 +32,57 @@ export async function POST(req: NextRequest) {
       couleurs, matieres, style, motif, defauts, prixSuggere, lang,
     } = body
 
-    const langLabel: Record<string, string> = {
-      fr: 'français', en: 'anglais', es: 'espagnol',
-      de: 'allemand', it: 'italien', nl: 'néerlandais', pl: 'polonais',
-    }
-
     const prompt = `Tu es un expert en copywriting pour Vinted. Rédige une annonce optimisée pour vendre rapidement.
 
 Article :
 - Marque : ${marque || 'Inconnue'}
 - Genre : ${genre}
 - Catégorie : ${categorie} > ${sousCategorie}
-- Taille : ${taille}
+- Taille : ${taille || 'Non précisée'}
 - État : ${etat}
-- Couleurs : ${couleurs.join(', ')}
-- Matières : ${matieres.join(', ')}
-- Style : ${style}
-- Motif : ${motif}
+- Couleurs : ${couleurs.join(', ') || 'Non précisées'}
+- Matières : ${matieres.join(', ') || 'Non précisées'}
+- Style : ${style || 'Non précisé'}
+- Motif : ${motif || 'Non précisé'}
 ${defauts ? `- Défauts : ${defauts}` : ''}
 ${prixSuggere ? `- Prix : ${prixSuggere}€` : ''}
 
-CONTRAINTES STRICTES :
-- Langue : ${langLabel[lang] ?? 'français'}
-- Titre : maximum 60 caractères, accrocheur, avec marque + type + taille ou couleur principale
-- Description : 80 à 150 mots, ton humain et vendeur (pas robotique)
-- Inclure : état, taille, matières principales, style
-- ${defauts ? 'Mentionner les défauts honnêtement mais positivement (ex: "légère imperfection à noter")' : 'Ne mentionner aucun défaut'}
-- Ne pas mentionner de frais vendeur (sur Vinted, les frais sont à charge de l'acheteur)
-- Pas de "N'hésitez pas à me contacter" ni de formules creuses
-- Inclure 2-3 mots-clés SEO Vinted naturellement intégrés
-- Finir par une phrase d'urgence douce (ex: "Stock limité", "Envoi rapide dès réception")
+FORMAT OBLIGATOIRE pour la description (emojis + bullet points aérés) :
+✅ [État de l'article]
+👕 [Description : type, coupe, couleur, style]
+🧵 [Composition : matières principales]
+📏 [Taille : avec équivalences si pertinent — ex: Taille 48 EU = M/L]
+📦 Envoi rapide sous pli bulles protégé · Vinted Pro disponible
 
-Réponds UNIQUEMENT avec ce JSON (sans markdown) :
+RÈGLES STRICTES :
+- Titre : maximum 60 caractères, marque + type + taille/couleur principale
+- JAMAIS d'information incertaine dans la description (si composition inconnue → ne pas mentionner, la mettre dans infosManquantes)
+- 5 bullet points maximum, aérés, lisibles
+- ${defauts ? 'Mentionner les défauts honnêtement mais succinctement dans le champ ✅ ou 👕' : 'Ne mentionner aucun défaut'}
+- Pas de frais vendeur (à charge de l'acheteur sur Vinted)
+- Pas de "N\'hésitez pas" ni de formules creuses
+- tailleEquivalences : ex "M = 40 EU = 12 UK" si taille connue, sinon laisser vide ""
+- seoTagsInDescription : 4-6 mots-clés DÉJÀ présents naturellement dans descriptionFR
+- seoTagsExtra : 3-5 mots-clés supplémentaires utiles pour Vinted SEO, pas dans la description
+- infosManquantes : liste des champs non disponibles qui seraient utiles (ex: ["composition", "taille"])
+- descriptionEN : traduction anglaise du même format 5 bullet points
+- Si lang='en' → les deux descriptions en anglais uniquement
+- Toujours générer les deux langues (FR et EN)
+
+Réponds UNIQUEMENT avec ce JSON (sans markdown, sans texte avant ou après) :
 {
   "titre": "string — max 60 caractères",
-  "description": "string — 80-150 mots"
+  "descriptionFR": "string — 5 bullet points en français avec emojis",
+  "descriptionEN": "string — 5 bullet points en anglais avec emojis",
+  "seoTagsInDescription": ["tag1", "tag2"],
+  "seoTagsExtra": ["tag1", "tag2"],
+  "infosManquantes": ["champ1"],
+  "tailleEquivalences": "string — équivalences tailles ou vide"
 }`
 
     const response = await client.messages.create({
       model: 'claude-sonnet-4-6',
-      max_tokens: 512,
+      max_tokens: 1024,
       messages: [{ role: 'user', content: prompt }],
     })
 

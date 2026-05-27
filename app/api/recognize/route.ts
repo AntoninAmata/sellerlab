@@ -42,6 +42,18 @@ NIVEAUX DE CONFIANCE :
 - "high" : tu es sûr à 85%+
 - "medium" : tu es sûr à 60-84%
 - "low" : tu es sûr à moins de 60% ou l'info n'est pas visible
+- IMPORTANT : si la valeur est vide ou non détectée, la confiance DOIT être "low"
+
+SYSTÈME DE TAILLES — règles selon le type d'article :
+- Hauts, pulls, sweats, vestes, manteaux : lettres XS/S/M/L/XL/XXL → tailleSysteme = "letters"
+- Pantalons, jeans (femme) : EU numérique 34/36/38/40... ou jeans 28/30/32... → tailleSysteme = "eu_femme" ou "jeans"
+- Pantalons, jeans (homme) : EU numérique 44/46/48... → tailleSysteme = "eu_homme"
+- Chaussures adulte : numéro EU pointure (35, 36... 48) — JAMAIS de lettres XS/S/M/L → tailleSysteme = "pointures"
+- Robes : EU femme 34/36/38/40... → tailleSysteme = "eu_femme"
+- Vêtements enfant : âge (0-3 mois, 2 ans...) ou cm (56, 62, 68...) → tailleSysteme = "enfant_age" ou "enfant_cm"
+- Article taille unique : tailleSysteme = "one_size"
+
+IMPORTANT pour les chaussures : retourner le numéro EU tel qu'il est marqué sur l'étiquette (ex: 42, 43, 44), JAMAIS une lettre de taille comme S ou M.
 
 Réponds UNIQUEMENT avec ce JSON (sans markdown, sans texte avant ou après) :
 {
@@ -49,7 +61,8 @@ Réponds UNIQUEMENT avec ce JSON (sans markdown, sans texte avant ou après) :
   "genre": { "value": "Femme|Homme|Enfant|Mixte", "confidence": "high|medium|low" },
   "categorie": { "value": "string — catégorie principale (ex: Robes, Pulls, Jeans...)", "confidence": "high|medium|low" },
   "sousCategorie": { "value": "string — sous-catégorie précise (ex: Robes longues, Jeans skinny...)", "confidence": "high|medium|low" },
-  "taille": { "value": "string — taille lisible sur étiquette ou déduite, sinon vide", "confidence": "high|medium|low" },
+  "taille": { "value": "string — taille lisible sur étiquette ou déduite selon le système approprié, sinon vide", "confidence": "high|medium|low" },
+  "tailleSysteme": { "value": "eu_femme|eu_homme|letters|jeans|pointures|enfant_age|enfant_cm|one_size", "confidence": "high|medium|low" },
   "etat": { "value": "string — parmi les 5 états Vinted exacts", "confidence": "high|medium|low" },
   "couleurs": { "value": ["couleur1"], "confidence": "high|medium|low" },
   "matieres": { "value": ["matière1"], "confidence": "high|medium|low" },
@@ -81,6 +94,11 @@ Réponds UNIQUEMENT avec ce JSON (sans markdown, sans texte avant ou après) :
     }
 
     const result: RecognitionResult = JSON.parse(jsonMatch[0])
+
+    /* ── Fallback : si tailleSysteme absent (ancienne réponse), ajouter un défaut ── */
+    if (!result.tailleSysteme) {
+      result.tailleSysteme = { value: 'letters', confidence: 'low' }
+    }
 
     return NextResponse.json(result)
   } catch (err) {

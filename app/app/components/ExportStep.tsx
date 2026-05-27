@@ -5,20 +5,15 @@ import {
   Copy, Check, Send, Tag, FileText, Image,
   Package, ChevronRight, ExternalLink,
 } from 'lucide-react'
-import type { PhotoSlot, RecognitionResult, PriceResult } from '../types'
+import type { PhotoSlot, RecognitionResult, PriceResult, GenerateResult } from '../types'
 
 /* ─── Props ──────────────────────────────────────────────────────────────── */
-
-interface AnnonceResult {
-  titre: string
-  description: string
-}
 
 interface Props {
   slots: PhotoSlot[]
   recognition: RecognitionResult | null
   pricing: PriceResult | null
-  annonce: AnnonceResult | null
+  annonce: GenerateResult | null
 }
 
 /* ─── Format colis suggéré ────────────────────────────────────────────────── */
@@ -72,11 +67,13 @@ export default function ExportStep({ slots, recognition, pricing, annonce }: Pro
 
   function copyAll() {
     if (!annonce || !pricing) return
+    /* Utilise la description FR par défaut pour l'export */
+    const desc = annonce.descriptionFR || ''
     const text = [
       `TITRE : ${annonce.titre}`,
       '',
       `DESCRIPTION :`,
-      annonce.description,
+      desc,
       '',
       `PRIX : ${pricing.prixSuggere}€`,
       `ÉTAT : ${recognition?.etat.value ?? ''}`,
@@ -157,7 +154,7 @@ export default function ExportStep({ slots, recognition, pricing, annonce }: Pro
             </div>
             <div className="px-5 py-4">
               <p className="text-sm text-gray-600 leading-relaxed line-clamp-3">
-                {annonce!.description}
+                {annonce!.descriptionFR}
               </p>
             </div>
           </div>
@@ -195,10 +192,10 @@ export default function ExportStep({ slots, recognition, pricing, annonce }: Pro
                 <FileText className="w-4 h-4 text-indigo-500 shrink-0 mt-0.5" />
                 <div className="min-w-0">
                   <p className="text-[10px] font-bold text-gray-400 uppercase tracking-widest mb-0.5">Description</p>
-                  <p className="text-sm text-gray-600 line-clamp-2 leading-relaxed">{annonce!.description}</p>
+                  <p className="text-sm text-gray-600 line-clamp-2 leading-relaxed">{annonce!.descriptionFR}</p>
                 </div>
               </div>
-              <CopyBtn text={annonce!.description} label="Copier" />
+              <CopyBtn text={annonce!.descriptionFR} label="Copier" />
             </div>
           </div>
 

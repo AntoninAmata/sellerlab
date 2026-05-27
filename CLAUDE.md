@@ -272,23 +272,65 @@ Fichiers :
 
 ## Corrections à faire sur /app (prochaine session)
 
+### Étape 1 — Photos (corrections)
+- NOUVEAU FLOW : après classification IA et placement dans les slots, afficher un écran de validation AVANT de lancer la suppression de fond
+- L'utilisateur valide l'ordre des photos (ou les réorganise par drag & drop)
+- Ce n'est qu'APRÈS validation que le remove background est lancé sur le slot 0
+- Raison : l'utilisateur ne peut pas changer la photo après suppression de fond
+
 ### Étape 2 — Reconnaissance (corrections)
-- Indicateur de confiance : ne pas afficher "confiance élevée" si le champ est vide — afficher "non détecté" à la place
-- Revoir les champs vides qui affichent quand même un badge de confiance
+- Indicateur de confiance : si champ vide ou non détecté → badge ROUGE "Incertaine" (jamais "Élevée" sur un champ vide)
+- Tailles chaussures : utiliser les systèmes corrects — EU (38, 39, 40... 47), US (6, 7, 8, 9, 10...), UK — PAS XS/S/M/L
+- Système de tailles adapté automatiquement selon la sous-catégorie détectée
+- Sous-catégories : si non sélectionnée → badge "Incertaine" + l'utilisateur doit choisir
 
 ### Étape 3 — Annonce (corrections)
-- Description bilingue : générer EN PLUS de la langue native, une version anglaise — onglets FR / EN comme prototypé
-- Aérer le bloc description — moins compact, plus lisible
-- Ajouter les mots-clés SEO en tags séparés sous la description (cliquables + ajout libre)
-- Bouton "Version détaillée" pour déployer une description plus longue
+- Bandeau "Informations manquantes" conditionnel : s'affiche si l'IA a un doute sur composition, taille, défauts
+- Bloc Dimensions optionnel : suggestions cliquables (tour de poitrine, longueur, épaules, taille, hanches, entrejambe, pointure, largeur, hauteur, profondeur) + mesure personnalisée libre (nom + valeur en cm)
+- Description UNIQUE — la plus vendeuse possible, optimisée SEO — PAS de version courte/longue
+- Description avec emojis et bullet points aérés — PAS un bloc de texte compact
+- Format description : ✅ État / 👕 Article / 🧵 Composition / 📏 Équivalences tailles (ex: 48 EU = M/L) / 📦 Expédition
+- IMPORTANT : inclure équivalences de tailles dans la description pour aider les acheteurs
+- Description bilingue : onglets FR / EN — anglais généré automatiquement sauf si utilisateur anglophone (→ anglais uniquement)
+- Mots-clés SEO : générés automatiquement par l'IA, affichés en tags sous la description
+  * Tags verts = déjà intégrés dans la description
+  * Tags bleus = disponibles à ajouter d'un clic dans la description
+  * Champ libre pour en ajouter manuellement
+- SUPPRIMER le bouton "Version détaillée" — une seule description complète
 
 ### Étape 4 — Prix (corrections)
-- Ajouter en bas le slider de prix final avec frise colorée verte→orange→rouge
-- Délai de vente estimé dynamique (~2-3 jours à +4 mois) qui change avec le slider
-- Conseil contextuel selon position du slider
-- Afficher le nombre d'annonces Vinted trouvées pour ce type d'article
-- Afficher la fourchette de prix observée sur Vinted (min — max)
-- Afficher le délai de vente estimé dans les sources
+Structure en 3 blocs :
+
+BLOC 1 — PRIX RECOMMANDÉ
+- Bannière confiance en haut : verte (données fiables) / orange (partielles) / rouge (inconnue)
+- Prix suggéré en grand
+- Court raisonnement sous le prix
+
+BLOC 2 — ANALYSE DU MARCHÉ (via web search Claude — jamais inventé)
+- Prix neuf sur site marque (web search)
+- Prix médian Vinted (web search Google/Vinted)
+- Fourchette Vinted min/max (web search)
+- Nombre d'annonces similaires (web search)
+- Délai de vente estimé à ce prix
+- Si données insuffisantes → afficher "non disponible" honnêtement, jamais inventer
+
+BLOC 3 — TROUVER MON PRIX (tout en un)
+- Champ "Prix d'achat neuf" — CHAMP PRINCIPAL
+  * Si renseigné → calcul automatique par % selon état :
+    - Neuf avec étiquette : 65% du prix neuf
+    - Neuf sans étiquette : 55% du prix neuf
+    - Très bon état : 40% du prix neuf
+    - Bon état : 30% du prix neuf
+    - Satisfaisant : 20% du prix neuf
+  * Plateforme d'achat + article rare/édition limitée
+- Slider prix final + frise colorée verte→orange→rouge
+  * Délai estimé dynamique (~2-3 jours à +4 mois) selon position
+  * Conseil contextuel selon position du slider
+- Marge de négociation
+  * Slider prix minimum à accepter
+  * "En dessous de X€, refuse l'offre — X% de réduction max"
+- Calcul de marge (optionnel — toggle pour revendeurs)
+  * Marge nette en € et % si prix d'achat renseigné
 
 ### Phase 2
 - Message auto favoris (lien pré-rempli + message IA)

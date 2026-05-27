@@ -3,7 +3,7 @@
 import { useState, useRef, useCallback, useEffect } from 'react'
 import {
   Camera, Tag, X, Lock, Upload, Sparkles,
-  GripVertical, AlertTriangle, Check,
+  GripVertical, AlertTriangle, Check, Wand2,
 } from 'lucide-react'
 import type { PhotoSlot } from '../types'
 import type { Lang } from '@/lib/i18n'
@@ -19,6 +19,46 @@ const SLOT_LABELS: Record<Lang, string[]> = {
   it: ['Foto fronte (piano/gruccia)', 'Foto retro (piano/gruccia)', 'Indossato fronte 1', 'Indossato fronte 2', 'Indossato lat.',   'Indossato retro',  'Etich. marca',     'Etich. taglia',    'Etich. composiz.', 'Difetto / dett.'   ],
   nl: ['Voorkant (plat/hanger)',      'Achterkant (plat/hanger)',  'Gedragen voor 1',    'Gedragen voor 2',    'Gedragen zijkant', 'Gedragen rug',     'Merklabel',        'Maatlabel',        'Samenst. label',   'Gebrek / detail'   ],
   pl: ['Przód (płasko/wieszak)',      'Tył (płasko/wieszak)',      'Ubrane przód 1',     'Ubrane przód 2',     'Ubrane bok',       'Ubrane tył',       'Etykieta marki',   'Etykieta rozm.',   'Etykieta skład',   'Wada / detal'      ],
+}
+
+/* ─── Traductions bannière de validation — 7 langues ─────────────────────── */
+
+const BANNER_I18N: Record<Lang, { title: string; desc: string; btn: string }> = {
+  fr: {
+    title: 'Vérifiez l\'ordre de vos photos',
+    desc:  'Réorganisez par glisser-déposer si besoin, puis choisissez votre fond et lancez le traitement.',
+    btn:   'Traiter les photos — Supprimer le fond',
+  },
+  en: {
+    title: 'Check your photo order',
+    desc:  'Drag and drop to reorder if needed, then choose your background and start processing.',
+    btn:   'Process photos — Remove background',
+  },
+  es: {
+    title: 'Verifica el orden de tus fotos',
+    desc:  'Reorganiza arrastrando si es necesario, elige tu fondo y lanza el procesamiento.',
+    btn:   'Procesar fotos — Eliminar fondo',
+  },
+  de: {
+    title: 'Überprüfe deine Fotoreihenfolge',
+    desc:  'Bei Bedarf per Drag & Drop neu anordnen, Hintergrund wählen und Verarbeitung starten.',
+    btn:   'Fotos verarbeiten — Hintergrund entfernen',
+  },
+  it: {
+    title: 'Verifica l\'ordine delle foto',
+    desc:  'Riorganizza con drag & drop se necessario, scegli lo sfondo e avvia l\'elaborazione.',
+    btn:   'Elabora foto — Rimuovi sfondo',
+  },
+  nl: {
+    title: 'Controleer de volgorde van je foto\'s',
+    desc:  'Herorden indien nodig via slepen, kies je achtergrond en start de verwerking.',
+    btn:   'Foto\'s verwerken — Achtergrond verwijderen',
+  },
+  pl: {
+    title: 'Sprawdź kolejność zdjęć',
+    desc:  'Przeciągnij, aby zmienić kolejność, wybierz tło i uruchom przetwarzanie.',
+    btn:   'Przetwórz zdjęcia — Usuń tło',
+  },
 }
 
 /* ─── 5 fonds disponibles ─────────────────────────────────────────────────── */
@@ -90,12 +130,15 @@ export default function PhotoUploadStep({ slots, setSlots }: Props) {
   const [globalDragOver, setGlobalDragOver]   = useState(false)
   const [selectedBg, setSelectedBg]       = useState(0)
 
+  /* Bannière de validation avant traitement (remove-bg) */
+  const [showValidationBanner, setShowValidationBanner] = useState(false)
+
   const dragSourceId = useRef<number | null>(null)
-  // Référence toujours à jour des slots pour éviter les stale closures dans les callbacks async
+  /* Référence toujours à jour des slots pour éviter les stale closures dans les callbacks async */
   const slotsRef = useRef<PhotoSlot[]>(slots)
   useEffect(() => { slotsRef.current = slots }, [slots])
 
-  // Charge la préférence fond depuis localStorage (côté client uniquement)
+  /* Charge la préférence fond depuis localStorage (côté client uniquement) */
   useEffect(() => {
     const saved = localStorage.getItem('sl-bg-preference')
     if (saved !== null) setSelectedBg(parseInt(saved) || 0)
@@ -113,9 +156,11 @@ export default function PhotoUploadStep({ slots, setSlots }: Props) {
     [setSlots]
   )
 
-  /* ── Charge un fichier dans un slot + déclenche la suppression de fond si slot 0 ── */
+  /* ── Charge un fichier dans un slot ──────────────────────────────────────── */
+  /* Si skipBgRemoval=true : on précharge juste le preview sans lancer remove-bg */
+  /* Si skipBgRemoval=false (défaut) : comportement habituel pour upload individuel */
   const loadFileInSlot = useCallback(
-    async (file: File, slotId: number) => {
+    async (file: File, slotId: number, skipBgRemoval = false) => {
       const preview = URL.createObjectURL(file)
       updateSlot(slotId, { file, preview, status: 'uploading', processedUrl: null, error: undefined })
 
@@ -123,7 +168,8 @@ export default function PhotoUploadStep({ slots, setSlots }: Props) {
 
       const def = SLOT_DEFS[slotId]
 
-      if (def.bgRemoval === 'free') {
+      /* Suppression fond uniquement pour slot 0 (bgRemoval='free') et si non ignoré */
+      if (def.bgRemoval === 'free' && !skipBgRemoval) {
         updateSlot(slotId, { status: 'processing-bg' })
         try {
           const { removeBackground } = await import('@imgly/background-removal')
@@ -135,19 +181,45 @@ export default function PhotoUploadStep({ slots, setSlots }: Props) {
           updateSlot(slotId, { status: 'done', processedUrl: null, error: 'bg_failed' })
         }
       } else {
+        /* Préchargement simple — pas de suppression fond */
         updateSlot(slotId, { status: 'done' })
       }
     },
     [updateSlot]
   )
 
+  /* ── Validation et lancement du remove-bg sur slot 0 ── */
+  /* Appelé depuis la ValidationBanner — déclenche enfin la suppression de fond */
+  const handleValidateAndProcess = useCallback(async () => {
+    const slot0 = slotsRef.current[0]
+    const def0  = SLOT_DEFS[0]
+
+    if (slot0.file && def0.bgRemoval === 'free') {
+      updateSlot(0, { status: 'processing-bg' })
+      try {
+        const { removeBackground } = await import('@imgly/background-removal')
+        const resultBlob = await removeBackground(slot0.file)
+        const processedUrl = URL.createObjectURL(resultBlob)
+        updateSlot(0, { status: 'done', processedUrl })
+      } catch (err) {
+        console.warn('[PhotoUpload] Suppression fond échouée :', err)
+        updateSlot(0, { status: 'done', processedUrl: null, error: 'bg_failed' })
+      }
+    }
+
+    /* Fermer la bannière de validation */
+    setShowValidationBanner(false)
+  }, [updateSlot])
+
   /* ── Upload multiple → classify → distribue dans les slots ── */
+  /* Après classification : charger en preview uniquement (skipBgRemoval=true) */
+  /* puis afficher la bannière de validation */
   const handleMultipleFiles = useCallback(
     async (files: File[]) => {
       if (!files.length) return
       setClassifiedCount(null)
 
-      // Un seul fichier → premier slot vide sans classification
+      /* Un seul fichier → premier slot vide, remove-bg IMMÉDIAT (comportement individuel) */
       if (files.length === 1) {
         const firstEmpty = SLOT_DEFS.find((d) => !slotsRef.current[d.id].file)
         if (firstEmpty) loadFileInSlot(files[0], firstEmpty.id)
@@ -170,8 +242,8 @@ export default function PhotoUploadStep({ slots, setSlots }: Props) {
           }
           console.log('Résultats API :', results)
 
-          // Fallback slot 0 : si aucune photo non portée n'a été classée en 0,
-          // promeut la meilleure vue frontale disponible (slot 2 en priorité, sinon 3)
+          /* Fallback slot 0 : si aucune photo non portée n'a été classée en 0,
+             promeut la meilleure vue frontale disponible (slot 2 en priorité, sinon 3) */
           const hasSlot0 = results.some((r) => r.slotIndex === 0)
           if (!hasSlot0) {
             const candidate =
@@ -183,7 +255,7 @@ export default function PhotoUploadStep({ slots, setSlots }: Props) {
             }
           }
 
-          // Utilise slotsRef.current pour éviter la stale closure
+          /* Utilise slotsRef.current pour éviter la stale closure */
           const taken = new Set<number>(
             slotsRef.current
               .map((s, i) => (s.file ? i : -1))
@@ -196,7 +268,7 @@ export default function PhotoUploadStep({ slots, setSlots }: Props) {
             if (fileIndex >= files.length) continue
             let target = slotIndex
 
-            // Si le slot cible est déjà pris, trouve le premier slot vide
+            /* Si le slot cible est déjà pris, trouve le premier slot vide */
             if (taken.has(target)) {
               const next = SLOT_DEFS.find((d) => !taken.has(d.id))
               if (!next) { console.warn(`Pas de slot libre pour le fichier ${fileIndex}`); continue }
@@ -207,27 +279,32 @@ export default function PhotoUploadStep({ slots, setSlots }: Props) {
             console.log(`  fichier[${fileIndex}] → slot ${target} (${SLOT_DEFS[target].label})`)
           }
 
-          assignments.forEach(({ file, slotId }) => loadFileInSlot(file, slotId))
+          /* Charger en preview uniquement — on ne lance PAS remove-bg avant validation */
+          assignments.forEach(({ file, slotId }) => loadFileInSlot(file, slotId, true))
           setClassifiedCount(assignments.length)
+          /* Afficher la bannière de validation */
+          setShowValidationBanner(true)
         } else {
           const err = await res.text()
           console.warn('[PhotoUpload] Classify API erreur :', res.status, err)
-          // Fallback séquentiel
+          /* Fallback séquentiel */
           const empty = SLOT_DEFS.filter((d) => !slotsRef.current[d.id].file).map((d) => d.id)
-          files.slice(0, empty.length).forEach((f, i) => loadFileInSlot(f, empty[i]))
+          files.slice(0, empty.length).forEach((f, i) => loadFileInSlot(f, empty[i], true))
           setClassifiedCount(Math.min(files.length, empty.length))
+          setShowValidationBanner(true)
         }
       } catch (err) {
         console.error('[PhotoUpload] Classify erreur réseau :', err)
         const empty = SLOT_DEFS.filter((d) => !slotsRef.current[d.id].file).map((d) => d.id)
-        files.slice(0, empty.length).forEach((f, i) => loadFileInSlot(f, empty[i]))
+        files.slice(0, empty.length).forEach((f, i) => loadFileInSlot(f, empty[i], true))
         setClassifiedCount(Math.min(files.length, empty.length))
+        setShowValidationBanner(true)
       }
 
       console.groupEnd()
       setIsClassifying(false)
     },
-    [loadFileInSlot]           // plus de dépendance sur `slots` — on utilise slotsRef
+    [loadFileInSlot]
   )
 
   /* ── Permute deux slots ── */
@@ -269,6 +346,7 @@ export default function PhotoUploadStep({ slots, setSlots }: Props) {
   const filledCount      = slots.filter((s) => s.file !== null).length
   const mainPhotoHasBg   = slots[0].processedUrl !== null
   const selectedBgStyle  = BACKGROUNDS[selectedBg].style
+  const bannerI18n       = BANNER_I18N[lang] ?? BANNER_I18N.fr
 
   return (
     <div className="space-y-5">
@@ -337,12 +415,89 @@ export default function PhotoUploadStep({ slots, setSlots }: Props) {
       </div>
 
       {/* Badge confirmation classification */}
-      {classifiedCount !== null && !isClassifying && (
+      {classifiedCount !== null && !isClassifying && !showValidationBanner && (
         <div className="flex items-center gap-2 text-xs text-green-700 bg-green-50 border border-green-200 rounded-xl px-4 py-2.5 w-fit">
           <Check className="w-3.5 h-3.5 shrink-0" />
           <span className="font-semibold">{classifiedCount} photo{classifiedCount > 1 ? 's' : ''} classée{classifiedCount > 1 ? 's' : ''} par l&apos;IA</span>
           <button onClick={() => setClassifiedCount(null)} className="ml-1 text-green-500 hover:text-green-700">
             <X className="w-3 h-3" />
+          </button>
+        </div>
+      )}
+
+      {/* ── Bannière de validation — visible entre l'import et les slots ─── */}
+      {/* Apparaît après classification multi-photos, avant le traitement       */}
+      {showValidationBanner && !isClassifying && (
+        <div className="rounded-2xl border-2 border-indigo-200 bg-indigo-50 p-5 space-y-4">
+
+          {/* Titre + description */}
+          <div className="flex items-start gap-3">
+            <div className="w-8 h-8 rounded-xl bg-indigo-100 flex items-center justify-center shrink-0">
+              <Wand2 className="w-4 h-4 text-indigo-600" />
+            </div>
+            <div>
+              <h3 className="font-display font-extrabold text-base text-indigo-900 mb-0.5">
+                {bannerI18n.title}
+              </h3>
+              <p className="text-sm text-indigo-700">{bannerI18n.desc}</p>
+            </div>
+            {/* Fermeture de la bannière sans lancer remove-bg */}
+            <button
+              onClick={() => setShowValidationBanner(false)}
+              className="ml-auto text-indigo-400 hover:text-indigo-600 transition-colors shrink-0"
+              title="Ignorer"
+            >
+              <X className="w-4 h-4" />
+            </button>
+          </div>
+
+          {/* Sélecteur de fond intégré dans la bannière */}
+          <div>
+            <p className="text-[10px] font-bold text-indigo-400 uppercase tracking-widest mb-2">
+              Fond de la photo principale
+            </p>
+            <div className="flex gap-3 flex-wrap">
+              {BACKGROUNDS.map((bg) => (
+                <button
+                  key={bg.id}
+                  onClick={() => handleBgSelect(bg.id)}
+                  className="flex flex-col items-center gap-1.5 group"
+                  title={bg.label}
+                >
+                  <div
+                    className={`w-10 h-10 rounded-full border-2 transition-all relative ${
+                      selectedBg === bg.id
+                        ? 'border-indigo-500 scale-110 shadow-md shadow-indigo-200'
+                        : 'border-white/60 group-hover:border-indigo-300'
+                    }`}
+                    style={bg.id <= 1 ? bg.style : { background: bg.preview }}
+                  >
+                    {selectedBg === bg.id && (
+                      <div className="absolute inset-0 flex items-center justify-center">
+                        <Check
+                          className="w-4 h-4 drop-shadow"
+                          style={{ color: bg.id >= 2 ? '#5a3e28' : '#374151' }}
+                        />
+                      </div>
+                    )}
+                  </div>
+                  <span className={`text-[10px] font-semibold leading-tight text-center max-w-[52px] ${
+                    selectedBg === bg.id ? 'text-indigo-700' : 'text-indigo-400'
+                  }`}>
+                    {bg.label}
+                  </span>
+                </button>
+              ))}
+            </div>
+          </div>
+
+          {/* Bouton principal : lancer le traitement */}
+          <button
+            onClick={handleValidateAndProcess}
+            className="w-full flex items-center justify-center gap-2 bg-indigo-600 hover:bg-indigo-700 text-white font-semibold text-sm py-3.5 rounded-xl transition-all active:scale-[0.98]"
+          >
+            <Wand2 className="w-4 h-4" />
+            {bannerI18n.btn}
           </button>
         </div>
       )}
@@ -376,8 +531,8 @@ export default function PhotoUploadStep({ slots, setSlots }: Props) {
         </div>
       </div>
 
-      {/* ── Sélecteur de fond (visible dès que slot 0 a un fond supprimé) ── */}
-      {mainPhotoHasBg && (
+      {/* ── Sélecteur de fond (visible uniquement si fond supprimé ET bannière masquée) ── */}
+      {mainPhotoHasBg && !showValidationBanner && (
         <div className="bg-gray-50 border border-gray-100 rounded-2xl p-4">
           <p className="text-xs font-bold text-gray-400 uppercase tracking-widest mb-3">
             Fond de la photo principale
@@ -480,7 +635,7 @@ function SlotCard({
     optional:    { label: 'Optionnel',   cls: 'bg-gray-50 text-gray-400'     },
   } as const
 
-  // Fond du container : fond choisi si transparence disponible, damier sinon
+  /* Fond du container : fond choisi si transparence disponible, damier sinon */
   const containerStyle: React.CSSProperties = hasBg && bgStyle
     ? bgStyle
     : hasBg

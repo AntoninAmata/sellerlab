@@ -8,7 +8,7 @@ import RecognitionStep from './components/RecognitionStep'
 import PricingStep from './components/PricingStep'
 import AnnonceStep from './components/AnnonceStep'
 import ExportStep from './components/ExportStep'
-import type { PhotoSlot, RecognitionResult, PriceResult } from './types'
+import type { PhotoSlot, RecognitionResult, PriceResult, GenerateResult } from './types'
 
 /* ─── Étapes du stepper ───────────────────────────────────────────────────── */
 
@@ -19,10 +19,6 @@ const STEPS = [
   { num: 4, label: 'Prix',            shortLabel: 'Prix',    Icon: Tag      },
   { num: 5, label: 'Export',          shortLabel: 'Export',  Icon: Send     },
 ] as const
-
-/* ─── Résultat annonce ────────────────────────────────────────────────────── */
-
-interface AnnonceResult { titre: string; description: string }
 
 /* ─── État initial des 10 slots ───────────────────────────────────────────── */
 
@@ -43,7 +39,7 @@ export default function AppPage() {
   const [slots, setSlots] = useState<PhotoSlot[]>(makeSlots)
   const [recognitionResult, setRecognitionResult] = useState<RecognitionResult | null>(null)
   const [pricingResult, setPricingResult] = useState<PriceResult | null>(null)
-  const [annonceResult, setAnnonceResult] = useState<AnnonceResult | null>(null)
+  const [annonceResult, setAnnonceResult] = useState<GenerateResult | null>(null)
 
   const mainPhotoReady = slots[0].file !== null
     && slots[0].status !== 'uploading'
