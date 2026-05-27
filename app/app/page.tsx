@@ -23,7 +23,7 @@ const STEPS = [
 /* ─── État initial des 10 slots ───────────────────────────────────────────── */
 
 function makeSlots(): PhotoSlot[] {
-  return Array.from({ length: 10 }, (_, i) => ({
+  return Array.from({ length: 14 }, (_, i) => ({
     id: i,
     file: null,
     preview: null,

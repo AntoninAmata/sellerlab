@@ -226,7 +226,7 @@ export default function ExportStep({ slots, recognition, pricing, annonce }: Pro
               <div className="flex items-center gap-2 mb-3">
                 <Image className="w-4 h-4 text-indigo-500" />
                 <p className="text-xs font-bold text-gray-400 uppercase tracking-widest">
-                  Photos ({filledSlots.length}/10)
+                  Photos ({filledSlots.length}/14)
                 </p>
               </div>
               <div className="flex gap-2 overflow-x-auto pb-1">

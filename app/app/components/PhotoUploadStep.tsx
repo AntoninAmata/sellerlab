@@ -9,16 +9,51 @@ import type { PhotoSlot } from '../types'
 import type { Lang } from '@/lib/i18n'
 import { useLang } from '@/app/providers'
 
-/* ─── Labels des slots — 7 langues ───────────────────────────────────────── */
+/* ─── Labels des 14 slots — 7 langues ────────────────────────────────────── */
 
 const SLOT_LABELS: Record<Lang, string[]> = {
-  fr: ['Photo recto (cintre/à plat)', 'Photo verso (cintre/à plat)', 'Photo portée 1',     'Photo portée 2',     'Photo portée 3',   'Photo portée 4',   'Étiquette marque', 'Étiquette taille', 'Étiquette compo.', 'Défaut / détail'   ],
-  en: ['Front photo (flat/hanger)',   'Back photo (flat/hanger)', 'Worn — front 1',     'Worn — front 2',     'Worn — side',      'Worn — back',      'Brand label',      'Size label',       'Care label',       'Flaw / detail'     ],
-  es: ['Foto frontal (plano/percha)', 'Foto trasera (plano/percha)', 'Puesto frente 1',    'Puesto frente 2',    'Puesto lateral',   'Puesto espalda',   'Etiqueta marca',   'Etiqueta talla',   'Etiqueta compos.', 'Defecto / detalle' ],
-  de: ['Vorderfoto (flach/Bügel)',    'Rückseite (flach/Bügel)',   'Getragen vorne 1',   'Getragen vorne 2',   'Getragen seitl.',  'Getragen hinten',  'Markenetikett',    'Größenetikett',    'Pflegeetikett',    'Mangel / Detail'   ],
-  it: ['Foto fronte (piano/gruccia)', 'Foto retro (piano/gruccia)', 'Indossato fronte 1', 'Indossato fronte 2', 'Indossato lat.',   'Indossato retro',  'Etich. marca',     'Etich. taglia',    'Etich. composiz.', 'Difetto / dett.'   ],
-  nl: ['Voorkant (plat/hanger)',      'Achterkant (plat/hanger)',  'Gedragen voor 1',    'Gedragen voor 2',    'Gedragen zijkant', 'Gedragen rug',     'Merklabel',        'Maatlabel',        'Samenst. label',   'Gebrek / detail'   ],
-  pl: ['Przód (płasko/wieszak)',      'Tył (płasko/wieszak)',      'Ubrane przód 1',     'Ubrane przód 2',     'Ubrane bok',       'Ubrane tył',       'Etykieta marki',   'Etykieta rozm.',   'Etykieta skład',   'Wada / detal'      ],
+  fr: [
+    'Photo recto (cintre/à plat)', 'Photo verso (cintre/à plat)',
+    'Vue 1', 'Vue 2', 'Vue 3', 'Vue 4', 'Vue 5', 'Vue 6',
+    'Étiquette marque', 'Étiquette taille', 'Étiquette compo.',
+    'Autre détail', 'Défaut', 'Emballage',
+  ],
+  en: [
+    'Front (flat/hanger)', 'Back (flat/hanger)',
+    'View 1', 'View 2', 'View 3', 'View 4', 'View 5', 'View 6',
+    'Brand label', 'Size label', 'Care label',
+    'Other detail', 'Flaw', 'Packaging',
+  ],
+  es: [
+    'Foto frontal (plano/percha)', 'Foto trasera (plano/percha)',
+    'Vista 1', 'Vista 2', 'Vista 3', 'Vista 4', 'Vista 5', 'Vista 6',
+    'Etiqueta marca', 'Etiqueta talla', 'Etiqueta compos.',
+    'Otro detalle', 'Defecto', 'Embalaje',
+  ],
+  de: [
+    'Vorderfoto (flach/Bügel)', 'Rückseite (flach/Bügel)',
+    'Ansicht 1', 'Ansicht 2', 'Ansicht 3', 'Ansicht 4', 'Ansicht 5', 'Ansicht 6',
+    'Markenetikett', 'Größenetikett', 'Pflegeetikett',
+    'Anderes Detail', 'Mangel', 'Verpackung',
+  ],
+  it: [
+    'Foto fronte (piano/gruccia)', 'Foto retro (piano/gruccia)',
+    'Vista 1', 'Vista 2', 'Vista 3', 'Vista 4', 'Vista 5', 'Vista 6',
+    'Etich. marca', 'Etich. taglia', 'Etich. composiz.',
+    'Altro dettaglio', 'Difetto', 'Imballaggio',
+  ],
+  nl: [
+    'Voorkant (plat/hanger)', 'Achterkant (plat/hanger)',
+    'Aanzicht 1', 'Aanzicht 2', 'Aanzicht 3', 'Aanzicht 4', 'Aanzicht 5', 'Aanzicht 6',
+    'Merklabel', 'Maatlabel', 'Samenst. label',
+    'Ander detail', 'Gebrek', 'Verpakking',
+  ],
+  pl: [
+    'Przód (płasko/wieszak)', 'Tył (płasko/wieszak)',
+    'Widok 1', 'Widok 2', 'Widok 3', 'Widok 4', 'Widok 5', 'Widok 6',
+    'Etykieta marki', 'Etykieta rozm.', 'Etykieta skład',
+    'Inny detal', 'Wada', 'Opakowanie',
+  ],
 }
 
 /* ─── Traductions bannière de validation — 7 langues ─────────────────────── */
@@ -61,6 +96,39 @@ const BANNER_I18N: Record<Lang, { title: string; desc: string; btn: string }> = 
   },
 }
 
+/* ─── Traductions astuce bas de page — 7 langues ─────────────────────────── */
+
+const TIP_I18N: Record<Lang, { unlock: string; lock: string }> = {
+  fr: {
+    unlock: 'Glissez-déposez entre les slots pour réorganiser · Cliquez sur un slot pour uploader',
+    lock:   'Photos figées (fond supprimé) · Cliquez sur un slot pour remplacer une photo',
+  },
+  en: {
+    unlock: 'Drag and drop between slots to reorder · Click a slot to upload',
+    lock:   'Photos locked (background removed) · Click a slot to replace a photo',
+  },
+  es: {
+    unlock: 'Arrastra entre slots para reorganizar · Haz clic en un slot para subir',
+    lock:   'Fotos bloqueadas (fondo eliminado) · Haz clic en un slot para reemplazar',
+  },
+  de: {
+    unlock: 'Zwischen Slots ziehen zum Umordnen · Slot klicken zum Hochladen',
+    lock:   'Fotos gesperrt (Hintergrund entfernt) · Slot klicken zum Ersetzen',
+  },
+  it: {
+    unlock: 'Trascina tra i slot per riordinare · Clicca uno slot per caricare',
+    lock:   'Foto bloccate (sfondo rimosso) · Clicca uno slot per sostituire',
+  },
+  nl: {
+    unlock: 'Sleep tussen slots om te herordenen · Klik op een slot om te uploaden',
+    lock:   'Foto\'s vergrendeld (achtergrond verwijderd) · Klik om te vervangen',
+  },
+  pl: {
+    unlock: 'Przeciągnij między slotami aby zmienić kolejność · Kliknij slot aby przesłać',
+    lock:   'Zdjęcia zablokowane (tło usunięte) · Kliknij slot aby zastąpić zdjęcie',
+  },
+}
+
 /* ─── 5 fonds disponibles ─────────────────────────────────────────────────── */
 
 const BACKGROUNDS = [
@@ -96,19 +164,26 @@ const BACKGROUNDS = [
   },
 ] as const
 
-/* ─── Définition des 10 slots ─────────────────────────────────────────────── */
+/* ─── Définition des 14 slots ─────────────────────────────────────────────── */
 
 const SLOT_DEFS = [
-  { id: 0, label: 'Photo recto — à plat ou sur cintre', badge: 'required',    type: 'garment', bgRemoval: 'free' },
-  { id: 1, label: 'Photo verso',      badge: 'recommended', type: 'garment', bgRemoval: 'pro'  },
-  { id: 2, label: 'Photo portée 1',  badge: 'recommended', type: 'garment', bgRemoval: 'pro'  },
-  { id: 3, label: 'Photo portée 2',  badge: 'recommended', type: 'garment', bgRemoval: 'pro'  },
-  { id: 4, label: 'Photo portée 3',  badge: 'recommended', type: 'garment', bgRemoval: 'pro'  },
-  { id: 5, label: 'Photo portée 4',  badge: 'recommended', type: 'garment', bgRemoval: 'pro'  },
-  { id: 6, label: 'Étiquette marque',badge: 'recommended', type: 'label',   bgRemoval: 'none' },
-  { id: 7, label: 'Étiquette taille',badge: 'recommended', type: 'label',   bgRemoval: 'none' },
-  { id: 8, label: 'Étiquette compo.',badge: 'recommended', type: 'label',   bgRemoval: 'none' },
-  { id: 9, label: 'Défaut / détail', badge: 'optional',    type: 'detail',  bgRemoval: 'none' },
+  /* Section Cintre / À plat */
+  { id: 0,  label: 'Photo recto — à plat ou sur cintre', badge: 'required',    type: 'garment', bgRemoval: 'free' },
+  { id: 1,  label: 'Photo verso',                         badge: 'recommended', type: 'garment', bgRemoval: 'pro'  },
+  /* Section Photos portées & supplémentaires */
+  { id: 2,  label: 'Vue portée 1',                        badge: 'recommended', type: 'garment', bgRemoval: 'pro'  },
+  { id: 3,  label: 'Vue portée 2',                        badge: 'recommended', type: 'garment', bgRemoval: 'pro'  },
+  { id: 4,  label: 'Vue portée 3',                        badge: 'recommended', type: 'garment', bgRemoval: 'pro'  },
+  { id: 5,  label: 'Vue portée 4',                        badge: 'recommended', type: 'garment', bgRemoval: 'pro'  },
+  { id: 6,  label: 'Vue portée 5',                        badge: 'optional',    type: 'garment', bgRemoval: 'pro'  },
+  { id: 7,  label: 'Vue portée 6',                        badge: 'optional',    type: 'garment', bgRemoval: 'pro'  },
+  /* Section Étiquettes & Détails */
+  { id: 8,  label: 'Étiquette marque',                    badge: 'recommended', type: 'label',   bgRemoval: 'none' },
+  { id: 9,  label: 'Étiquette taille',                    badge: 'recommended', type: 'label',   bgRemoval: 'none' },
+  { id: 10, label: 'Étiquette compo.',                    badge: 'recommended', type: 'label',   bgRemoval: 'none' },
+  { id: 11, label: 'Autre détail',                        badge: 'optional',    type: 'detail',  bgRemoval: 'none' },
+  { id: 12, label: 'Défaut',                              badge: 'optional',    type: 'detail',  bgRemoval: 'none' },
+  { id: 13, label: 'Emballage',                           badge: 'optional',    type: 'detail',  bgRemoval: 'none' },
 ] as const
 
 type SlotDef = (typeof SLOT_DEFS)[number]
@@ -134,11 +209,9 @@ export default function PhotoUploadStep({ slots, setSlots }: Props) {
   const [showValidationBanner, setShowValidationBanner] = useState(false)
 
   const dragSourceId = useRef<number | null>(null)
-  /* Référence toujours à jour des slots pour éviter les stale closures dans les callbacks async */
   const slotsRef = useRef<PhotoSlot[]>(slots)
   useEffect(() => { slotsRef.current = slots }, [slots])
 
-  /* Charge la préférence fond depuis localStorage (côté client uniquement) */
   useEffect(() => {
     const saved = localStorage.getItem('sl-bg-preference')
     if (saved !== null) setSelectedBg(parseInt(saved) || 0)
@@ -149,6 +222,13 @@ export default function PhotoUploadStep({ slots, setSlots }: Props) {
     localStorage.setItem('sl-bg-preference', String(id))
   }
 
+  /* Quand slot 0 a son fond supprimé, toutes les photos sont figées */
+  const mainPhotoHasBg  = slots[0]?.processedUrl !== null
+  const selectedBgStyle = BACKGROUNDS[selectedBg].style
+  const bannerI18n      = BANNER_I18N[lang] ?? BANNER_I18N.fr
+  const tipI18n         = TIP_I18N[lang]    ?? TIP_I18N.fr
+  const filledCount     = slots.filter((s) => s.file !== null).length
+
   /* ── Met à jour un seul slot ── */
   const updateSlot = useCallback(
     (id: number, patch: Partial<PhotoSlot>) =>
@@ -156,9 +236,7 @@ export default function PhotoUploadStep({ slots, setSlots }: Props) {
     [setSlots]
   )
 
-  /* ── Charge un fichier dans un slot ──────────────────────────────────────── */
-  /* Si skipBgRemoval=true : on précharge juste le preview sans lancer remove-bg */
-  /* Si skipBgRemoval=false (défaut) : comportement habituel pour upload individuel */
+  /* ── Charge un fichier dans un slot ── */
   const loadFileInSlot = useCallback(
     async (file: File, slotId: number, skipBgRemoval = false) => {
       const preview = URL.createObjectURL(file)
@@ -166,10 +244,9 @@ export default function PhotoUploadStep({ slots, setSlots }: Props) {
 
       await new Promise((r) => setTimeout(r, 200))
 
-      const def = SLOT_DEFS[slotId]
+      const def = SLOT_DEFS[slotId as keyof typeof SLOT_DEFS] ?? SLOT_DEFS[0]
 
-      /* Suppression fond uniquement pour slot 0 (bgRemoval='free') et si non ignoré */
-      if (def.bgRemoval === 'free' && !skipBgRemoval) {
+      if ((def as typeof SLOT_DEFS[0]).bgRemoval === 'free' && !skipBgRemoval) {
         updateSlot(slotId, { status: 'processing-bg' })
         try {
           const { removeBackground } = await import('@imgly/background-removal')
@@ -181,7 +258,6 @@ export default function PhotoUploadStep({ slots, setSlots }: Props) {
           updateSlot(slotId, { status: 'done', processedUrl: null, error: 'bg_failed' })
         }
       } else {
-        /* Préchargement simple — pas de suppression fond */
         updateSlot(slotId, { status: 'done' })
       }
     },
@@ -189,12 +265,10 @@ export default function PhotoUploadStep({ slots, setSlots }: Props) {
   )
 
   /* ── Validation et lancement du remove-bg sur slot 0 ── */
-  /* Appelé depuis la ValidationBanner — déclenche enfin la suppression de fond */
   const handleValidateAndProcess = useCallback(async () => {
     const slot0 = slotsRef.current[0]
-    const def0  = SLOT_DEFS[0]
 
-    if (slot0.file && def0.bgRemoval === 'free') {
+    if (slot0.file) {
       updateSlot(0, { status: 'processing-bg' })
       try {
         const { removeBackground } = await import('@imgly/background-removal')
@@ -207,28 +281,22 @@ export default function PhotoUploadStep({ slots, setSlots }: Props) {
       }
     }
 
-    /* Fermer la bannière de validation */
     setShowValidationBanner(false)
   }, [updateSlot])
 
   /* ── Upload multiple → classify → distribue dans les slots ── */
-  /* Après classification : charger en preview uniquement (skipBgRemoval=true) */
-  /* puis afficher la bannière de validation */
   const handleMultipleFiles = useCallback(
     async (files: File[]) => {
       if (!files.length) return
       setClassifiedCount(null)
 
-      /* Un seul fichier → premier slot vide, remove-bg IMMÉDIAT (comportement individuel) */
       if (files.length === 1) {
-        const firstEmpty = SLOT_DEFS.find((d) => !slotsRef.current[d.id].file)
+        const firstEmpty = SLOT_DEFS.find((d) => !slotsRef.current[d.id]?.file)
         if (firstEmpty) loadFileInSlot(files[0], firstEmpty.id)
         return
       }
 
       setIsClassifying(true)
-      console.group('[PhotoUpload] Classification IA')
-      console.log(`${files.length} fichiers à classifier`)
 
       try {
         const fd = new FormData()
@@ -240,22 +308,15 @@ export default function PhotoUploadStep({ slots, setSlots }: Props) {
           const { results } = (await res.json()) as {
             results: { fileIndex: number; slotIndex: number }[]
           }
-          console.log('Résultats API :', results)
 
-          /* Fallback slot 0 : si aucune photo non portée n'a été classée en 0,
-             promeut la meilleure vue frontale disponible (slot 2 en priorité, sinon 3) */
           const hasSlot0 = results.some((r) => r.slotIndex === 0)
           if (!hasSlot0) {
             const candidate =
               results.find((r) => r.slotIndex === 2) ??
               results.find((r) => r.slotIndex === 3)
-            if (candidate) {
-              console.log(`[PhotoUpload] Fallback slot 0 : fichier[${candidate.fileIndex}] promu de slot ${candidate.slotIndex} → 0`)
-              candidate.slotIndex = 0
-            }
+            if (candidate) candidate.slotIndex = 0
           }
 
-          /* Utilise slotsRef.current pour éviter la stale closure */
           const taken = new Set<number>(
             slotsRef.current
               .map((s, i) => (s.file ? i : -1))
@@ -268,48 +329,40 @@ export default function PhotoUploadStep({ slots, setSlots }: Props) {
             if (fileIndex >= files.length) continue
             let target = slotIndex
 
-            /* Si le slot cible est déjà pris, trouve le premier slot vide */
             if (taken.has(target)) {
               const next = SLOT_DEFS.find((d) => !taken.has(d.id))
-              if (!next) { console.warn(`Pas de slot libre pour le fichier ${fileIndex}`); continue }
+              if (!next) continue
               target = next.id
             }
             taken.add(target)
             assignments.push({ file: files[fileIndex], slotId: target })
-            console.log(`  fichier[${fileIndex}] → slot ${target} (${SLOT_DEFS[target].label})`)
           }
 
-          /* Charger en preview uniquement — on ne lance PAS remove-bg avant validation */
           assignments.forEach(({ file, slotId }) => loadFileInSlot(file, slotId, true))
           setClassifiedCount(assignments.length)
-          /* Afficher la bannière de validation */
           setShowValidationBanner(true)
         } else {
-          const err = await res.text()
-          console.warn('[PhotoUpload] Classify API erreur :', res.status, err)
-          /* Fallback séquentiel */
-          const empty = SLOT_DEFS.filter((d) => !slotsRef.current[d.id].file).map((d) => d.id)
+          const empty = SLOT_DEFS.filter((d) => !slotsRef.current[d.id]?.file).map((d) => d.id)
           files.slice(0, empty.length).forEach((f, i) => loadFileInSlot(f, empty[i], true))
           setClassifiedCount(Math.min(files.length, empty.length))
           setShowValidationBanner(true)
         }
-      } catch (err) {
-        console.error('[PhotoUpload] Classify erreur réseau :', err)
-        const empty = SLOT_DEFS.filter((d) => !slotsRef.current[d.id].file).map((d) => d.id)
+      } catch {
+        const empty = SLOT_DEFS.filter((d) => !slotsRef.current[d.id]?.file).map((d) => d.id)
         files.slice(0, empty.length).forEach((f, i) => loadFileInSlot(f, empty[i], true))
         setClassifiedCount(Math.min(files.length, empty.length))
         setShowValidationBanner(true)
       }
 
-      console.groupEnd()
       setIsClassifying(false)
     },
     [loadFileInSlot]
   )
 
-  /* ── Permute deux slots ── */
+  /* ── Permute deux slots (désactivé si photos figées) ── */
   const swapSlots = useCallback(
     (sourceId: number, targetId: number) => {
+      if (mainPhotoHasBg) return
       if (sourceId === targetId) return
       setSlots((prev) => {
         const next = [...prev]
@@ -318,7 +371,7 @@ export default function PhotoUploadStep({ slots, setSlots }: Props) {
         return next
       })
     },
-    [setSlots]
+    [setSlots, mainPhotoHasBg]
   )
 
   /* ── Vide un slot ── */
@@ -343,11 +396,6 @@ export default function PhotoUploadStep({ slots, setSlots }: Props) {
     if (images.length) handleMultipleFiles(images)
   }, [handleMultipleFiles])
 
-  const filledCount      = slots.filter((s) => s.file !== null).length
-  const mainPhotoHasBg   = slots[0].processedUrl !== null
-  const selectedBgStyle  = BACKGROUNDS[selectedBg].style
-  const bannerI18n       = BANNER_I18N[lang] ?? BANNER_I18N.fr
-
   return (
     <div className="space-y-5">
 
@@ -357,7 +405,7 @@ export default function PhotoUploadStep({ slots, setSlots }: Props) {
           Photos de l&apos;article
         </h2>
         <p className="text-sm text-gray-500">
-          Ajoutez jusqu&apos;à 10 photos.{' '}
+          Ajoutez jusqu&apos;à 14 photos.{' '}
           <span className="font-semibold text-gray-700">La photo principale est obligatoire</span>
           {' '}— l&apos;IA supprime automatiquement son fond.
         </p>
@@ -425,12 +473,10 @@ export default function PhotoUploadStep({ slots, setSlots }: Props) {
         </div>
       )}
 
-      {/* ── Bannière de validation — visible entre l'import et les slots ─── */}
-      {/* Apparaît après classification multi-photos, avant le traitement       */}
+      {/* ── Bannière de validation ── */}
       {showValidationBanner && !isClassifying && (
         <div className="rounded-2xl border-2 border-indigo-200 bg-indigo-50 p-5 space-y-4">
 
-          {/* Titre + description */}
           <div className="flex items-start gap-3">
             <div className="w-8 h-8 rounded-xl bg-indigo-100 flex items-center justify-center shrink-0">
               <Wand2 className="w-4 h-4 text-indigo-600" />
@@ -441,7 +487,6 @@ export default function PhotoUploadStep({ slots, setSlots }: Props) {
               </h3>
               <p className="text-sm text-indigo-700">{bannerI18n.desc}</p>
             </div>
-            {/* Fermeture de la bannière sans lancer remove-bg */}
             <button
               onClick={() => setShowValidationBanner(false)}
               className="ml-auto text-indigo-400 hover:text-indigo-600 transition-colors shrink-0"
@@ -451,16 +496,15 @@ export default function PhotoUploadStep({ slots, setSlots }: Props) {
             </button>
           </div>
 
-          {/* Sélecteur de fond intégré dans la bannière */}
           <div>
             <p className="text-[10px] font-bold text-indigo-400 uppercase tracking-widest mb-2">
               Fond de la photo principale
             </p>
 
             {/* Prévisualisation fond en temps réel */}
-            {slots[0].preview && (
+            {slots[0]?.preview && (
               <div
-                className="w-full h-28 rounded-xl overflow-hidden mb-3 relative"
+                className="w-full h-28 rounded-xl overflow-hidden mb-3"
                 style={BACKGROUNDS[selectedBg].style}
               >
                 <img
@@ -506,7 +550,6 @@ export default function PhotoUploadStep({ slots, setSlots }: Props) {
             </div>
           </div>
 
-          {/* Bouton principal : lancer le traitement */}
           <button
             onClick={handleValidateAndProcess}
             className="w-full flex items-center justify-center gap-2 bg-indigo-600 hover:bg-indigo-700 text-white font-semibold text-sm py-3.5 rounded-xl transition-all active:scale-[0.98]"
@@ -517,17 +560,20 @@ export default function PhotoUploadStep({ slots, setSlots }: Props) {
         </div>
       )}
 
-      {/* ── Section 1 : Cintre / À plat (slots 0–1) ── */}
+      {/* ══════════════════════════════════════════════════════════════════ */}
+      {/* SECTION 1 — Cintre / À plat (slots 0–1) — taille réduite         */}
+      {/* ══════════════════════════════════════════════════════════════════ */}
       <div>
         <div className="flex items-center justify-between mb-3">
           <p className="text-xs font-bold text-gray-400 uppercase tracking-widest">
             Cintre / À plat · 2 photos
           </p>
           {filledCount > 0 && (
-            <p className="text-xs text-gray-400 font-medium">{filledCount}/10 remplis</p>
+            <p className="text-xs text-gray-400 font-medium">{filledCount}/14 remplis</p>
           )}
         </div>
-        <div className="grid grid-cols-2 sm:grid-cols-2 gap-2.5">
+        {/* Largeur limitée : cartes ~130px au lieu de demi-écran */}
+        <div className="grid grid-cols-2 gap-2.5 max-w-[280px]">
           {SLOT_DEFS.slice(0, 2).map((def) => (
             <SlotCard
               key={def.id}
@@ -536,6 +582,7 @@ export default function PhotoUploadStep({ slots, setSlots }: Props) {
               isDragOver={dragOverId === def.id}
               dragSourceId={dragSourceId}
               bgStyle={selectedBgStyle}
+              locked={mainPhotoHasBg}
               displayLabel={SLOT_LABELS[lang]?.[def.id] ?? def.label}
               onFileSelected={(file) => loadFileInSlot(file, def.id)}
               onSwap={swapSlots}
@@ -546,7 +593,7 @@ export default function PhotoUploadStep({ slots, setSlots }: Props) {
         </div>
       </div>
 
-      {/* ── Sélecteur de fond (visible uniquement si fond supprimé ET bannière masquée) ── */}
+      {/* Sélecteur de fond (visible après remove-bg, bannière fermée) */}
       {mainPhotoHasBg && !showValidationBanner && (
         <div className="bg-gray-50 border border-gray-100 rounded-2xl p-4">
           <p className="text-xs font-bold text-gray-400 uppercase tracking-widest mb-3">
@@ -588,20 +635,22 @@ export default function PhotoUploadStep({ slots, setSlots }: Props) {
         </div>
       )}
 
-      {/* ── Section 2 : Photos portées (slots 2–5) ── */}
+      {/* ══════════════════════════════════════════════════════════════════ */}
+      {/* SECTION 2 — Photos portées & supplémentaires (slots 2–7) — 3+3   */}
+      {/* ══════════════════════════════════════════════════════════════════ */}
       <div>
         <p className="text-xs font-bold text-gray-400 uppercase tracking-widest mb-3">
-          Photos portées · 4 photos
+          Photos portées &amp; supplémentaires · 6 photos
         </p>
-        <div className="grid grid-cols-2 sm:grid-cols-4 gap-2.5">
-          {SLOT_DEFS.slice(2, 6).map((def) => (
+        <div className="grid grid-cols-3 gap-2.5">
+          {SLOT_DEFS.slice(2, 8).map((def) => (
             <SlotCard
               key={def.id}
               def={def}
               slot={slots[def.id]}
               isDragOver={dragOverId === def.id}
               dragSourceId={dragSourceId}
-              bgStyle={selectedBgStyle}
+              locked={mainPhotoHasBg}
               displayLabel={SLOT_LABELS[lang]?.[def.id] ?? def.label}
               onFileSelected={(file) => loadFileInSlot(file, def.id)}
               onSwap={swapSlots}
@@ -612,19 +661,22 @@ export default function PhotoUploadStep({ slots, setSlots }: Props) {
         </div>
       </div>
 
-      {/* ── Section 3 : Étiquettes & détails (slots 6–9) ── */}
+      {/* ══════════════════════════════════════════════════════════════════ */}
+      {/* SECTION 3 — Étiquettes & Détails (slots 8–13) — 3+3              */}
+      {/* ══════════════════════════════════════════════════════════════════ */}
       <div>
         <p className="text-xs font-bold text-gray-400 uppercase tracking-widest mb-3">
-          Étiquettes & détails · 4 photos
+          Étiquettes &amp; Détails · 6 photos
         </p>
-        <div className="grid grid-cols-2 sm:grid-cols-4 gap-2.5">
-          {SLOT_DEFS.slice(6).map((def) => (
+        <div className="grid grid-cols-3 gap-2.5">
+          {SLOT_DEFS.slice(8).map((def) => (
             <SlotCard
               key={def.id}
               def={def}
               slot={slots[def.id]}
               isDragOver={dragOverId === def.id}
               dragSourceId={dragSourceId}
+              locked={mainPhotoHasBg}
               displayLabel={SLOT_LABELS[lang]?.[def.id] ?? def.label}
               onFileSelected={(file) => loadFileInSlot(file, def.id)}
               onSwap={swapSlots}
@@ -637,7 +689,7 @@ export default function PhotoUploadStep({ slots, setSlots }: Props) {
 
       {/* ── Astuce ── */}
       <p className="text-xs text-gray-400 text-center pb-2">
-        Glissez-déposez entre les slots pour réorganiser · Cliquez sur un slot pour uploader
+        {mainPhotoHasBg ? tipI18n.lock : tipI18n.unlock}
       </p>
     </div>
   )
@@ -651,6 +703,7 @@ interface SlotCardProps {
   isDragOver: boolean
   dragSourceId: React.MutableRefObject<number | null>
   bgStyle?: React.CSSProperties
+  locked?: boolean
   displayLabel: string
   onFileSelected: (file: File) => void
   onSwap: (sourceId: number, targetId: number) => void
@@ -659,13 +712,13 @@ interface SlotCardProps {
 }
 
 function SlotCard({
-  def, slot, isDragOver, dragSourceId, bgStyle, displayLabel,
+  def, slot, isDragOver, dragSourceId, bgStyle, locked = false, displayLabel,
   onFileSelected, onSwap, onClear, onDragOverChange,
 }: SlotCardProps) {
-  const inputRef = useRef<HTMLInputElement>(null)
-  const isEmpty  = slot.status === 'empty'
+  const inputRef  = useRef<HTMLInputElement>(null)
+  const isEmpty   = slot.status === 'empty'
   const isLoading = slot.status === 'uploading' || slot.status === 'processing-bg'
-  const hasBg    = slot.processedUrl !== null
+  const hasBg     = slot.processedUrl !== null
   const displayUrl = slot.processedUrl ?? slot.preview
 
   const BADGE = {
@@ -674,7 +727,6 @@ function SlotCard({
     optional:    { label: 'Optionnel',   cls: 'bg-gray-50 text-gray-400'     },
   } as const
 
-  /* Fond du container : fond choisi si transparence disponible, damier sinon */
   const containerStyle: React.CSSProperties = hasBg && bgStyle
     ? bgStyle
     : hasBg
@@ -684,7 +736,10 @@ function SlotCard({
   const handleDragOver = (e: React.DragEvent) => {
     e.preventDefault()
     e.stopPropagation()
-    if (dragSourceId.current !== null && dragSourceId.current !== def.id) onDragOverChange(true)
+    /* N'accepte le highlight de drop que pour les swaps entre slots si non figé */
+    if (!locked && dragSourceId.current !== null && dragSourceId.current !== def.id) {
+      onDragOverChange(true)
+    }
   }
 
   const handleDrop = (e: React.DragEvent) => {
@@ -692,7 +747,12 @@ function SlotCard({
     e.stopPropagation()
     onDragOverChange(false)
     const sourceId = e.dataTransfer.getData('slotId')
-    if (sourceId !== '') { onSwap(parseInt(sourceId), def.id); return }
+    /* Swap inter-slots : uniquement si photos non figées */
+    if (sourceId !== '') {
+      if (!locked) onSwap(parseInt(sourceId), def.id)
+      return
+    }
+    /* Drop fichier depuis l'OS : toujours autorisé */
     const files = Array.from(e.dataTransfer.files).filter((f) => f.type.startsWith('image/'))
     if (files[0]) onFileSelected(files[0])
   }
@@ -704,7 +764,7 @@ function SlotCard({
       onDrop={handleDrop}
       onClick={() => isEmpty && inputRef.current?.click()}
       className={`relative aspect-square rounded-xl overflow-hidden transition-all duration-150 group ${
-        isDragOver
+        isDragOver && !locked
           ? 'ring-2 ring-indigo-500 ring-offset-2 scale-[1.04]'
           : isEmpty
           ? 'border-2 border-dashed border-gray-200 hover:border-indigo-300 bg-gray-50 hover:bg-indigo-50/30 cursor-pointer'
@@ -729,7 +789,6 @@ function SlotCard({
           <span className="text-[10px] font-semibold text-gray-400 text-center leading-tight px-1">
             {displayLabel}
           </span>
-
           <span className={`text-[9px] font-bold px-1.5 py-0.5 rounded-full ${BADGE[def.badge].cls}`}>
             {BADGE[def.badge].label}
           </span>
@@ -749,15 +808,16 @@ function SlotCard({
       {/* ── Photo chargée ── */}
       {displayUrl && !isLoading && (
         <div
-          draggable
-          onDragStart={(e) => {
+          /* Drag désactivé quand photos figées */
+          draggable={!locked}
+          onDragStart={locked ? undefined : (e) => {
             e.stopPropagation()
             e.dataTransfer.setData('slotId', String(def.id))
             e.dataTransfer.effectAllowed = 'move'
             dragSourceId.current = def.id
           }}
-          onDragEnd={() => { dragSourceId.current = null }}
-          className="absolute inset-0 cursor-grab active:cursor-grabbing"
+          onDragEnd={locked ? undefined : () => { dragSourceId.current = null }}
+          className={`absolute inset-0 ${locked ? 'cursor-default' : 'cursor-grab active:cursor-grabbing'}`}
           style={displayUrl === slot.processedUrl ? containerStyle : undefined}
         >
           <img
@@ -792,17 +852,19 @@ function SlotCard({
               <span className="bg-orange-500 text-white text-[9px] font-bold px-2 py-0.5 rounded-full flex items-center gap-1 shadow">
                 <AlertTriangle className="w-2 h-2" /> Fond indisponible
               </span>
-            ) : def.bgRemoval === 'pro' ? (
+            ) : (def as { bgRemoval: string }).bgRemoval === 'pro' ? (
               <span className="bg-indigo-600/90 text-white text-[9px] font-bold px-2 py-0.5 rounded-full flex items-center gap-1 backdrop-blur-sm shadow">
                 <Lock className="w-2 h-2" /> Fond Pro
               </span>
             ) : null}
           </div>
 
-          {/* Icône déplacement */}
-          <div className="absolute top-1.5 right-1.5 opacity-0 group-hover:opacity-60 transition-opacity pointer-events-none">
-            <GripVertical className="w-3.5 h-3.5 text-white drop-shadow" />
-          </div>
+          {/* Icône déplacement — masquée quand figé */}
+          {!locked && (
+            <div className="absolute top-1.5 right-1.5 opacity-0 group-hover:opacity-60 transition-opacity pointer-events-none">
+              <GripVertical className="w-3.5 h-3.5 text-white drop-shadow" />
+            </div>
+          )}
         </div>
       )}
 
