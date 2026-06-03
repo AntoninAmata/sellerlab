@@ -60,17 +60,21 @@ SaaS pour vendeurs Vinted (et autres plateformes à terme).
 ## Stack technique
 - Frontend : Next.js 16, TypeScript, Tailwind CSS
 - UI : shadcn/ui, lucide-react, motion/react
-- Backend : Supabase (DB + Auth + Storage)
+- Backend : Supabase (DB + Auth + Storage pour photos utilisateurs)
 - Paiements : Stripe
 - Emails : Resend + react-email
-- IA : Claude API — claude-sonnet-4-20250514 pour vision et génération
+- IA : Claude API — claude-sonnet-4-6 pour vision et génération, claude-haiku-4-5 pour classification photos
 - Suppression fond : @imgly/background-removal (WebAssembly côté client, gratuit, privé)
 - Analytics : Umami (RGPD, gratuit)
 - Hébergement : Vercel
 
 ## Variables d'environnement (.env.local)
 - ANTHROPIC_API_KEY ✅ configurée
-- HUGGINGFACE_API_KEY ✅ configurée (pour classification photos)
+- HUGGINGFACE_API_KEY ✅ configurée
+
+## RÈGLE CRITIQUE — next.config.ts
+- NE JAMAIS ajouter `asyncWebAssembly: true` dans next.config.ts — casse Safari
+- Le fichier next.config.ts doit rester avec une config minimale
 
 ---
 
@@ -78,7 +82,7 @@ SaaS pour vendeurs Vinted (et autres plateformes à terme).
 - FR, EN, ES, DE, IT, NL, PL — toutes en place
 - Fichiers i18n créés pour toutes les langues ✅
 - Fallback : anglais si langue non disponible
-- RÈGLE : tout développement doit être appliqué dans les 7 langues
+- RÈGLE ABSOLUE : tout développement doit être appliqué dans les 7 langues
 
 ---
 
@@ -93,66 +97,131 @@ SaaS pour vendeurs Vinted (et autres plateformes à terme).
 
 ### Étape 1 — Photos ✅ Construite
 
-Slots (10 au total) :
-- Slot 0 : 'Photo recto (cintre/à plat)' — OBLIGATOIRE — suppression fond gratuite
-- Slot 1 : 'Photo verso (cintre/à plat)' — Recommandé — suppression fond Pro
-- Slot 2 : Porté de face — Recommandé — suppression fond Pro
-- Slot 3 : Porté 3/4 — Recommandé — suppression fond Pro
-- Slot 4 : Porté de profil — Recommandé — suppression fond Pro
-- Slot 5 : Porté de dos — Recommandé — suppression fond Pro
-- Slot 6 : Étiquette marque — Recommandé — PAS de suppression fond
-- Slot 7 : Étiquette taille — Recommandé — PAS de suppression fond
-- Slot 8 : Étiquette composition — Recommandé — PAS de suppression fond
-- Slot 9 : Autre (défaut, détail) — Optionnel — PAS de suppression fond
+#### Slots (15 au total) — Structure définitive
+
+**Section 1 — PHOTOS NON PORTÉES** — 9 slots
+- Slot 0 : Photo recto (cintre / à plat) — OBLIGATOIRE — suppression fond gratuite
+- Slot 1 : Photo verso (cintre / à plat) — Recommandé
+- Slot 2 : Autre vue non portée — Recommandé
+- Slot 3 : Étiquette marque — Recommandé
+- Slot 4 : Étiquette taille — Recommandé
+- Slot 5 : Étiquette composition — Recommandé
+- Slot 6 : Autre détail — Optionnel
+- Slot 7 : Défaut — Optionnel
+- Slot 8 : Emballage — Optionnel
+
+**Section 2 — PHOTOS PORTÉES (FACE, PROFIL, DOS)** — 6 slots
+- Slots 9-14 : Vue portée 1 à 6 — Recommandé (1-4) / Optionnel (5-6)
+
+#### Disposition visuelle
+- Section NON PORTÉES : grille `grid-cols-3` × 3 lignes (9 cases), `w-full aspect-square object-cover`
+- Section PORTÉES : grille `grid-cols-6` × 1 ligne (6 cases), `w-full aspect-square object-cover`
+- Toutes les photos s'affichent en `object-cover` pour remplir les cases carrées
+- Les 2 sections doivent tenir sur une seule page sans scroller
+
+#### Upload et classification IA
 
 Upload :
-- Classique + drag & drop par slot individuel
-- Upload multiple : l'IA classe automatiquement (Claude Haiku Vision)
-- Drag & drop entre slots pour corriger classification
-- Slot 0 : classification uniquement photos non portées (cintre/à plat)
-- Photos portées → slots 2-5 uniquement
+- Zone "Importer plusieurs photos" en haut + drag & drop
+- Upload individuel par slot (clic sur la case)
+- Classification automatique via Claude Haiku Vision (`app/api/classify-photos/route.ts`)
+- Drag & drop entre slots pour corriger (DÉSACTIVÉ après remove background)
+- Photos FIGÉES après suppression de fond
 
-Suppression de fond :
-- @imgly/background-removal (WebAssembly côté client)
+Règles de classification IA — ordre de priorité STRICT :
+
+1. **L'article est porté par une personne ?** → `worn` → slots 9-14
+2. **L'article est sur cintre ou à plat ?** → `flat` → slots 0, 1, 2
+3. **Texte/étiquette lisible au premier plan ?** → `detail` avec sous-type :
+   - Nom de marque (ex: KENZO, Nike...) → slot 3
+   - Taille uniquement → slot 4
+   - Composition uniquement → slot 5
+   - Taille + composition sur la même étiquette → slot 4
+   - Pas de texte lisible (gros plan couture, zip, défaut...) → slot 6, 7 ou 8
+4. **Sinon** → slot 6 (autre détail)
+
+Règles de débordement :
+- Si slots 0-2 pleins → débordement flat → slots 6, 7, 8
+- Si slots 9-14 pleins → débordement worn → slots 6, 7, 8
+- Si slots 6, 7, 8 pleins → avertissement orange "X photo(s) ignorée(s) faute de place"
+- Si total photos > 15 → avertissement "Seules les 15 premières photos ont été importées"
+
+#### Suppression de fond
+
+- @imgly/background-removal (WebAssembly côté client) — GRATUIT
+- Compatible Chrome, Firefox, Edge
+- Sur Safari : afficher message orange "Suppression de fond indisponible sur ce navigateur. Utilisez Chrome ou Firefox." dans les 7 langues — NE PAS bloquer le reste du flux
 - Gratuit : slot 0 uniquement
-- Pro : slots 1-5
-- Pas de suppression fond : slots 6-9
+- Pro : slots 1-8
+- Pas de suppression fond : slots 9-14 (photos portées)
 
-5 fonds disponibles (choix sauvegardé localStorage) :
-1. Blanc pur
-2. Studio gris dégradé
-3. Intérieur minimaliste scandinave (Unsplash, remplacé par image IA en prod)
-4. Showroom beige/crème (Unsplash, remplacé par image IA en prod)
-5. Extérieur nature bokeh (Unsplash, remplacé par image IA en prod)
+#### Fonds disponibles — 23 au total (choix sauvegardé localStorage, clé `sellerlab_bg_choice`)
+
+1. **Blanc pur** — CSS `#FFFFFF` — toujours en première position — pas d'image
+2-23. **bg-01.jpg à bg-22.jpg** — images IA générées dans `/public/backgrounds/`
+
+Interface de sélection : grille scrollable horizontalement avec vignettes ~64px.
+PAS de dépendance Unsplash ou autre service externe — tout est local dans /public/backgrounds/.
+
+Composite fond : cutout PNG (fond transparent) + image de fond choisie → canvas → JPEG 92%
+
+#### Bannière de validation (avant remove background)
+- Affichée quand slot 0 contient une photo et n'est pas encore figé
+- Titre : "Vérifiez l'ordre de vos photos"
+- Grille scrollable horizontale pour choisir le fond
+- Aperçu : afficher UNIQUEMENT le fond choisi (sans l'article par-dessus)
+- Bouton "Traiter les photos — Supprimer le fond"
 
 Fichiers :
-- app/app/page.tsx — stepper 5 étapes
+- app/app/page.tsx — stepper 5 étapes (makeSlots() crée 15 slots)
 - app/app/types.ts — types PhotoSlot, SlotStatus
 - app/app/components/PhotoUploadStep.tsx
 - app/api/remove-bg/route.ts
 - app/api/classify-photos/route.ts
 
+---
+
 ### Étape 2 — Reconnaissance automatique ✅ Construite
 
-Claude Vision (claude-sonnet-4-20250514) analyse les photos et pré-remplit le formulaire.
+Claude Vision (claude-sonnet-4-6) analyse les photos et pré-remplit le formulaire.
 L'utilisateur ne voit JAMAIS les 200 catégories Vinted directement.
 
 Champs détectés automatiquement :
 - Marque
 - Genre (Homme/Femme/Mixte/Enfant)
 - Catégorie Vinted + sous-catégorie (depuis vinted-taxonomy.ts)
-- Taille (détection auto sur étiquette, menu filtré par sous-catégorie si correction)
+- Taille (détection auto sur étiquette — voir règles ci-dessous)
 - État (5 états officiels Vinted avec descriptions exactes)
 - Couleur (max 2, liste exacte 29 couleurs Vinted)
 - Matière (liste exacte 55 matériaux Vinted)
 - Style, Motif
 - Défauts visibles (confirmation utilisateur obligatoire)
 
+#### Règles de détection de taille — PRIORITÉ ABSOLUE
+
+1. Scanner TOUS les slots 0-8 (non portées) pour trouver une taille lisible sur une étiquette
+2. Slots prioritaires : slot 4 (Étiquette taille) en premier, puis les autres slots 0-8
+3. Si une taille est lisible sur n'importe quel slot 0-8 → confiance ÉLEVÉE, jamais Incertaine
+4. La taille reconnue doit être automatiquement pré-sélectionnée dans le menu déroulant
+5. S'applique à TOUS les systèmes : numérique (48, 46...), lettres (XS, S, M...), jeans (28, 29, 30...), pointures (EU, UK, US), tailles femme (34, 36...), tailles italiennes, françaises, etc.
+6. Un seul menu déroulant pour la taille — pas de tabs/pills par système de taille
+7. "Incertaine" uniquement si aucune étiquette visible et taille impossible à déterminer visuellement
+
 Indicateur de confiance :
 - Vert = Élevée
 - Orange = Moyenne (à vérifier)
-- Rouge = Incertaine (à compléter)
+- Rouge = Incertaine (à compléter) — JAMAIS "Élevée" sur un champ vide
 - Gris = Modifié manuellement
+
+Systèmes de tailles disponibles (référence vinted-taxonomy.ts) :
+- Lettres : XS, S, M, L, XL, XXL, XXXL
+- EU femme : 34, 36, 38, 40, 42, 44, 46, 48
+- EU homme : 44, 46, 48, 50, 52, 54, 56
+- Jeans : 28, 29, 30, 31, 32, 33, 34, 36, 38, 40, 42 (les impaires existent)
+- Pointures : EU 35-46 avec demi-pointures, UK, US homme/femme
+- Enfant âge : 0-3 mois à 14 ans
+- Enfant cm : 56 à 164
+- One Size
 
 États officiels Vinted (descriptions exactes) :
 - Neuf avec étiquette : article neuf, jamais porté/utilisé avec étiquettes ou dans son emballage d'origine
@@ -167,37 +236,52 @@ Noir, Gris, Blanc, Crème, Beige, Abricot, Orange, Corail, Rouge, Bordeaux, Fuch
 Matériaux Vinted (55, ordre alphabétique exact) :
 Acier, Acrylique, Alpaga, Argent, Bambou, Bois, Cachemire, Caoutchouc, Carton, Coton, Cuir, Cuir synthétique, Cuir verni, Céramique, Daim, Denim, Dentelle, Duvet, Fausse fourrure, Feutre, Flanelle, Jute, Laine, Latex, Lin, Maille, Mohair, Mousse, Mousseline, Mérinos, Métal, Nylon, Néoprène, Or, Paille, Papier, Peluche, Pierre, Plastique, Polaire, Polyester, Porcelaine, Rotin, Satin, Sequin, Silicone, Soie, Toile, Tulle, Tweed, Velours, Velours côtelé, Verre, Viscose, Élasthanne
 
-Systèmes de tailles :
-- Lettres : XS, S, M, L, XL, XXL, XXXL
-- EU femme : 34, 36, 38, 40, 42, 44, 46, 48
-- Homme : 44, 46, 48, 50, 52, 54, 56
-- Jeans : 28, 30, 32, 34, 36, 38, 40, 42
-- Pointures : 35 à 48
-- Enfant âge : 0-3 mois à 14 ans
-- Enfant cm : 56 à 164
-- One Size
-
 Fichiers :
-- lib/vinted-taxonomy.ts ✅
-- app/api/recognize/route.ts ✅
+- lib/vinted-taxonomy.ts ✅ (taxonomie complète avec Maison, Électronique, Beauté, Sport)
+- app/api/recognize/route.ts ✅ (slots étiquettes : marque=3, taille=4, composition=5)
 - app/app/components/RecognitionStep.tsx ✅
+
+---
 
 ### Étape 3 — Génération de l'annonce ✅ Construite
 (Annonce avant Prix — décision finale)
 
-- Titre optimisé Vinted max 60 caractères — éditable directement
-- Description courte par défaut (4-5 lignes) + bouton "Version détaillée"
-- Bilingue : langue native de l'utilisateur + anglais automatique
-- JAMAIS d'information incertaine dans la description
-- Bloc "Informations manquantes" conditionnel — affiché UNIQUEMENT si l'IA a un doute
-- Mots-clés SEO : intégrés dans description + tags séparés + ajout libre utilisateur
-- Dimensions optionnelles : système libre (suggestions + mesure personnalisée)
-- Bouton "Régénérer" pour une nouvelle version
-- Langue : FR/EN/ES/DE/IT/NL/PL + fallback anglais
+RÈGLE ABSOLUE : jamais d'information dont on n'est pas sûr à 100%
+- Seules les infos détectées sur photos OU renseignées par l'utilisateur
+- Si doute → champ dans "Infos à valider" pour confirmation utilisateur
+- Si validé → intégration automatique dans la description
+- NE JAMAIS mentionner "Vinted Pro" — remplacer par "Envoi soigné et rapide"
+
+Structure de la page (ordre exact) :
+
+1. MOTS-CLÉS SEO (en haut)
+   - Tags verts = déjà dans la description
+   - Tags bleus = à ajouter (clic → passe vert)
+   - Champ ajout personnalisé
+   - Bouton "Intégrer les mots-clés sélectionnés" → intègre dans titre ET description de façon fluide et naturelle (pas de hashtags)
+
+2. SECTION "INFORMATIONS À COMPLÉTER" (orange, une seule section fusionnée)
+   - Informations manquantes détectées par l'IA : clic sur un tag → champ texte inline → bouton "Ajouter à la description"
+   - Dimensions optionnelles (nom + valeur en cm)
+   - Prix neuf (optionnel)
+   - Bouton "Intégrer ces infos dans l'annonce"
+
+3. TITRE (max 60 caractères, éditable, compteur)
+
+4. DESCRIPTION (éditable directement, sans scroll)
+   - Format aéré avec emojis et bullet points
+   - ✅ État / 👕 Article / 🧵 Composition / 📏 Équivalences tailles / 💰 Prix neuf si renseigné / 📦 Expédition
+   - Équivalences tailles automatiques depuis le tableau officiel (voir section Équivalences tailles)
+   - Prix d'achat neuf → intégré si renseigné
+   - PAS d'info inventée
+   - Utilisateur peut modifier/supprimer n'importe quelle ligne
+   - Description en français EN PREMIER, puis version anglaise EN DESSOUS séparée par "English version" — PAS d'onglets
 
 Fichiers :
 - app/api/generate/route.ts ✅
 - app/app/components/AnnonceStep.tsx ✅
+
+---
 
 ### Étape 4 — Calcul du prix ✅ Construite
 (Prix après Annonce — décision finale)
@@ -205,34 +289,34 @@ Fichiers :
 - Pas de frais vendeur Vinted (frais à charge de l'acheteur)
 - Calcul marge OPTIONNEL — uniquement pour revendeurs
 
-Niveau de confiance selon la marque :
-- Élevée : résultat direct, pas de question
-- Moyenne : avertissement orange + bouton "Préciser"
-- Inconnue : avertissement rouge + formulaire obligatoire
+Structure en 2 blocs compacts :
 
-Logique calcul (si prix d'achat neuf fourni — champ principal) :
-- Neuf avec étiquette : 65% du prix neuf
-- Neuf sans étiquette : 55% du prix neuf
-- Très bon état : 40% du prix neuf
-- Bon état : 30% du prix neuf
-- Satisfaisant : 20% du prix neuf
-→ Affiné ensuite par prix moyens Vinted
+BLOC 1 — PRIX RECOMMANDÉ + MARCHÉ (tout en un)
+- Bannière confiance : verte (fiable) / orange (partielle) / rouge (inconnue)
+- Prix suggéré en grand
+- Raisonnement court (2-3 lignes)
+- Analyse marché en ligne horizontale : Prix neuf | Médiane Vinted | Fourchette | Annonces | Délai
+- Données via web search Claude — si indisponible → "N/D", jamais inventé
 
-Formulaire de précision (confiance moyenne/faible) :
-- Prix d'achat neuf (CHAMP PRINCIPAL)
-- État exact (5 états officiels Vinted)
-- Plateforme d'achat originale
-- Article rare ou édition limitée
-
-Slider prix final :
-- Frise colorée verte→orange→rouge
-- Délai estimé dynamique (~2-3 jours à +4 mois)
-- Conseil contextuel selon position slider
-- Marge de négociation : slider prix minimum à accepter
+BLOC 2 — AJUSTER MON PRIX (tout en un)
+- Slider prix + frise colorée verte→orange→rouge
+- Délai estimé dynamique (~2-3 jours à +1 mois) à droite
+- Conseil contextuel sous le slider
+- Prix minimum à accepter (négociation)
+- Section optionnelle repliée "Prix d'achat & marge" :
+  * Prix d'achat neuf → calcul % selon état :
+    - Neuf avec étiquette : 65%
+    - Neuf sans étiquette : 55%
+    - Très bon état : 40%
+    - Bon état : 30%
+    - Satisfaisant : 20%
+  * Toggle "Je suis revendeur" → marge nette
 
 Fichiers :
 - app/api/price/route.ts ✅
 - app/app/components/PricingStep.tsx ✅
+
+---
 
 ### Étape 5 — Export vers Vinted ✅ Construite
 
@@ -246,7 +330,7 @@ Fichiers :
 - 10 champs dans l'ordre EXACT du formulaire Vinted :
   1. Photos (bouton "Fait ✓" manuel)
   2. Titre (Copier → coche auto)
-  3. Description (switch FR/EN + Copier → coche auto)
+  3. Description (Copier → coche auto)
   4. Catégorie (bouton "Fait ✓" manuel)
   5. Marque (Copier → coche auto)
   6. Taille (Copier → coche auto)
@@ -258,7 +342,85 @@ Fichiers :
 - V1.5 : extension Chrome pré-remplit Vinted automatiquement
 
 Fichiers :
-- app/app/components/ExportStep.tsx ✅
+- app/app/components/ExportStep.tsx ✅ (15 slots — slots 0-8 non portées, slots 9-14 portées)
+
+---
+
+## Équivalences de tailles — Référence officielle
+
+Ces tableaux font autorité sur TOUTES les étapes du flux (reconnaissance, annonce, export).
+Toujours afficher l'équivalence en lettres (XS/S/M/L...) à partir de la taille détectée.
+
+### Vêtements homme/femme
+| EU Homme | EU Femme | Lettres | IT | FR | UK | US |
+|----------|----------|---------|----|----|-----|-----|
+| 44 | 34 | XS | 44 | 34 | 8 | 4 |
+| 46 | 36 | S | 46 | 36 | 10 | 6 |
+| 48 | 38 | M | 48 | 38 | 12 | 8 |
+| 50 | 40 | L | 50 | 40 | 14 | 10 |
+| 52 | 42 | XL | 52 | 42 | 16 | 12 |
+| 54 | 44 | XXL | 54 | 44 | 18 | 14 |
+| 56 | 46 | XXXL | 56 | 46 | 20 | 16 |
+
+### Jeans (W)
+| Tour de taille (cm) | W | Lettres |
+|---------------------|---|---------|
+| 71 | 28 | XS |
+| 74 | 29 | XS |
+| 76 | 30 | S |
+| 79 | 31 | S |
+| 81 | 32 | M |
+| 84 | 33 | M |
+| 86 | 34 | L |
+| 91 | 36 | L |
+| 97 | 38 | XL |
+| 102 | 40 | XXL |
+| 107 | 42 | XXXL |
+
+### Pointures (avec demi-pointures EU)
+| EU | UK | US Homme | US Femme |
+|----|-----|----------|----------|
+| 35 | 2.5 | 4 | 5 |
+| 35.5 | 3 | 4.5 | 5.5 |
+| 36 | 3.5 | 5 | 6 |
+| 36.5 | 4 | 5.5 | 6.5 |
+| 37 | 4.5 | 6 | 7 |
+| 37.5 | 5 | 6.5 | 7.5 |
+| 38 | 5.5 | 6.5 | 8 |
+| 38.5 | 6 | 7 | 8.5 |
+| 39 | 6.5 | 7.5 | 9 |
+| 39.5 | 7 | 8 | 9.5 |
+| 40 | 7 | 8.5 | 10 |
+| 40.5 | 7.5 | 9 | 10.5 |
+| 41 | 7.5 | 9.5 | 11 |
+| 41.5 | 8 | 10 | 11.5 |
+| 42 | 8.5 | 10.5 | 12 |
+| 42.5 | 9 | 11 | 12.5 |
+| 43 | 9.5 | 11.5 | 13 |
+| 43.5 | 10 | 12 | 13.5 |
+| 44 | 10 | 12.5 | 14 |
+| 44.5 | 10.5 | 13 | 14.5 |
+| 45 | 11 | 13.5 | 15 |
+| 45.5 | 11.5 | 14 | 15.5 |
+| 46 | 11.5 | 14.5 | 16 |
+
+### Tailles enfant
+Conserver le système de taille Vinted existant (déjà dans vinted-taxonomy.ts).
+
+---
+
+## Taxonomie Vinted
+
+Couleurs (29 dans l'ordre) : Noir, Gris, Blanc, Crème, Beige, Abricot, Orange, Corail, Rouge, Bordeaux, Fuchsia, Rose, Violet, Lila, Bleu clair, Bleu, Marine, Turquoise, Menthe, Vert, Vert foncé, Kaki, Marron, Moutarde, Jaune, Argenté, Doré, Multicolore, Transparence
+
+États officiels (5) :
+- Neuf avec étiquette
+- Neuf sans étiquette
+- Très bon état
+- Bon état
+- Satisfaisant
+
+Matériaux (55) : Acier, Acrylique, Alpaga, Argent, Bambou, Bois, Cachemire, Caoutchouc, Carton, Coton, Cuir, Cuir synthétique, Cuir verni, Céramique, Daim, Denim, Dentelle, Duvet, Fausse fourrure, Feutre, Flanelle, Jute, Laine, Latex, Lin, Maille, Mohair, Mousse, Mousseline, Mérinos, Métal, Nylon, Néoprène, Or, Paille, Papier, Peluche, Pierre, Plastique, Polaire, Polyester, Porcelaine, Rotin, Satin, Sequin, Silicone, Soie, Toile, Tulle, Tweed, Velours, Velours côtelé, Verre, Viscose, Élasthanne
 
 ---
 
@@ -268,69 +430,7 @@ Fichiers :
 - Landing page + blog + pages légales ✅
 - Redesign complet ✅
 - Multilingue 7 langues ✅
-- Flux /app 5 étapes construites ✅ — corrections à faire 🔄
-
-## Corrections à faire sur /app (prochaine session)
-
-### Étape 1 — Photos (corrections)
-- NOUVEAU FLOW : après classification IA et placement dans les slots, afficher un écran de validation AVANT de lancer la suppression de fond
-- L'utilisateur valide l'ordre des photos (ou les réorganise par drag & drop)
-- Ce n'est qu'APRÈS validation que le remove background est lancé sur le slot 0
-- Raison : l'utilisateur ne peut pas changer la photo après suppression de fond
-
-### Étape 2 — Reconnaissance (corrections)
-- Indicateur de confiance : si champ vide ou non détecté → badge ROUGE "Incertaine" (jamais "Élevée" sur un champ vide)
-- Tailles chaussures : utiliser les systèmes corrects — EU (38, 39, 40... 47), US (6, 7, 8, 9, 10...), UK — PAS XS/S/M/L
-- Système de tailles adapté automatiquement selon la sous-catégorie détectée
-- Sous-catégories : si non sélectionnée → badge "Incertaine" + l'utilisateur doit choisir
-
-### Étape 3 — Annonce (corrections)
-- Bandeau "Informations manquantes" conditionnel : s'affiche si l'IA a un doute sur composition, taille, défauts
-- Bloc Dimensions optionnel : suggestions cliquables (tour de poitrine, longueur, épaules, taille, hanches, entrejambe, pointure, largeur, hauteur, profondeur) + mesure personnalisée libre (nom + valeur en cm)
-- Description UNIQUE — la plus vendeuse possible, optimisée SEO — PAS de version courte/longue
-- Description avec emojis et bullet points aérés — PAS un bloc de texte compact
-- Format description : ✅ État / 👕 Article / 🧵 Composition / 📏 Équivalences tailles (ex: 48 EU = M/L) / 📦 Expédition
-- IMPORTANT : inclure équivalences de tailles dans la description pour aider les acheteurs
-- Description bilingue : onglets FR / EN — anglais généré automatiquement sauf si utilisateur anglophone (→ anglais uniquement)
-- Mots-clés SEO : générés automatiquement par l'IA, affichés en tags sous la description
-  * Tags verts = déjà intégrés dans la description
-  * Tags bleus = disponibles à ajouter d'un clic dans la description
-  * Champ libre pour en ajouter manuellement
-- SUPPRIMER le bouton "Version détaillée" — une seule description complète
-
-### Étape 4 — Prix (corrections)
-Structure en 3 blocs :
-
-BLOC 1 — PRIX RECOMMANDÉ
-- Bannière confiance en haut : verte (données fiables) / orange (partielles) / rouge (inconnue)
-- Prix suggéré en grand
-- Court raisonnement sous le prix
-
-BLOC 2 — ANALYSE DU MARCHÉ (via web search Claude — jamais inventé)
-- Prix neuf sur site marque (web search)
-- Prix médian Vinted (web search Google/Vinted)
-- Fourchette Vinted min/max (web search)
-- Nombre d'annonces similaires (web search)
-- Délai de vente estimé à ce prix
-- Si données insuffisantes → afficher "non disponible" honnêtement, jamais inventer
-
-BLOC 3 — TROUVER MON PRIX (tout en un)
-- Champ "Prix d'achat neuf" — CHAMP PRINCIPAL
-  * Si renseigné → calcul automatique par % selon état :
-    - Neuf avec étiquette : 65% du prix neuf
-    - Neuf sans étiquette : 55% du prix neuf
-    - Très bon état : 40% du prix neuf
-    - Bon état : 30% du prix neuf
-    - Satisfaisant : 20% du prix neuf
-  * Plateforme d'achat + article rare/édition limitée
-- Slider prix final + frise colorée verte→orange→rouge
-  * Délai estimé dynamique (~2-3 jours à +4 mois) selon position
-  * Conseil contextuel selon position du slider
-- Marge de négociation
-  * Slider prix minimum à accepter
-  * "En dessous de X€, refuse l'offre — X% de réduction max"
-- Calcul de marge (optionnel — toggle pour revendeurs)
-  * Marge nette en € et % si prix d'achat renseigné
+- Flux /app 5 étapes construites ✅ — corrections en cours 🔄
 
 ### Phase 2
 - Message auto favoris (lien pré-rempli + message IA)
@@ -354,7 +454,8 @@ BLOC 3 — TROUVER MON PRIX (tout en un)
 ---
 
 ## V2
-- Mannequin IA (Krea.ai / Fal.ai)
+- Mannequin IA — faire porter l'article par un mannequin IA (IDM-VTON / CatVTON via fal.ai)
+- Amélioration suppression de fond (rembg ou InSPyReNet pour meilleure qualité)
 - Graphique probabilité vente / prix / temps
 - Import URL Vinted
 

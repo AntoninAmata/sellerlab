@@ -9,21 +9,141 @@ import PricingStep from './components/PricingStep'
 import AnnonceStep from './components/AnnonceStep'
 import ExportStep from './components/ExportStep'
 import type { PhotoSlot, RecognitionResult, PriceResult, GenerateResult } from './types'
+import { useLang } from '@/app/providers'
+import type { Lang } from '@/lib/i18n'
 
-/* ─── Étapes du stepper ───────────────────────────────────────────────────── */
+/* ─── Icônes des étapes (statiques) ──────────────────────────────────────── */
 
-const STEPS = [
-  { num: 1, label: 'Photos',          shortLabel: 'Photos',  Icon: Camera   },
-  { num: 2, label: 'Reconnaissance',  shortLabel: 'Reconn.', Icon: ScanLine },
-  { num: 3, label: 'Annonce',         shortLabel: 'Annonce', Icon: FileText },
-  { num: 4, label: 'Prix',            shortLabel: 'Prix',    Icon: Tag      },
-  { num: 5, label: 'Export',          shortLabel: 'Export',  Icon: Send     },
-] as const
+const STEP_ICONS = [
+  { num: 1 as const, Icon: Camera   },
+  { num: 2 as const, Icon: ScanLine },
+  { num: 3 as const, Icon: FileText },
+  { num: 4 as const, Icon: Tag      },
+  { num: 5 as const, Icon: Send     },
+]
 
-/* ─── État initial des 10 slots ───────────────────────────────────────────── */
+/* ─── Traductions de la page — 7 langues ─────────────────────────────────── */
+
+const PAGE_I18N: Record<Lang, {
+  steps: { label: string; shortLabel: string }[]
+  newListing: string
+  stepOf: (s: number, t: number) => string
+  prev: string
+  next: string
+  finish: string
+  addMainPhoto: string
+}> = {
+  fr: {
+    steps: [
+      { label: 'Photos',          shortLabel: 'Photos'  },
+      { label: 'Reconnaissance',  shortLabel: 'Reconn.' },
+      { label: 'Annonce',         shortLabel: 'Annonce' },
+      { label: 'Prix',            shortLabel: 'Prix'    },
+      { label: 'Export',          shortLabel: 'Export'  },
+    ],
+    newListing:   'Nouvelle annonce',
+    stepOf:       (s, t) => `Étape ${s} / ${t}`,
+    prev:         'Précédent',
+    next:         'Continuer',
+    finish:       'Terminer',
+    addMainPhoto: 'Ajoutez au moins la photo principale pour continuer',
+  },
+  en: {
+    steps: [
+      { label: 'Photos',      shortLabel: 'Photos'  },
+      { label: 'Recognition', shortLabel: 'Recogn.' },
+      { label: 'Listing',     shortLabel: 'Listing' },
+      { label: 'Price',       shortLabel: 'Price'   },
+      { label: 'Export',      shortLabel: 'Export'  },
+    ],
+    newListing:   'New listing',
+    stepOf:       (s, t) => `Step ${s} / ${t}`,
+    prev:         'Previous',
+    next:         'Continue',
+    finish:       'Finish',
+    addMainPhoto: 'Add at least the main photo to continue',
+  },
+  es: {
+    steps: [
+      { label: 'Fotos',         shortLabel: 'Fotos'   },
+      { label: 'Identificación',shortLabel: 'Ident.'  },
+      { label: 'Anuncio',       shortLabel: 'Anuncio' },
+      { label: 'Precio',        shortLabel: 'Precio'  },
+      { label: 'Exportar',      shortLabel: 'Export'  },
+    ],
+    newListing:   'Nuevo anuncio',
+    stepOf:       (s, t) => `Paso ${s} / ${t}`,
+    prev:         'Anterior',
+    next:         'Continuar',
+    finish:       'Finalizar',
+    addMainPhoto: 'Añade al menos la foto principal para continuar',
+  },
+  de: {
+    steps: [
+      { label: 'Fotos',       shortLabel: 'Fotos'   },
+      { label: 'Erkennung',   shortLabel: 'Erkenn.' },
+      { label: 'Anzeige',     shortLabel: 'Anzeige' },
+      { label: 'Preis',       shortLabel: 'Preis'   },
+      { label: 'Export',      shortLabel: 'Export'  },
+    ],
+    newListing:   'Neue Anzeige',
+    stepOf:       (s, t) => `Schritt ${s} / ${t}`,
+    prev:         'Zurück',
+    next:         'Weiter',
+    finish:       'Fertig',
+    addMainPhoto: 'Füge mindestens das Hauptfoto hinzu, um fortzufahren',
+  },
+  it: {
+    steps: [
+      { label: 'Foto',          shortLabel: 'Foto'    },
+      { label: 'Riconoscimento',shortLabel: 'Riconosc.'},
+      { label: 'Annuncio',      shortLabel: 'Annuncio'},
+      { label: 'Prezzo',        shortLabel: 'Prezzo'  },
+      { label: 'Esporta',       shortLabel: 'Esporta' },
+    ],
+    newListing:   'Nuovo annuncio',
+    stepOf:       (s, t) => `Passo ${s} / ${t}`,
+    prev:         'Precedente',
+    next:         'Continua',
+    finish:       'Fine',
+    addMainPhoto: 'Aggiungi almeno la foto principale per continuare',
+  },
+  nl: {
+    steps: [
+      { label: "Foto's",    shortLabel: "Foto's"  },
+      { label: 'Herkenning',shortLabel: 'Herkenn.'},
+      { label: 'Advertentie',shortLabel: 'Advert.' },
+      { label: 'Prijs',     shortLabel: 'Prijs'   },
+      { label: 'Export',    shortLabel: 'Export'  },
+    ],
+    newListing:   'Nieuwe advertentie',
+    stepOf:       (s, t) => `Stap ${s} / ${t}`,
+    prev:         'Vorige',
+    next:         'Volgende',
+    finish:       'Afronden',
+    addMainPhoto: "Voeg minimaal de hoofdfoto toe om door te gaan",
+  },
+  pl: {
+    steps: [
+      { label: 'Zdjęcia',    shortLabel: 'Zdjęcia' },
+      { label: 'Rozpoznanie',shortLabel: 'Rozp.'   },
+      { label: 'Ogłoszenie', shortLabel: 'Ogłosz.' },
+      { label: 'Cena',       shortLabel: 'Cena'    },
+      { label: 'Eksport',    shortLabel: 'Eksport' },
+    ],
+    newListing:   'Nowe ogłoszenie',
+    stepOf:       (s, t) => `Krok ${s} / ${t}`,
+    prev:         'Wstecz',
+    next:         'Dalej',
+    finish:       'Zakończ',
+    addMainPhoto: 'Dodaj co najmniej główne zdjęcie, aby kontynuować',
+  },
+}
+
+/* ─── État initial des 15 slots ───────────────────────────────────────────── */
 
 function makeSlots(): PhotoSlot[] {
-  return Array.from({ length: 14 }, (_, i) => ({
+  return Array.from({ length: 15 }, (_, i) => ({
     id: i,
     file: null,
     preview: null,
@@ -35,6 +155,10 @@ function makeSlots(): PhotoSlot[] {
 /* ─── Page /app ───────────────────────────────────────────────────────────── */
 
 export default function AppPage() {
+  const { lang } = useLang()
+  const t = PAGE_I18N[lang] ?? PAGE_I18N.fr
+  const STEPS = STEP_ICONS.map((s, i) => ({ ...s, ...t.steps[i] }))
+
   const [step, setStep] = useState(1)
   const [slots, setSlots] = useState<PhotoSlot[]>(makeSlots)
   const [recognitionResult, setRecognitionResult] = useState<RecognitionResult | null>(null)
@@ -70,11 +194,11 @@ export default function AppPage() {
           </Link>
 
           <span className="hidden sm:block text-sm font-semibold text-gray-500">
-            Nouvelle annonce
+            {t.newListing}
           </span>
 
           <span className="text-xs font-medium text-gray-400 shrink-0">
-            Étape {step} / {STEPS.length}
+            {t.stepOf(step, STEPS.length)}
           </span>
         </div>
       </header>
@@ -176,12 +300,12 @@ export default function AppPage() {
             className="flex items-center gap-1.5 text-sm font-semibold text-gray-500 hover:text-gray-900 disabled:opacity-30 disabled:pointer-events-none transition-colors px-4 py-2 rounded-full hover:bg-gray-50"
           >
             <ArrowLeft className="w-4 h-4" />
-            Précédent
+            {t.prev}
           </button>
 
           {step === 1 && !mainPhotoReady && (
             <p className="text-xs text-gray-400 hidden sm:block">
-              Ajoutez au moins la photo principale pour continuer
+              {t.addMainPhoto}
             </p>
           )}
 
@@ -191,7 +315,7 @@ export default function AppPage() {
               disabled={!canContinue()}
               className="btn-shimmer flex items-center gap-2 bg-indigo-600 text-white font-semibold px-6 py-2.5 rounded-full hover:bg-indigo-700 disabled:opacity-40 disabled:pointer-events-none active:scale-95 transition-all text-sm shadow-md shadow-indigo-200/60"
             >
-              Continuer
+              {t.next}
               <ChevronRight className="w-4 h-4" />
             </button>
           )}
@@ -201,7 +325,7 @@ export default function AppPage() {
               href="/"
               className="btn-shimmer flex items-center gap-2 bg-green-600 text-white font-semibold px-6 py-2.5 rounded-full hover:bg-green-700 active:scale-95 transition-all text-sm shadow-md shadow-green-200/60"
             >
-              Terminer
+              {t.finish}
               <ChevronRight className="w-4 h-4" />
             </Link>
           )}

@@ -3,170 +3,273 @@
 import { useCallback, useEffect, useRef, useState } from 'react'
 import {
   Loader2, RefreshCw, AlertCircle, FileText,
-  Copy, Check, Pencil, X, AlertTriangle, Plus,
+  Copy, Check, X, Plus,
 } from 'lucide-react'
 import type { RecognitionResult, GenerateResult } from '../types'
 import { useLang } from '@/app/providers'
 import type { Lang } from '@/lib/i18n'
 
-/* ─── Traductions des labels UI (7 langues) ──────────────────────────────── */
+/* ─── Traductions UI (7 langues) ─────────────────────────────────────────── */
 
 const UI: Record<Lang, {
-  missingInfo: string
-  tabFr: string
-  tabEn: string
-  dimensions: string
-  copyAll: string
-  seoTitle: string
-  seoInDesc: string
-  seoToAdd: string
-  seoPlaceholder: string
-  dimTitle: string
-  dimBtn: string
-  generate: string
-  regenerate: string
-  title: string
-  titleHint: string
-  subtitle: string
+  missingInfoTitle: string
+  seoIntegrate:     string
+  seoTitle:         string
+  seoInDesc:        string
+  seoToAdd:         string
+  seoPlaceholder:   string
+  addToDesc:        string
+  integrateMissing: string
+  addInfoToDesc:    string
+  copyAll:          string
+  dimensions:       string
+  dimTitle:         string
+  generate:         string
+  regenerate:       string
+  title:            string
+  titleHint:        string
+  subtitle:         string
+  descLangNative:   string
+  descLangEn:       string
+  descLangBoth:     string
+  prixNeuf:         string
+  generateFailed:   string
+  completeStep2:    string
+  add:              string
+  integrating:      string
+  titleLabel:       string
+  copy:             string
+  copied:           string
+  generateSubtitle: string
 }> = {
   fr: {
-    missingInfo:  'Informations manquantes',
-    tabFr:        'Français',
-    tabEn:        'Anglais',
-    dimensions:   'Ajouter les dimensions',
-    copyAll:      'Tout copier (titre + description)',
-    seoTitle:     'Mots-clés SEO',
-    seoInDesc:    'Dans la description',
-    seoToAdd:     'À ajouter',
-    seoPlaceholder: 'Ajouter un mot-clé…',
-    dimTitle:     'Dimensions (optionnel)',
-    dimBtn:       'Masquer les dimensions',
-    generate:     'Rédaction en cours…',
-    regenerate:   'Régénérer',
-    title:        'Annonce générée',
-    titleHint:    'max 60 caractères',
-    subtitle:     'Modifiez les champs si besoin, puis copiez vers Vinted.',
+    missingInfoTitle: 'Informations à compléter',
+    seoIntegrate:     'Intégrer les mots-clés sélectionnés',
+    seoTitle:         'Mots-clés SEO',
+    seoInDesc:        'Dans la description',
+    seoToAdd:         'À ajouter (cliquer pour sélectionner)',
+    seoPlaceholder:   'Ajouter un mot-clé…',
+    addToDesc:        'Ajouter à la description',
+    integrateMissing: 'Intégrer dans l\'annonce',
+    addInfoToDesc:    'Ajouter à la description',
+    copyAll:          'Tout copier (titre + description)',
+    dimensions:       'Ajouter les dimensions',
+    dimTitle:         'Dimensions (optionnel)',
+    generate:         'Rédaction en cours…',
+    regenerate:       'Régénérer',
+    title:            'Annonce générée',
+    titleHint:        'max 60 caractères',
+    subtitle:         'Modifiez les champs si besoin, puis copiez vers Vinted.',
+    descLangNative:   'Français uniquement',
+    descLangEn:       'Anglais uniquement',
+    descLangBoth:     'Les deux',
+    prixNeuf:         'Prix neuf (optionnel)',
+    generateFailed:   'Génération impossible',
+    completeStep2:    "Complétez l'étape 2 pour générer votre annonce.",
+    add:              'Ajouter',
+    integrating:      'Traduction en cours…',
+    titleLabel:       'Titre',
+    copy:             'Copier',
+    copied:           'Copié !',
+    generateSubtitle: "L'IA rédige votre annonce optimisée pour Vinted.",
   },
   en: {
-    missingInfo:  'Missing information',
-    tabFr:        'French',
-    tabEn:        'English',
-    dimensions:   'Add dimensions',
-    copyAll:      'Copy all (title + description)',
-    seoTitle:     'SEO keywords',
-    seoInDesc:    'In description',
-    seoToAdd:     'Add to description',
-    seoPlaceholder: 'Add a keyword…',
-    dimTitle:     'Dimensions (optional)',
-    dimBtn:       'Hide dimensions',
-    generate:     'Generating…',
-    regenerate:   'Regenerate',
-    title:        'Generated listing',
-    titleHint:    'max 60 characters',
-    subtitle:     'Edit if needed, then copy to Vinted.',
+    missingInfoTitle: 'Information to complete',
+    seoIntegrate:     'Integrate selected keywords',
+    seoTitle:         'SEO keywords',
+    seoInDesc:        'In description',
+    seoToAdd:         'Add (click to select)',
+    seoPlaceholder:   'Add a keyword…',
+    addToDesc:        'Add to description',
+    integrateMissing: 'Add to listing',
+    addInfoToDesc:    'Add to description',
+    copyAll:          'Copy all (title + description)',
+    dimensions:       'Add dimensions',
+    dimTitle:         'Dimensions (optional)',
+    generate:         'Generating…',
+    regenerate:       'Regenerate',
+    title:            'Generated listing',
+    titleHint:        'max 60 characters',
+    subtitle:         'Edit if needed, then copy to Vinted.',
+    descLangNative:   'English only',
+    descLangEn:       'English only',
+    descLangBoth:     'Both',
+    prixNeuf:         'Original price (optional)',
+    generateFailed:   'Generation failed',
+    completeStep2:    'Complete step 2 to generate your listing.',
+    add:              'Add',
+    integrating:      'Translating…',
+    titleLabel:       'Title',
+    copy:             'Copy',
+    copied:           'Copied!',
+    generateSubtitle: 'AI is writing your optimised Vinted listing.',
   },
   es: {
-    missingInfo:  'Información faltante',
-    tabFr:        'Francés',
-    tabEn:        'Inglés',
-    dimensions:   'Añadir dimensiones',
-    copyAll:      'Copiar todo (título + descripción)',
-    seoTitle:     'Palabras clave SEO',
-    seoInDesc:    'En la descripción',
-    seoToAdd:     'Añadir',
-    seoPlaceholder: 'Añadir palabra clave…',
-    dimTitle:     'Dimensiones (opcional)',
-    dimBtn:       'Ocultar dimensiones',
-    generate:     'Redactando…',
-    regenerate:   'Regenerar',
-    title:        'Anuncio generado',
-    titleHint:    'máx 60 caracteres',
-    subtitle:     'Edita si es necesario, luego copia a Vinted.',
+    missingInfoTitle: 'Información a completar',
+    seoIntegrate:     'Integrar palabras clave seleccionadas',
+    seoTitle:         'Palabras clave SEO',
+    seoInDesc:        'En la descripción',
+    seoToAdd:         'Añadir (clic para seleccionar)',
+    seoPlaceholder:   'Añadir palabra clave…',
+    addToDesc:        'Añadir a la descripción',
+    integrateMissing: 'Integrar en el anuncio',
+    addInfoToDesc:    'Añadir a la descripción',
+    copyAll:          'Copiar todo (título + descripción)',
+    dimensions:       'Añadir dimensiones',
+    dimTitle:         'Dimensiones (opcional)',
+    generate:         'Redactando…',
+    regenerate:       'Regenerar',
+    title:            'Anuncio generado',
+    titleHint:        'máx 60 caracteres',
+    subtitle:         'Edita si es necesario, luego copia a Vinted.',
+    descLangNative:   'Solo español',
+    descLangEn:       'Solo inglés',
+    descLangBoth:     'Los dos',
+    prixNeuf:         'Precio original (opcional)',
+    generateFailed:   'Generación imposible',
+    completeStep2:    'Completa el paso 2 para generar tu anuncio.',
+    add:              'Añadir',
+    integrating:      'Traduciendo…',
+    titleLabel:       'Título',
+    copy:             'Copiar',
+    copied:           '¡Copiado!',
+    generateSubtitle: 'La IA redacta tu anuncio optimizado para Vinted.',
   },
   de: {
-    missingInfo:  'Fehlende Informationen',
-    tabFr:        'Französisch',
-    tabEn:        'Englisch',
-    dimensions:   'Maße hinzufügen',
-    copyAll:      'Alles kopieren (Titel + Beschreibung)',
-    seoTitle:     'SEO-Schlüsselwörter',
-    seoInDesc:    'In der Beschreibung',
-    seoToAdd:     'Hinzufügen',
-    seoPlaceholder: 'Schlüsselwort hinzufügen…',
-    dimTitle:     'Maße (optional)',
-    dimBtn:       'Maße ausblenden',
-    generate:     'Wird erstellt…',
-    regenerate:   'Neu generieren',
-    title:        'Generierte Anzeige',
-    titleHint:    'max. 60 Zeichen',
-    subtitle:     'Bei Bedarf bearbeiten, dann zu Vinted kopieren.',
+    missingInfoTitle: 'Zu ergänzende Informationen',
+    seoIntegrate:     'Ausgewählte Schlüsselwörter einfügen',
+    seoTitle:         'SEO-Schlüsselwörter',
+    seoInDesc:        'In der Beschreibung',
+    seoToAdd:         'Hinzufügen (klicken zum Auswählen)',
+    seoPlaceholder:   'Schlüsselwort hinzufügen…',
+    addToDesc:        'Zur Beschreibung hinzufügen',
+    integrateMissing: 'In die Anzeige einfügen',
+    addInfoToDesc:    'Zur Beschreibung hinzufügen',
+    copyAll:          'Alles kopieren (Titel + Beschreibung)',
+    dimensions:       'Maße hinzufügen',
+    dimTitle:         'Maße (optional)',
+    generate:         'Wird erstellt…',
+    regenerate:       'Neu generieren',
+    title:            'Generierte Anzeige',
+    titleHint:        'max. 60 Zeichen',
+    subtitle:         'Bei Bedarf bearbeiten, dann zu Vinted kopieren.',
+    descLangNative:   'Nur Deutsch',
+    descLangEn:       'Nur Englisch',
+    descLangBoth:     'Beide',
+    prixNeuf:         'Neupreis (optional)',
+    generateFailed:   'Generierung fehlgeschlagen',
+    completeStep2:    'Schritt 2 abschließen, um die Anzeige zu erstellen.',
+    add:              'Hinzufügen',
+    integrating:      'Übersetzung läuft…',
+    titleLabel:       'Titel',
+    copy:             'Kopieren',
+    copied:           'Kopiert!',
+    generateSubtitle: 'KI erstellt deine optimierte Vinted-Anzeige.',
   },
   it: {
-    missingInfo:  'Informazioni mancanti',
-    tabFr:        'Francese',
-    tabEn:        'Inglese',
-    dimensions:   'Aggiungi dimensioni',
-    copyAll:      'Copia tutto (titolo + descrizione)',
-    seoTitle:     'Parole chiave SEO',
-    seoInDesc:    'Nella descrizione',
-    seoToAdd:     'Da aggiungere',
-    seoPlaceholder: 'Aggiungi parola chiave…',
-    dimTitle:     'Dimensioni (opzionale)',
-    dimBtn:       'Nascondi dimensioni',
-    generate:     'Generazione in corso…',
-    regenerate:   'Rigenera',
-    title:        'Annuncio generato',
-    titleHint:    'max 60 caratteri',
-    subtitle:     'Modifica se necessario, poi copia su Vinted.',
+    missingInfoTitle: 'Informazioni da completare',
+    seoIntegrate:     'Integra le parole chiave selezionate',
+    seoTitle:         'Parole chiave SEO',
+    seoInDesc:        'Nella descrizione',
+    seoToAdd:         'Da aggiungere (clic per selezionare)',
+    seoPlaceholder:   'Aggiungi parola chiave…',
+    addToDesc:        'Aggiungi alla descrizione',
+    integrateMissing: 'Aggiungi all\'annuncio',
+    addInfoToDesc:    'Aggiungi alla descrizione',
+    copyAll:          'Copia tutto (titolo + descrizione)',
+    dimensions:       'Aggiungi dimensioni',
+    dimTitle:         'Dimensioni (opzionale)',
+    generate:         'Generazione in corso…',
+    regenerate:       'Rigenera',
+    title:            'Annuncio generato',
+    titleHint:        'max 60 caratteri',
+    subtitle:         'Modifica se necessario, poi copia su Vinted.',
+    descLangNative:   'Solo italiano',
+    descLangEn:       'Solo inglese',
+    descLangBoth:     'Entrambe',
+    prixNeuf:         'Prezzo originale (opzionale)',
+    generateFailed:   'Generazione impossibile',
+    completeStep2:    "Completa il passaggio 2 per generare il tuo annuncio.",
+    add:              'Aggiungi',
+    integrating:      'Traduzione in corso…',
+    titleLabel:       'Titolo',
+    copy:             'Copia',
+    copied:           'Copiato!',
+    generateSubtitle: "L'IA redige il tuo annuncio ottimizzato per Vinted.",
   },
   nl: {
-    missingInfo:  'Ontbrekende informatie',
-    tabFr:        'Frans',
-    tabEn:        'Engels',
-    dimensions:   'Afmetingen toevoegen',
-    copyAll:      "Alles kopiëren (titel + beschrijving)",
-    seoTitle:     'SEO-trefwoorden',
-    seoInDesc:    'In de beschrijving',
-    seoToAdd:     'Toe te voegen',
-    seoPlaceholder: 'Trefwoord toevoegen…',
-    dimTitle:     'Afmetingen (optioneel)',
-    dimBtn:       'Afmetingen verbergen',
-    generate:     'Bezig met genereren…',
-    regenerate:   'Opnieuw genereren',
-    title:        'Gegenereerde advertentie',
-    titleHint:    'max 60 tekens',
-    subtitle:     'Bewerk indien nodig, kopieer daarna naar Vinted.',
+    missingInfoTitle: 'Te completeren informatie',
+    seoIntegrate:     'Geselecteerde trefwoorden invoegen',
+    seoTitle:         'SEO-trefwoorden',
+    seoInDesc:        'In de beschrijving',
+    seoToAdd:         'Toe te voegen (klik om te selecteren)',
+    seoPlaceholder:   'Trefwoord toevoegen…',
+    addToDesc:        'Toevoegen aan beschrijving',
+    integrateMissing: 'Toevoegen aan advertentie',
+    addInfoToDesc:    'Toevoegen aan beschrijving',
+    copyAll:          "Alles kopiëren (titel + beschrijving)",
+    dimensions:       'Afmetingen toevoegen',
+    dimTitle:         'Afmetingen (optioneel)',
+    generate:         'Bezig met genereren…',
+    regenerate:       'Opnieuw genereren',
+    title:            'Gegenereerde advertentie',
+    titleHint:        'max 60 tekens',
+    subtitle:         'Bewerk indien nodig, kopieer daarna naar Vinted.',
+    descLangNative:   'Alleen Nederlands',
+    descLangEn:       'Alleen Engels',
+    descLangBoth:     'Beide',
+    prixNeuf:         'Originele prijs (optioneel)',
+    generateFailed:   'Genereren mislukt',
+    completeStep2:    'Voltooi stap 2 om je advertentie te genereren.',
+    add:              'Toevoegen',
+    integrating:      'Vertalen…',
+    titleLabel:       'Titel',
+    copy:             'Kopiëren',
+    copied:           'Gekopieerd!',
+    generateSubtitle: 'AI schrijft uw geoptimaliseerde Vinted-advertentie.',
   },
   pl: {
-    missingInfo:  'Brakujące informacje',
-    tabFr:        'Francuski',
-    tabEn:        'Angielski',
-    dimensions:   'Dodaj wymiary',
-    copyAll:      'Kopiuj wszystko (tytuł + opis)',
-    seoTitle:     'Słowa kluczowe SEO',
-    seoInDesc:    'W opisie',
-    seoToAdd:     'Do dodania',
-    seoPlaceholder: 'Dodaj słowo kluczowe…',
-    dimTitle:     'Wymiary (opcjonalne)',
-    dimBtn:       'Ukryj wymiary',
-    generate:     'Generowanie…',
-    regenerate:   'Wygeneruj ponownie',
-    title:        'Wygenerowane ogłoszenie',
-    titleHint:    'maks. 60 znaków',
-    subtitle:     'Edytuj w razie potrzeby, następnie skopiuj do Vinted.',
+    missingInfoTitle: 'Informacje do uzupełnienia',
+    seoIntegrate:     'Zintegruj wybrane słowa kluczowe',
+    seoTitle:         'Słowa kluczowe SEO',
+    seoInDesc:        'W opisie',
+    seoToAdd:         'Do dodania (kliknij, aby wybrać)',
+    seoPlaceholder:   'Dodaj słowo kluczowe…',
+    addToDesc:        'Dodaj do opisu',
+    integrateMissing: 'Dodaj do ogłoszenia',
+    addInfoToDesc:    'Dodaj do opisu',
+    copyAll:          'Kopiuj wszystko (tytuł + opis)',
+    dimensions:       'Dodaj wymiary',
+    dimTitle:         'Wymiary (opcjonalne)',
+    generate:         'Generowanie…',
+    regenerate:       'Wygeneruj ponownie',
+    title:            'Wygenerowane ogłoszenie',
+    titleHint:        'maks. 60 znaków',
+    subtitle:         'Edytuj w razie potrzeby, następnie skopiuj do Vinted.',
+    descLangNative:   'Tylko polski',
+    descLangEn:       'Tylko angielski',
+    descLangBoth:     'Oba',
+    prixNeuf:         'Cena nowa (opcjonalnie)',
+    generateFailed:   'Generowanie niemożliwe',
+    completeStep2:    'Ukończ krok 2, aby wygenerować swoje ogłoszenie.',
+    add:              'Dodaj',
+    integrating:      'Tłumaczenie…',
+    titleLabel:       'Tytuł',
+    copy:             'Kopiuj',
+    copied:           'Skopiowano!',
+    generateSubtitle: 'AI pisze Twoje zoptymalizowane ogłoszenie na Vinted.',
   },
 }
 
-/* ─── Boutons de dimensions prédéfinis ───────────────────────────────────── */
+/* ─── Labels et drapeaux langue native ───────────────────────────────────── */
 
-const DIM_PRESETS: Record<Lang, string[]> = {
-  fr: ['Tour de poitrine', 'Longueur', 'Épaules', 'Tour de taille', 'Tour de hanches', 'Entrejambe', 'Pointure', 'Largeur', 'Hauteur', 'Profondeur'],
-  en: ['Chest', 'Length', 'Shoulders', 'Waist', 'Hips', 'Inseam', 'Shoe size', 'Width', 'Height', 'Depth'],
-  es: ['Pecho', 'Largo', 'Hombros', 'Cintura', 'Cadera', 'Entrepierna', 'Talla pie', 'Ancho', 'Altura', 'Profundidad'],
-  de: ['Brust', 'Länge', 'Schultern', 'Taille', 'Hüfte', 'Schrittlänge', 'Schuhgröße', 'Breite', 'Höhe', 'Tiefe'],
-  it: ['Petto', 'Lunghezza', 'Spalle', 'Vita', 'Fianchi', 'Cavallo', 'Numero scarpa', 'Larghezza', 'Altezza', 'Profondità'],
-  nl: ['Borst', 'Lengte', 'Schouders', 'Taille', 'Heupen', 'Binnenbeenlengte', 'Schoenmaat', 'Breedte', 'Hoogte', 'Diepte'],
-  pl: ['Klatka', 'Długość', 'Ramiona', 'Talia', 'Biodra', 'Krok', 'Rozmiar buta', 'Szerokość', 'Wysokość', 'Głębokość'],
+const LANG_NATIVE_LABELS: Record<Lang, string> = {
+  fr: 'Français', en: 'English', es: 'Español',
+  de: 'Deutsch', it: 'Italiano', nl: 'Nederlands', pl: 'Polski',
+}
+
+const LANG_FLAGS: Record<Lang, string> = {
+  fr: '🇫🇷', en: '🇬🇧', es: '🇪🇸', de: '🇩🇪', it: '🇮🇹', nl: '🇳🇱', pl: '🇵🇱',
 }
 
 /* ─── Props ──────────────────────────────────────────────────────────────── */
@@ -184,7 +287,6 @@ function useGenerate(
   result: GenerateResult | null,
   setResult: (r: GenerateResult) => void,
   lang: string,
-  prixAchatNeuf?: number,
 ) {
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState<string | null>(null)
@@ -205,13 +307,14 @@ function useGenerate(
           categorie:     recognition.categorie.value,
           sousCategorie: recognition.sousCategorie.value,
           taille:        recognition.taille.value,
+          tailleSysteme: recognition.tailleSysteme.value[0] ?? '',
           etat:          recognition.etat.value,
           couleurs:      recognition.couleurs.value,
           matieres:      recognition.matieres.value,
           style:         recognition.style.value,
           motif:         recognition.motif.value,
           defauts:       recognition.defauts.value,
-          prixAchatNeuf: prixAchatNeuf !== undefined ? prixAchatNeuf : undefined,
+          extraInfo:     recognition.extraInfo,
           lang,
         }),
       })
@@ -223,7 +326,7 @@ function useGenerate(
     } finally {
       setLoading(false)
     }
-  }, [recognition, setResult, lang, prixAchatNeuf])
+  }, [recognition, setResult, lang])
 
   useEffect(() => {
     if (!ranRef.current && !result && recognition) {
@@ -237,7 +340,7 @@ function useGenerate(
 
 /* ─── Bouton copier ──────────────────────────────────────────────────────── */
 
-function CopyButton({ text, label }: { text: string; label?: string }) {
+function CopyButton({ text, label, copiedLabel }: { text: string; label?: string; copiedLabel?: string }) {
   const [copied, setCopied] = useState(false)
   function copy() {
     navigator.clipboard.writeText(text)
@@ -254,8 +357,38 @@ function CopyButton({ text, label }: { text: string; label?: string }) {
       }`}
     >
       {copied ? <Check className="w-3 h-3" /> : <Copy className="w-3 h-3" />}
-      {copied ? 'Copié !' : (label ?? 'Copier')}
+      {copied ? (copiedLabel ?? '✓') : (label ?? 'Copier')}
     </button>
+  )
+}
+
+/* ─── Textarea auto-hauteur ──────────────────────────────────────────────── */
+
+function AutoTextarea({
+  value,
+  onChange,
+  className,
+}: {
+  value: string
+  onChange: (v: string) => void
+  className?: string
+}) {
+  const ref = useRef<HTMLTextAreaElement>(null)
+
+  useEffect(() => {
+    if (!ref.current) return
+    ref.current.style.height = 'auto'
+    ref.current.style.height = ref.current.scrollHeight + 'px'
+  }, [value])
+
+  return (
+    <textarea
+      ref={ref}
+      value={value}
+      onChange={e => onChange(e.target.value)}
+      style={{ resize: 'none', overflow: 'hidden' }}
+      className={className}
+    />
   )
 }
 
@@ -265,80 +398,169 @@ export default function AnnonceStep({ recognition, result, setResult }: Props) {
   const { lang } = useLang()
   const t = UI[lang] ?? UI.fr
 
-  /* Prix d'achat neuf optionnel */
-  const [prixAchatNeuf, setPrixAchatNeuf] = useState('')
+  const { loading, error, retry } = useGenerate(recognition, result, setResult, lang)
 
-  const { loading, error, retry } = useGenerate(
-    recognition,
-    result,
-    setResult,
-    lang,
-    prixAchatNeuf ? parseFloat(prixAchatNeuf) : undefined,
-  )
+  /* Tags SEO — suggestions IA (bleu → vert au clic) */
+  const [selectedSeoTags, setSelectedSeoTags] = useState<string[]>([])
+  /* Tags SEO — personnalisés (verts dès l'ajout) */
+  const [customTags, setCustomTags] = useState<string[]>([])
+  const [customTagInput, setCustomTagInput] = useState('')
+  /* En cours d'intégration (appel traduction) */
+  const [integrating, setIntegrating] = useState(false)
 
-  /* Onglet actif : 'fr' ou 'en' — si langue utilisateur = 'en', forcer 'en' */
-  const [activeTab, setActiveTab] = useState<'fr' | 'en'>(lang === 'en' ? 'en' : 'fr')
+  /* Langue de la description affichée */
+  const [descLang, setDescLang] = useState<'native' | 'en' | 'both'>('both')
 
-  /* Tags SEO supplémentaires saisis manuellement par l'utilisateur */
-  const [seoExtra, setSeoExtra] = useState<string[]>([])
-  const [seoInput, setSeoInput] = useState('')
+  /* Texte combiné éditable pour le mode "Les deux" */
+  const [bothDesc, setBothDesc] = useState('')
 
-  /* Toggle bloc dimensions */
-  const [showDimensions, setShowDimensions] = useState(false)
-  /* Dimensions saisies : tableau de { nom: string, valeur: string } */
-  const [dimensions, setDimensions] = useState<{ nom: string; valeur: string }[]>([])
+  /* Reset lors d'une régénération */
+  useEffect(() => {
+    setSelectedSeoTags([])
+    setCustomTags([])
+  }, [result])
 
-  /* Mise à jour locale du titre */
+  /* Synchronise bothDesc depuis les descriptions FR+EN (collapse des doubles sauts de ligne) */
+  useEffect(() => {
+    if (!result) return
+    const flag  = LANG_FLAGS[lang] ?? '🇫🇷'
+    const label = LANG_NATIVE_LABELS[lang] ?? 'Français'
+    const cleanFR = result.descriptionFR.replace(/\n\n+/g, '\n').trimEnd()
+    const cleanEN = result.descriptionEN.replace(/\n\n+/g, '\n').trimEnd()
+    setBothDesc(`${flag} ${label}\n${cleanFR}\n\n🇬🇧 English\n${cleanEN}`)
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [result?.descriptionFR, result?.descriptionEN, lang])
+
+  /* Synchronise descriptionExport → parent (ExportStep lit ce champ) */
+  useEffect(() => {
+    if (!result) return
+    const exportDesc = (lang === 'en' || descLang === 'native')
+      ? result.descriptionFR
+      : descLang === 'en'
+      ? result.descriptionEN
+      : bothDesc
+    if (result.descriptionExport === exportDesc) return
+    setResult({ ...result, descriptionExport: exportDesc })
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [descLang, result?.descriptionFR, result?.descriptionEN, bothDesc, lang])
+
+  /* ── Visibilité des blocs description ── */
+  /* Quand lang=en, descriptionFR est aussi en anglais → une seule description, pas de pills */
+  const isEnUI      = lang === 'en'
+  const showNativeDesc = isEnUI || descLang === 'native'
+  const showEnDesc  = !isEnUI && descLang === 'en'
+  const showBothDesc = !isEnUI && descLang === 'both'
+
+  /* ── Mise à jour locale ── */
   function updateTitre(v: string) {
     if (!result) return
     setResult({ ...result, titre: v })
   }
-
-  /* Mise à jour locale de la description active */
-  function updateDesc(v: string) {
+  function updateDescFR(v: string) {
     if (!result) return
-    if (activeTab === 'fr') setResult({ ...result, descriptionFR: v })
-    else setResult({ ...result, descriptionEN: v })
+    setResult({ ...result, descriptionFR: v })
+  }
+  function updateDescEN(v: string) {
+    if (!result) return
+    setResult({ ...result, descriptionEN: v })
   }
 
-  /* Ajouter un tag SEO libre */
-  function addSeoTag() {
-    const tag = seoInput.trim()
-    if (!tag || seoExtra.includes(tag)) return
-    setSeoExtra(prev => [...prev, tag])
-    setSeoInput('')
+  /* ── Toggle tag IA ── */
+  function toggleSeoTag(tag: string) {
+    setSelectedSeoTags(prev =>
+      prev.includes(tag) ? prev.filter(t => t !== tag) : [...prev, tag]
+    )
   }
 
-  /* Ajouter un preset de dimension */
-  function addDimPreset(nom: string) {
-    if (dimensions.find(d => d.nom === nom)) return
-    setDimensions(prev => [...prev, { nom, valeur: '' }])
+  /* ── Ajouter tag personnalisé (vert = pré-sélectionné) ── */
+  function addCustomTag() {
+    const tag = customTagInput.trim()
+    if (!tag || customTags.includes(tag) || selectedSeoTags.includes(tag)) return
+    setCustomTags(prev => [...prev, tag])
+    setCustomTagInput('')
   }
 
-  /* Mettre à jour la valeur d'une dimension */
-  function updateDimValeur(nom: string, valeur: string) {
-    setDimensions(prev => prev.map(d => d.nom === nom ? { ...d, valeur } : d))
+  /* ── Appende un bloc de hashtags à une description (fusionne si bloc existant) ── */
+  function appendToHashtags(desc: string, newHashtags: string): string {
+    if (!newHashtags) return desc
+    const trimmed = desc.trimEnd()
+    const lastLine = trimmed.split('\n').pop()?.trim() ?? ''
+    if (lastLine.startsWith('#')) return trimmed + ' ' + newHashtags
+    return trimmed + '\n\n' + newHashtags
   }
 
-  /* Supprimer une dimension */
-  function removeDim(nom: string) {
-    setDimensions(prev => prev.filter(d => d.nom !== nom))
+  /* ── Intégrer tous les tags verts en hashtags, séparés par langue ── */
+  async function integrateSeoTags() {
+    if (!result) return
+    const allTags = [...selectedSeoTags, ...customTags]
+    const aiFR = (result.hashtagsFR ?? '').replace(/\n+/g, ' ').trim()
+    const aiEN = (result.hashtagsEN ?? '').replace(/\n+/g, ' ').trim()
+    if (!allTags.length && !aiFR && !aiEN) return
+
+    setIntegrating(true)
+
+    /* Traduire les tags personnalisés en anglais via Claude Haiku */
+    let translations: Record<string, string> = {}
+    if (customTags.length > 0 && !isEnUI) {
+      try {
+        const res = await fetch('/api/translate-hashtags', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ tags: customTags, sourceLang: lang }),
+        })
+        if (res.ok) translations = await res.json()
+      } catch { /* fallback sans traduction */ }
+    }
+
+    const toCamel = (s: string) =>
+      '#' + s.replace(/^#/, '').trim().split(/[\s_-]+/).map(w => w.charAt(0).toUpperCase() + w.slice(1)).join('')
+
+    /* Tags utilisateur : version native pour la description native */
+    const userNative = allTags.map(t => toCamel(t)).join(' ')
+
+    /* Tags utilisateur : version EN — traduction pour les custom, natif pour les autres */
+    const userEN = allTags.map(t => {
+      if (customTags.includes(t) && !isEnUI && translations[t]) {
+        return toCamel(translations[t])
+      }
+      return toCamel(t)
+    }).join(' ')
+
+    const normalize = (a: string, b: string) =>
+      [a, b].filter(Boolean).join(' ').replace(/\s{2,}/g, ' ').trim()
+
+    /* Pour l'UI anglais, descriptionFR = description EN → utiliser les hashtags EN */
+    const hashtagsForFR = isEnUI ? normalize(userEN, aiEN) : normalize(userNative, aiFR)
+    const hashtagsForEN = normalize(userEN, aiEN)
+
+    const newFR = appendToHashtags(result.descriptionFR, hashtagsForFR)
+    const newEN = appendToHashtags(result.descriptionEN, hashtagsForEN)
+
+    setResult({
+      ...result,
+      descriptionFR: newFR,
+      descriptionEN: newEN,
+      seoTagsInDescription: [...(result.seoTagsInDescription ?? []), ...allTags],
+      seoTagsExtra: (result.seoTagsExtra ?? []).filter(t => !selectedSeoTags.includes(t)),
+      hashtagsFR: '',
+      hashtagsEN: '',
+    })
+    setIntegrating(false)
+    setSelectedSeoTags([])
+    setCustomTags([])
   }
 
-  /* Construire le texte "tout copier" */
+  /* ── Texte tout copier ── */
   function buildCopyText(): string {
     if (!result) return ''
-    const desc = activeTab === 'fr' ? result.descriptionFR : result.descriptionEN
-    const tags = [
-      ...(result.seoTagsInDescription ?? []),
-      ...(result.seoTagsExtra ?? []),
-      ...seoExtra,
-    ].filter(Boolean).join(' · ')
-    const dimBlock = dimensions.filter(d => d.valeur).map(d => `${d.nom} : ${d.valeur} cm`).join('\n')
-    const parts = [result.titre, '', desc]
-    if (tags) parts.push('', tags)
-    if (dimBlock) parts.push('', dimBlock)
-    return parts.join('\n')
+    if (isEnUI || descLang === 'native') {
+      return [result.titre, '', result.descriptionFR].join('\n')
+    }
+    if (descLang === 'en') {
+      return [result.titre, '', result.descriptionEN].join('\n')
+    }
+    /* Mode "Les deux" — utilise bothDesc (inclut les éventuels édits utilisateur) */
+    return result.titre + '\n\n' + bothDesc
   }
 
   /* ── Chargement ── */
@@ -351,7 +573,7 @@ export default function AnnonceStep({ recognition, result, setResult }: Props) {
         <div>
           <p className="font-display font-extrabold text-xl text-gray-900">{t.generate}</p>
           <p className="text-sm text-gray-400 mt-1 max-w-xs">
-            L&apos;IA rédige votre annonce optimisée pour Vinted.
+            {t.generateSubtitle}
           </p>
         </div>
         <div className="flex gap-1.5 mt-2">
@@ -371,7 +593,7 @@ export default function AnnonceStep({ recognition, result, setResult }: Props) {
         <div className="w-16 h-16 rounded-2xl bg-red-50 flex items-center justify-center">
           <AlertCircle className="w-7 h-7 text-red-500" />
         </div>
-        <p className="font-display font-extrabold text-xl text-gray-900">Génération impossible</p>
+        <p className="font-display font-extrabold text-xl text-gray-900">{t.generateFailed}</p>
         <p className="text-sm text-gray-400 max-w-xs">{error}</p>
         <button onClick={retry}
           className="flex items-center gap-2 bg-indigo-600 text-white text-sm font-semibold px-5 py-2.5 rounded-full hover:bg-indigo-700 transition-colors">
@@ -389,7 +611,7 @@ export default function AnnonceStep({ recognition, result, setResult }: Props) {
           <FileText className="w-7 h-7 text-gray-400" />
         </div>
         <p className="text-gray-400 text-sm max-w-xs">
-          Complétez l&apos;étape 2 pour générer votre annonce.
+          {t.completeStep2}
         </p>
       </div>
     )
@@ -397,12 +619,10 @@ export default function AnnonceStep({ recognition, result, setResult }: Props) {
 
   if (!result) return null
 
-  /* Description courante selon onglet actif */
-  const descActive = activeTab === 'fr' ? result.descriptionFR : result.descriptionEN
-  const infosManquantes = result.infosManquantes ?? []
-  const seoInDesc = result.seoTagsInDescription ?? []
-  const seoToAdd = result.seoTagsExtra ?? []
-  const presets = DIM_PRESETS[lang] ?? DIM_PRESETS.fr
+  const seoInDesc      = result.seoTagsInDescription ?? []
+  const seoToAdd       = result.seoTagsExtra ?? []
+  const allPendingTags = [...selectedSeoTags, ...customTags]
+  const nativeLabel    = LANG_NATIVE_LABELS[lang] ?? 'Français'
 
   return (
     <div className="max-w-2xl mx-auto">
@@ -414,9 +634,7 @@ export default function AnnonceStep({ recognition, result, setResult }: Props) {
             <div className="w-8 h-8 rounded-xl bg-indigo-50 flex items-center justify-center">
               <FileText className="w-4 h-4 text-indigo-600" />
             </div>
-            <h2 className="font-display font-extrabold text-2xl text-gray-900">
-              {t.title}
-            </h2>
+            <h2 className="font-display font-extrabold text-2xl text-gray-900">{t.title}</h2>
           </div>
           <p className="text-sm text-gray-400 ml-10">{t.subtitle}</p>
         </div>
@@ -431,13 +649,13 @@ export default function AnnonceStep({ recognition, result, setResult }: Props) {
 
       <div className="space-y-4">
 
-        {/* ── Tags SEO ── */}
+        {/* ════ MOTS-CLÉS SEO ════ */}
         <div className="bg-white rounded-2xl border border-gray-100 shadow-sm p-5">
           <p className="text-xs font-bold text-gray-400 uppercase tracking-widest mb-3">
             {t.seoTitle}
           </p>
 
-          {/* Tags verts = dans la description */}
+          {/* Tags verts — déjà intégrés dans la description */}
           {seoInDesc.length > 0 && (
             <div className="mb-3">
               <p className="text-[10px] font-semibold text-green-600 uppercase tracking-wide mb-1.5">
@@ -453,84 +671,96 @@ export default function AnnonceStep({ recognition, result, setResult }: Props) {
             </div>
           )}
 
-          {/* Tags bleus = à ajouter optionnellement */}
-          {seoToAdd.length > 0 && (
+          {/* Tags bleus (IA, non sélectionnés) + tags verts (IA sélectionnés + personnalisés) */}
+          {(seoToAdd.length > 0 || customTags.length > 0) && (
             <div className="mb-3">
               <p className="text-[10px] font-semibold text-blue-600 uppercase tracking-wide mb-1.5">
                 {t.seoToAdd}
               </p>
               <div className="flex flex-wrap gap-1.5">
-                {seoToAdd.map(tag => (
-                  <span key={tag} className="text-xs font-semibold bg-blue-50 text-blue-700 border border-blue-200 px-2.5 py-1 rounded-full cursor-default">
+                {/* Tags IA — bleu non sélectionné, vert sélectionné */}
+                {seoToAdd.map(tag => {
+                  const selected = selectedSeoTags.includes(tag)
+                  return (
+                    <button
+                      key={tag}
+                      type="button"
+                      onClick={() => toggleSeoTag(tag)}
+                      className={`text-xs font-semibold px-2.5 py-1 rounded-full border transition-all ${
+                        selected
+                          ? 'bg-green-50 text-green-700 border-green-200'
+                          : 'bg-blue-50 text-blue-700 border-blue-200 hover:bg-green-50 hover:text-green-700 hover:border-green-200'
+                      }`}
+                    >
+                      {tag}
+                    </button>
+                  )
+                })}
+                {/* Tags personnalisés — toujours verts, avec X pour supprimer */}
+                {customTags.map(tag => (
+                  <span
+                    key={tag}
+                    className="inline-flex items-center gap-1 text-xs font-semibold bg-green-50 text-green-700 border border-green-200 px-2.5 py-1 rounded-full"
+                  >
                     {tag}
+                    <button
+                      type="button"
+                      onClick={() => setCustomTags(prev => prev.filter(t => t !== tag))}
+                      className="ml-0.5 text-green-500 hover:text-red-500 transition-colors"
+                    >
+                      <X className="w-2.5 h-2.5" />
+                    </button>
                   </span>
                 ))}
               </div>
             </div>
           )}
 
-          {/* Tags libres ajoutés par l'utilisateur */}
-          {seoExtra.length > 0 && (
-            <div className="mb-3 flex flex-wrap gap-1.5">
-              {seoExtra.map(tag => (
-                <span key={tag} className="inline-flex items-center gap-1 text-xs font-semibold bg-gray-100 text-gray-700 px-2.5 py-1 rounded-full">
-                  {tag}
-                  <button onClick={() => setSeoExtra(prev => prev.filter(t => t !== tag))} className="ml-0.5 text-gray-400 hover:text-red-500">
-                    <X className="w-2.5 h-2.5" />
-                  </button>
-                </span>
-              ))}
-            </div>
-          )}
-
-          {/* Champ libre ajout tag */}
+          {/* Champ ajout tag personnalisé */}
           <div className="flex gap-2 mt-2">
             <input
               type="text"
-              value={seoInput}
-              onChange={e => setSeoInput(e.target.value)}
-              onKeyDown={e => e.key === 'Enter' && addSeoTag()}
+              value={customTagInput}
+              onChange={e => setCustomTagInput(e.target.value)}
+              onKeyDown={e => e.key === 'Enter' && addCustomTag()}
               placeholder={t.seoPlaceholder}
               className="flex-1 text-sm rounded-xl border border-gray-200 px-3 py-2 focus:outline-none focus:ring-2 focus:ring-indigo-100 focus:border-indigo-400 transition-colors"
             />
             <button
-              onClick={addSeoTag}
+              onClick={addCustomTag}
               className="flex items-center gap-1.5 bg-gray-100 hover:bg-indigo-600 hover:text-white text-gray-600 text-xs font-semibold px-3 py-2 rounded-xl transition-all"
             >
               <Plus className="w-3.5 h-3.5" />
-              Ajouter
+              {t.add}
             </button>
           </div>
+
+          {/* CTA intégration — visible quand des tags verts sont en attente ou que hashtagLine existe */}
+          {(allPendingTags.length > 0 || !!(result.hashtagsFR) || !!(result.hashtagsEN)) && (
+            <button
+              onClick={integrateSeoTags}
+              disabled={integrating}
+              className="mt-3 w-full flex items-center justify-center gap-2 bg-indigo-600 hover:bg-indigo-700 disabled:bg-indigo-400 disabled:cursor-not-allowed text-white text-xs font-semibold py-2.5 rounded-xl transition-all active:scale-[0.98]"
+            >
+              {integrating
+                ? <Loader2 className="w-3.5 h-3.5 animate-spin" />
+                : <Check className="w-3.5 h-3.5" />}
+              {integrating ? t.integrating : `${t.seoIntegrate}${allPendingTags.length > 0 ? ` (${allPendingTags.length})` : ''}`}
+            </button>
+          )}
         </div>
 
-        {/* ── Bandeau informations manquantes ── */}
-        {infosManquantes.length > 0 && (
-          <div className="flex items-start gap-3 p-4 bg-orange-50 border border-orange-200 rounded-2xl">
-            <AlertTriangle className="w-4 h-4 text-orange-500 shrink-0 mt-0.5" />
-            <div>
-              <p className="text-sm font-semibold text-orange-700 mb-1">{t.missingInfo}</p>
-              <div className="flex flex-wrap gap-1.5">
-                {infosManquantes.map(info => (
-                  <span key={info} className="text-xs bg-orange-100 text-orange-700 px-2 py-0.5 rounded-full font-medium">
-                    {info}
-                  </span>
-                ))}
-              </div>
-            </div>
-          </div>
-        )}
-
-        {/* ── Titre éditable ── */}
+        {/* ════ TITRE ════ */}
         <div className="bg-white rounded-2xl border border-gray-100 shadow-sm overflow-hidden">
           <div className="flex items-center justify-between px-5 py-3 border-b border-gray-50">
             <div className="flex items-center gap-2">
-              <span className="text-xs font-bold text-gray-400 uppercase tracking-widest">Titre</span>
+              <span className="text-xs font-bold text-gray-400 uppercase tracking-widest">{t.titleLabel}</span>
               <span className="text-[10px] text-gray-300">{t.titleHint}</span>
               <span className={`text-[10px] font-semibold ${result.titre.length > 60 ? 'text-red-500' : 'text-gray-300'}`}>
                 {result.titre.length}/60
               </span>
             </div>
-            <CopyButton text={result.titre} />
+            <CopyButton text={result.titre} label={t.copy} copiedLabel={t.copied} />
           </div>
           <div className="px-5 py-4">
             <input
@@ -543,157 +773,104 @@ export default function AnnonceStep({ recognition, result, setResult }: Props) {
           </div>
         </div>
 
-        {/* ── Champ prix d'achat neuf optionnel ── */}
+        {/* ════ DESCRIPTION ════ */}
         <div className="bg-white rounded-2xl border border-gray-100 shadow-sm overflow-hidden">
-          <div className="px-5 py-3.5 flex items-center gap-3">
-            <span className="text-xs font-bold text-gray-400 uppercase tracking-widest shrink-0">
-              Prix neuf (optionnel)
-            </span>
-            <div className="flex-1 flex items-center gap-2">
-              <input
-                type="number"
-                min="0"
-                step="0.01"
-                value={prixAchatNeuf}
-                onChange={e => setPrixAchatNeuf(e.target.value)}
-                placeholder="Ex: 49.90"
-                className="flex-1 text-sm rounded-xl border border-gray-200 px-3 py-2 focus:outline-none focus:ring-2 focus:ring-indigo-100 focus:border-indigo-400 transition-colors"
-              />
-              <span className="text-xs text-gray-400 shrink-0">€</span>
-            </div>
-            {prixAchatNeuf && (
-              <span className="text-[10px] text-green-600 font-semibold bg-green-50 px-2 py-0.5 rounded-full shrink-0">
-                Sera inclus
-              </span>
-            )}
-          </div>
-        </div>
 
-        {/* ── Onglets FR / EN + description ── */}
-        <div className="bg-white rounded-2xl border border-gray-100 shadow-sm overflow-hidden">
-          {/* En-tête avec onglets */}
-          <div className="flex items-center justify-between px-5 py-3 border-b border-gray-50">
-            <div className="flex gap-1">
-              {/* Onglet FR : masqué si utilisateur anglophone */}
-              {lang !== 'en' && (
+          {/* Pills choix de langue — masquées si interface en anglais */}
+          {!isEnUI && (
+            <div className="flex items-center gap-2 px-5 py-3 border-b border-gray-50">
+              {(['native', 'en', 'both'] as const).map(option => (
                 <button
-                  onClick={() => setActiveTab('fr')}
-                  className={`px-3 py-1.5 rounded-lg text-xs font-semibold transition-all ${
-                    activeTab === 'fr'
-                      ? 'bg-indigo-600 text-white'
-                      : 'text-gray-400 hover:text-gray-600 hover:bg-gray-50'
+                  key={option}
+                  type="button"
+                  onClick={() => setDescLang(option)}
+                  className={`text-xs font-semibold px-3 py-1.5 rounded-full border transition-all ${
+                    descLang === option
+                      ? 'bg-indigo-600 text-white border-indigo-600'
+                      : 'bg-white text-gray-500 border-gray-200 hover:border-indigo-300'
                   }`}
                 >
-                  {t.tabFr}
+                  {option === 'native' ? t.descLangNative
+                    : option === 'en' ? t.descLangEn
+                    : t.descLangBoth}
                 </button>
-              )}
-              <button
-                onClick={() => setActiveTab('en')}
-                className={`px-3 py-1.5 rounded-lg text-xs font-semibold transition-all ${
-                  activeTab === 'en'
-                    ? 'bg-indigo-600 text-white'
-                    : 'text-gray-400 hover:text-gray-600 hover:bg-gray-50'
-                }`}
-              >
-                {t.tabEn}
-              </button>
+              ))}
             </div>
-            <div className="flex items-center gap-2">
-              <CopyButton text={descActive} />
-              <button
-                onClick={() => {/* toggle edit inline — géré via textarea */}}
-                className="flex items-center gap-1 text-xs font-semibold px-2.5 py-1.5 rounded-full border border-gray-200 text-gray-400 hover:border-indigo-300 hover:text-indigo-600 transition-all"
-              >
-                <Pencil className="w-3 h-3" />
-                Modifier
-              </button>
-            </div>
-          </div>
-          {/* Corps — textarea éditable */}
-          <div className="px-5 py-4">
-            <textarea
-              value={descActive}
-              onChange={e => updateDesc(e.target.value)}
-              rows={8}
-              className="w-full text-sm text-gray-800 leading-relaxed bg-gray-50 rounded-xl p-3 border border-gray-200 focus:outline-none focus:ring-2 focus:ring-indigo-100 focus:border-indigo-400 resize-none transition-colors"
-            />
-          </div>
-          {/* Équivalences de tailles si disponibles */}
-          {result.tailleEquivalences && (
-            <div className="px-5 pb-4">
+          )}
+
+          {/* Description native uniquement */}
+          {showNativeDesc && (
+            <>
+              <div className="flex items-center justify-between px-5 py-3 border-b border-gray-50">
+                <span className="text-xs font-bold text-gray-400 uppercase tracking-widest">
+                  Description — {nativeLabel}
+                </span>
+                <CopyButton text={result.descriptionFR} label={t.copy} copiedLabel={t.copied} />
+              </div>
+              <div className="px-5 py-4">
+                <AutoTextarea
+                  value={result.descriptionFR}
+                  onChange={updateDescFR}
+                  className="w-full text-sm text-gray-800 leading-relaxed bg-gray-50 rounded-xl p-3 border border-gray-200 focus:outline-none focus:ring-2 focus:ring-indigo-100 focus:border-indigo-400 transition-colors min-h-[160px]"
+                />
+              </div>
+            </>
+          )}
+
+          {/* Équivalences tailles — affichées après la description native */}
+          {result.tailleEquivalences && showNativeDesc && (
+            <div className="px-5 pb-3">
               <span className="text-[11px] text-indigo-600 font-semibold bg-indigo-50 px-2.5 py-1 rounded-full">
                 📏 {result.tailleEquivalences}
               </span>
             </div>
           )}
-        </div>
 
-        {/* ── Bloc dimensions (toggle) ── */}
-        <div className="bg-white rounded-2xl border border-gray-100 shadow-sm overflow-hidden">
-          <button
-            onClick={() => setShowDimensions(!showDimensions)}
-            className="w-full flex items-center justify-between px-5 py-3.5 hover:bg-gray-50 transition-colors text-sm font-semibold text-gray-600"
-          >
-            <span className="flex items-center gap-2">
-              📐 {showDimensions ? t.dimBtn : t.dimensions}
-            </span>
-            {showDimensions
-              ? <X className="w-4 h-4 text-gray-400" />
-              : <Plus className="w-4 h-4 text-gray-400" />
-            }
-          </button>
-
-          {showDimensions && (
-            <div className="px-5 pb-5 border-t border-gray-50 pt-4 space-y-4">
-              <p className="text-xs font-bold text-gray-400 uppercase tracking-widest">
-                {t.dimTitle}
-              </p>
-
-              {/* Boutons presets */}
-              <div className="flex flex-wrap gap-2">
-                {presets.map(nom => (
-                  <button
-                    key={nom}
-                    onClick={() => addDimPreset(nom)}
-                    disabled={!!dimensions.find(d => d.nom === nom)}
-                    className={`text-xs font-semibold px-3 py-1.5 rounded-full border transition-all ${
-                      dimensions.find(d => d.nom === nom)
-                        ? 'bg-indigo-50 text-indigo-600 border-indigo-200 cursor-default'
-                        : 'bg-white text-gray-600 border-gray-200 hover:border-indigo-300 hover:text-indigo-600'
-                    }`}
-                  >
-                    {nom}
-                  </button>
-                ))}
+          {/* Description anglaise uniquement */}
+          {showEnDesc && (
+            <>
+              <div className="flex items-center justify-between px-5 py-3 border-b border-gray-50">
+                <span className="text-xs font-bold text-gray-400 uppercase tracking-widest">
+                  Description — English
+                </span>
+                <CopyButton text={result.descriptionEN} label={t.copy} copiedLabel={t.copied} />
               </div>
+              <div className="px-5 py-4">
+                <AutoTextarea
+                  value={result.descriptionEN}
+                  onChange={updateDescEN}
+                  className="w-full text-sm text-gray-800 leading-relaxed bg-gray-50 rounded-xl p-3 border border-gray-200 focus:outline-none focus:ring-2 focus:ring-indigo-100 focus:border-indigo-400 transition-colors min-h-[160px]"
+                />
+              </div>
+            </>
+          )}
 
-              {/* Champs valeurs */}
-              {dimensions.length > 0 && (
-                <div className="space-y-2">
-                  {dimensions.map(dim => (
-                    <div key={dim.nom} className="flex items-center gap-2">
-                      <span className="text-xs font-semibold text-gray-600 w-36 shrink-0">{dim.nom}</span>
-                      <div className="flex-1 flex items-center gap-1.5">
-                        <input
-                          type="number"
-                          min="0"
-                          step="0.1"
-                          value={dim.valeur}
-                          onChange={e => updateDimValeur(dim.nom, e.target.value)}
-                          placeholder="cm"
-                          className="flex-1 text-sm rounded-xl border border-gray-200 px-3 py-2 focus:outline-none focus:ring-2 focus:ring-indigo-100 focus:border-indigo-400 transition-colors"
-                        />
-                        <span className="text-xs text-gray-400 shrink-0">cm</span>
-                      </div>
-                      <button onClick={() => removeDim(dim.nom)} className="text-gray-300 hover:text-red-500 transition-colors">
-                        <X className="w-4 h-4" />
-                      </button>
-                    </div>
-                  ))}
+          {/* Mode "Les deux" — un seul bloc continu éditable avec drapeaux */}
+          {showBothDesc && (
+            <>
+              <div className="flex items-center justify-between px-5 py-3 border-b border-gray-50">
+                <span className="text-xs font-bold text-gray-400 uppercase tracking-widest">
+                  {LANG_FLAGS[lang]} {nativeLabel} + 🇬🇧 English
+                </span>
+                <CopyButton text={bothDesc} label={t.copyAll} copiedLabel={t.copied} />
+              </div>
+              <div className="px-5 py-4">
+                <AutoTextarea
+                  value={bothDesc}
+                  onChange={setBothDesc}
+                  className="w-full text-sm text-gray-800 leading-relaxed bg-gray-50 rounded-xl p-3 border border-gray-200 focus:outline-none focus:ring-2 focus:ring-indigo-100 focus:border-indigo-400 transition-colors min-h-[160px]"
+                />
+              </div>
+              {result.tailleEquivalences && (
+                <div className="px-5 pb-3">
+                  <span className="text-[11px] text-indigo-600 font-semibold bg-indigo-50 px-2.5 py-1 rounded-full">
+                    📏 {result.tailleEquivalences}
+                  </span>
                 </div>
               )}
-            </div>
+            </>
           )}
+
         </div>
 
         {/* ── Bouton tout copier ── */}

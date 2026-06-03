@@ -1,26 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server'
 import Anthropic from '@anthropic-ai/sdk'
 
-/* ─── Descriptions des 14 slots ─────────────────────────────────────────── */
-/* Conçu pour tout type d'article : vêtements ET accessoires (sacs, lunettes, bijoux...) */
-
-const SLOT_DESCRIPTIONS = [
-  '0: vue principale recto — article à plat, posé sur surface ou suspendu, aucune personne visible. Pour vêtements : sur cintre ou à plat. Pour accessoires/sacs/bijoux/lunettes : première vue de face ou dessus, posé à plat sur surface.',
-  '1: vue verso ou deuxième angle — article à plat/sur surface, aucune personne. Pour vêtements : dos sur cintre. Pour accessoires : vue de dos, dessous ou angle différent.',
-  '2: vue portée de face OU troisième angle — pour vêtements : personne portant l\'article de face. Pour accessoires : troisième vue sous un angle différent.',
-  '3: vue portée 3/4 ou diagonal OU quatrième angle — pour vêtements : personne portant l\'article en diagonal. Pour accessoires : quatrième vue.',
-  '4: vue portée de profil OU cinquième angle — pour vêtements : vue latérale portée. Pour accessoires : cinquième vue.',
-  '5: vue portée de dos OU sixième angle — pour vêtements : vue de dos portée. Pour accessoires : sixième vue.',
-  '6: septième vue — vue supplémentaire portée ou angle additionnel.',
-  '7: huitième vue — vue supplémentaire portée ou angle additionnel.',
-  '8: étiquette marque — logo ou label de marque en gros plan.',
-  '9: étiquette taille — indication de taille en gros plan.',
-  '10: étiquette composition matière — tissu/entretien en gros plan.',
-  '11: autre détail — détail de texture, fermeture, couture ou finition.',
-  '12: défaut ou signe d\'usure — tache, accroc, usure visible.',
-  '13: emballage — boîte, sac, housse ou emballage d\'origine.',
-]
-
 const VALID_MEDIA_TYPES = new Set(['image/jpeg', 'image/png', 'image/webp', 'image/gif'])
 
 export async function POST(request: NextRequest) {
@@ -37,7 +17,7 @@ export async function POST(request: NextRequest) {
   }
 
   const client = new Anthropic({ apiKey })
-  const results: { fileIndex: number; slotIndex: number }[] = []
+  const results: { fileIndex: number; type: 'flat' | 'worn' | 'detail'; detailSlot: number }[] = []
 
   for (let i = 0; i < files.length; i++) {
     const file = files[i]
@@ -49,7 +29,7 @@ export async function POST(request: NextRequest) {
 
       const msg = await client.messages.create({
         model: 'claude-haiku-4-5-20251001',
-        max_tokens: 5,
+        max_tokens: 40,
         messages: [
           {
             role: 'user',
@@ -64,34 +44,54 @@ export async function POST(request: NextRequest) {
               },
               {
                 type: 'text',
-                text: `Quel slot correspond le mieux à cette image parmi les 14 slots ci-dessous ?
+                text: `Analyse cette photo d'article vestimentaire. Réponds UNIQUEMENT avec du JSON valide, sans markdown ni texte supplémentaire.
 
-${SLOT_DESCRIPTIONS.join('\n')}
+ÉTAPE 1 — Détermine le type (ordre de priorité strict, applique la première règle qui correspond) :
+1. Une personne porte l'article sur elle (vêtement sur le corps, chaussures aux pieds, sac tenu en main ou à l'épaule) ? → type "worn"
+2. L'article entier est visible à plat ou sur cintre, sans aucune personne ? → type "flat"
+3. Du texte lisible apparaît au premier plan sur une étiquette cousue, imprimée ou collée sur l'article ? → type "detail"
+4. Sinon (gros plan, défaut visible, emballage, accessoire) ? → type "detail"
 
-RÈGLES IMPORTANTES :
-- SLOT 0 : première vue principale à plat/sur surface, aucune personne. Valable pour TOUS les types d'articles (vêtement sur cintre, sac posé à plat, lunettes sur table, bijou sur surface). Si l'objet est posé/suspendu et qu'aucune personne n'est visible → slot 0.
-- SLOT 1 : deuxième vue à plat/sur surface, aucune personne (dos du vêtement, ou deuxième angle de l'accessoire).
-- SLOTS 2-7 : vues portées (personne visible) OU angles supplémentaires d'un accessoire (intérieur sac, vue de côté, détail fermeture...).
-- SLOTS 8-10 : uniquement des étiquettes en gros plan (marque, taille, composition).
-- SLOT 11 : détail de texture/finition sans défaut visible.
-- SLOT 12 : défaut, tache, usure clairement visible.
-- SLOT 13 : emballage, boîte ou housse.
+ÉTAPE 2 — Si et SEULEMENT SI type = "detail", détermine detailSlot :
+3 = étiquette marque (nom ou logo : KENZO, Nike, Zara…)
+4 = étiquette taille et/ou composition (M, 42, L/XL… avec ou sans matières)
+5 = étiquette composition seule (matières ou instructions d'entretien, sans taille)
+6 = gros plan sur l'article (zip, bouton, couture, texture, doublure…)
+7 = défaut visible (décoloration, trou, fil tiré, usure, trace…)
+8 = emballage ou accessoire séparé (boîte, sac de rangement, ceinture, lacets…)
+Si type = "flat" ou type = "worn" → detailSlot = 6 (champ ignoré)
 
-Réponds uniquement avec le chiffre (0 à 13).`,
+Réponds UNIQUEMENT avec ce JSON (sans texte avant ni après) :
+{"type":"flat"|"worn"|"detail","detailSlot":3|4|5|6|7|8}`,
               },
             ],
           },
         ],
       })
 
-      const raw = msg.content[0].type === 'text' ? msg.content[0].text.trim() : '0'
-      /* Extrait le premier ou deuxième chiffre (ex: "10", "13") */
-      const numMatch = raw.match(/\d+/)
-      const parsed = numMatch ? parseInt(numMatch[0]) : 0
-      results.push({ fileIndex: i, slotIndex: Math.min(13, Math.max(0, parsed)) })
+      const raw = msg.content[0].type === 'text' ? msg.content[0].text.trim() : ''
+      console.log(`[classify] file ${i} raw:`, JSON.stringify(raw))
+      let type: 'flat' | 'worn' | 'detail' = 'flat'
+      let detailSlot = 6
+
+      try {
+        const jsonMatch = raw.replace(/```(?:json)?/g, '').trim().match(/\{[^}]+\}/)
+        if (jsonMatch) {
+          const parsed = JSON.parse(jsonMatch[0])
+          if (['flat', 'worn', 'detail'].includes(parsed.type)) {
+            type = parsed.type as 'flat' | 'worn' | 'detail'
+          }
+          const ds = parseInt(String(parsed.detailSlot))
+          if ([3, 4, 5, 6, 7, 8].includes(ds)) detailSlot = ds
+        }
+      } catch {
+        // keep defaults
+      }
+
+      results.push({ fileIndex: i, type, detailSlot })
     } catch (err) {
       console.error(`Classify error for file ${i}:`, err)
-      results.push({ fileIndex: i, slotIndex: i % 14 })
+      results.push({ fileIndex: i, type: 'flat', detailSlot: 6 })
     }
   }
 
