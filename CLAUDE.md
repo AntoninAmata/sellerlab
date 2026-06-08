@@ -26,8 +26,8 @@ SaaS pour vendeurs Vinted (et autres plateformes à terme).
 - Taxonomie Vinted traduite dans les 7 langues ✅
 - i18n complet sur tout le flux /app ✅
 - Mannequin IA FASHN intégré (plan Pro) ✅
-- Bookmarklet Vinted (en cours) 🔄
-- Import URL Vinted (en cours) 🔄
+- Import URL Vinted ✅ (plan Pro)
+- Bookmarklet Vinted 🔄 (à faire)
 
 ---
 
@@ -76,7 +76,7 @@ SaaS pour vendeurs Vinted (et autres plateformes à terme).
 
 ## Variables d'environnement (.env.local)
 - ANTHROPIC_API_KEY ✅ configurée
-- FASHN_API_KEY ✅ configurée
+- FASHN_API_KEY ✅ configurée (fa-zaUBIGEPff7K-BkFUaRR8lABFmlzx3ZM19BBQ)
 
 ## RÈGLE CRITIQUE — next.config.ts
 - NE JAMAIS ajouter `asyncWebAssembly: true` dans next.config.ts — casse Safari
@@ -97,23 +97,26 @@ SaaS pour vendeurs Vinted (et autres plateformes à terme).
 ---
 
 ## 3 Formules tarifaires
-- Freemium 0€ : 1 annonce/mois, background removal blanc uniquement sur slot 0, pas de mannequin IA
-- Premium X€ : annonces limitées/mois, background removal 22 fonds sur photos choisies, pas de mannequin IA
-- Pro XX€ : annonces limitées/mois, background removal complet, mannequin IA (2 photos), bookmarklet Vinted
+- Freemium 0€ : 1 annonce/mois, background removal blanc uniquement sur slot 0, pas de mannequin IA, pas d'import URL
+- Premium X€ : annonces limitées/mois, background removal 22 fonds sur photos choisies, pas de mannequin IA, pas d'import URL
+- Pro XX€ : annonces limitées/mois, background removal complet, mannequin IA (2 photos), import URL Vinted, bookmarklet Vinted
 
 ---
 
 ## Page /app — Flux en 5 étapes
 
-### Étape 0 — Import URL Vinted (optionnel, avant étape 1)
-- Champ optionnel : "Vous avez déjà une annonce Vinted ? Importez-la directement"
-- Input URL + bouton "Importer"
-- API `app/api/import-vinted/route.ts` : fetch côté serveur → parse HTML/JSON Vinted → extrait photos, titre, description, prix, marque, taille, état, catégorie
-- Les photos importées passent par la classification IA normale (comme un upload manuel)
-- Les données pré-remplissent l'étape 2 (Reconnaissance)
-- Fichier : `app/api/import-vinted/route.ts`
-
 ### Étape 1 — Photos ✅ Construite
+
+#### Import URL Vinted ✅ (plan Pro uniquement)
+- Zone "Importer depuis Vinted" en haut de l'étape 1, alternative à l'upload manuel
+- Freemium/Premium : zone visible mais verrouillée (cadenas)
+- Pro : input URL + bouton "Importer"
+- Supporte tous les domaines Vinted : .fr, .es, .de, .it, .nl, .pl, .co.uk
+- API : `app/api/import-vinted/route.ts`
+- Technique : fetch côté serveur avec headers navigateur → regex sur HTML pour extraire URLs images (format images1.vinted.net) → filtre par timestamp dominant pour éliminer la photo de profil du vendeur → téléchargement en base64 côté serveur → injection dans slots
+- IMPORTANT : Vinted n'utilise PAS __NEXT_DATA__ — on parse le HTML directement avec une regex
+- Les photos importées passent par la classification IA normale (même process qu'un upload manuel)
+- NE récupère PAS titre/description/prix/catégorie — uniquement les photos
 
 #### Slots (15 au total) — Structure définitive
 
@@ -354,7 +357,7 @@ Couleurs (29), États (5), Matériaux (55), Catégories, Sous-catégories — to
 - Flux /app 5 étapes ✅
 - i18n complet ✅
 - Mannequin IA ✅
-- Import URL Vinted 🔄
+- Import URL Vinted ✅
 - Bookmarklet Vinted 🔄
 - Supabase Auth + limites freemium 🔄
 - Stripe paiements 🔄

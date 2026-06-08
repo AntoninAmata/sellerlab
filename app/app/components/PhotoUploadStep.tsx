@@ -3,7 +3,7 @@
 import { useState, useRef, useCallback, useEffect } from 'react'
 import {
   Camera, Tag, X, Lock, Upload, Sparkles,
-  GripVertical, AlertTriangle, Check, Wand2, User,
+  GripVertical, AlertTriangle, Check, Wand2, User, Link,
 } from 'lucide-react'
 import type { PhotoSlot } from '../types'
 import type { Lang } from '@/lib/i18n'
@@ -326,6 +326,15 @@ const PLAN_I18N: Record<Lang, {
   modalClose: string
   modalConfirmBg: string
   modalConfirmMannequin: string
+  importVintedTitle: string
+  importVintedPlaceholder: string
+  importVintedBtn: string
+  importVintedLoading: string
+  importVintedLocked: string
+  importVintedSuccess: (n: number) => string
+  importVintedErrInvalid: string
+  importVintedErrFetch: string
+  importVintedErrNoPhotos: string
 }> = {
   fr: {
     bgPanelTitle:          'Fond des photos',
@@ -349,6 +358,15 @@ const PLAN_I18N: Record<Lang, {
     modalClose:            'Fermer',
     modalConfirmBg:        'Utiliser ce fond',
     modalConfirmMannequin: 'Choisir ce style',
+    importVintedTitle:     'Importer depuis Vinted',
+    importVintedPlaceholder: 'Colle le lien de ton article Vinted…',
+    importVintedBtn:       'Importer',
+    importVintedLoading:   'Importation en cours…',
+    importVintedLocked:    'Disponible avec le plan Pro',
+    importVintedSuccess:   (n) => `${n} photo${n > 1 ? 's' : ''} importée${n > 1 ? 's' : ''} depuis Vinted`,
+    importVintedErrInvalid: 'Lien Vinted invalide',
+    importVintedErrFetch:  "Impossible de récupérer l'article",
+    importVintedErrNoPhotos: 'Aucune photo trouvée',
   },
   en: {
     bgPanelTitle:          'Photo background',
@@ -372,6 +390,15 @@ const PLAN_I18N: Record<Lang, {
     modalClose:            'Close',
     modalConfirmBg:        'Use this background',
     modalConfirmMannequin: 'Choose this style',
+    importVintedTitle:     'Import from Vinted',
+    importVintedPlaceholder: 'Paste your Vinted listing link…',
+    importVintedBtn:       'Import',
+    importVintedLoading:   'Importing…',
+    importVintedLocked:    'Available with Pro plan',
+    importVintedSuccess:   (n) => `${n} photo${n > 1 ? 's' : ''} imported from Vinted`,
+    importVintedErrInvalid: 'Invalid Vinted link',
+    importVintedErrFetch:  'Unable to fetch the listing',
+    importVintedErrNoPhotos: 'No photos found',
   },
   es: {
     bgPanelTitle:          'Fondo de las fotos',
@@ -395,6 +422,15 @@ const PLAN_I18N: Record<Lang, {
     modalClose:            'Cerrar',
     modalConfirmBg:        'Usar este fondo',
     modalConfirmMannequin: 'Elegir este estilo',
+    importVintedTitle:     'Importar desde Vinted',
+    importVintedPlaceholder: 'Pega el enlace de tu artículo de Vinted…',
+    importVintedBtn:       'Importar',
+    importVintedLoading:   'Importando…',
+    importVintedLocked:    'Disponible con el plan Pro',
+    importVintedSuccess:   (n) => `${n} foto${n > 1 ? 's' : ''} importada${n > 1 ? 's' : ''} desde Vinted`,
+    importVintedErrInvalid: 'Enlace de Vinted inválido',
+    importVintedErrFetch:  'No se puede obtener el artículo',
+    importVintedErrNoPhotos: 'No se encontraron fotos',
   },
   de: {
     bgPanelTitle:          'Foto-Hintergrund',
@@ -418,6 +454,15 @@ const PLAN_I18N: Record<Lang, {
     modalClose:            'Schließen',
     modalConfirmBg:        'Hintergrund verwenden',
     modalConfirmMannequin: 'Diesen Stil wählen',
+    importVintedTitle:     'Von Vinted importieren',
+    importVintedPlaceholder: 'Füge den Link deines Vinted-Artikels ein…',
+    importVintedBtn:       'Importieren',
+    importVintedLoading:   'Wird importiert…',
+    importVintedLocked:    'Verfügbar mit dem Pro-Plan',
+    importVintedSuccess:   (n) => `${n} Foto${n > 1 ? 's' : ''} von Vinted importiert`,
+    importVintedErrInvalid: 'Ungültiger Vinted-Link',
+    importVintedErrFetch:  'Artikel konnte nicht abgerufen werden',
+    importVintedErrNoPhotos: 'Keine Fotos gefunden',
   },
   it: {
     bgPanelTitle:          'Sfondo delle foto',
@@ -441,6 +486,15 @@ const PLAN_I18N: Record<Lang, {
     modalClose:            'Chiudi',
     modalConfirmBg:        'Usa questo sfondo',
     modalConfirmMannequin: 'Scegli questo stile',
+    importVintedTitle:     'Importa da Vinted',
+    importVintedPlaceholder: "Incolla il link del tuo articolo Vinted…",
+    importVintedBtn:       'Importa',
+    importVintedLoading:   'Importazione in corso…',
+    importVintedLocked:    'Disponibile con il piano Pro',
+    importVintedSuccess:   (n) => `${n} foto importat${n > 1 ? 'e' : 'a'} da Vinted`,
+    importVintedErrInvalid: 'Link Vinted non valido',
+    importVintedErrFetch:  "Impossibile recuperare l'articolo",
+    importVintedErrNoPhotos: 'Nessuna foto trovata',
   },
   nl: {
     bgPanelTitle:          "Achtergrond foto's",
@@ -464,6 +518,15 @@ const PLAN_I18N: Record<Lang, {
     modalClose:            'Sluiten',
     modalConfirmBg:        'Gebruik achtergrond',
     modalConfirmMannequin: 'Kies deze stijl',
+    importVintedTitle:     'Importeren van Vinted',
+    importVintedPlaceholder: 'Plak de link van je Vinted-artikel…',
+    importVintedBtn:       'Importeren',
+    importVintedLoading:   'Bezig met importeren…',
+    importVintedLocked:    'Beschikbaar met het Pro-plan',
+    importVintedSuccess:   (n) => `${n} foto${n > 1 ? "'s" : ''} geïmporteerd van Vinted`,
+    importVintedErrInvalid: 'Ongeldige Vinted-link',
+    importVintedErrFetch:  'Artikel kan niet worden opgehaald',
+    importVintedErrNoPhotos: "Geen foto's gevonden",
   },
   pl: {
     bgPanelTitle:          'Tło zdjęć',
@@ -487,6 +550,15 @@ const PLAN_I18N: Record<Lang, {
     modalClose:            'Zamknij',
     modalConfirmBg:        'Użyj tego tła',
     modalConfirmMannequin: 'Wybierz ten styl',
+    importVintedTitle:     'Importuj z Vinted',
+    importVintedPlaceholder: 'Wklej link do swojego ogłoszenia na Vinted…',
+    importVintedBtn:       'Importuj',
+    importVintedLoading:   'Importowanie…',
+    importVintedLocked:    'Dostępne w planie Pro',
+    importVintedSuccess:   (n) => `${n} zdjęci${n === 1 ? 'e' : 'a'} zaimportowane z Vinted`,
+    importVintedErrInvalid: 'Nieprawidłowy link Vinted',
+    importVintedErrFetch:  'Nie można pobrać ogłoszenia',
+    importVintedErrNoPhotos: 'Nie znaleziono zdjęć',
   },
 }
 
@@ -685,6 +757,12 @@ export default function PhotoUploadStep({ slots, setSlots, aiPhotos, setAiPhotos
   const [selectedMannequin, setSelectedMannequin] = useState<string | null>(null)
   const [isGeneratingMannequin, setIsGeneratingMannequin] = useState(false)
   const [mannequinCustomPrompt, setMannequinCustomPrompt] = useState('outfit adapted to the garment, contemporary 2026 casual style')
+
+  /* Pro — import URL Vinted */
+  const [vintedUrl, setVintedUrl]         = useState('')
+  const [isImporting, setIsImporting]     = useState(false)
+  const [importError, setImportError]     = useState<string | null>(null)
+  const [importSuccess, setImportSuccess] = useState<string | null>(null)
 
   /* Compositing fond sur tous les slots traités */
   const [compositedUrls, setCompositedUrls]       = useState<Record<number, string>>({})
@@ -961,6 +1039,59 @@ export default function PhotoUploadStep({ slots, setSlots, aiPhotos, setAiPhotos
     [loadFileInSlot, plan],
   )
 
+  /* ── Import depuis URL Vinted (Pro) ── */
+  const handleImportFromVinted = useCallback(async () => {
+    if (!vintedUrl.trim() || isImporting) return
+    setIsImporting(true)
+    setImportError(null)
+    setImportSuccess(null)
+
+    try {
+      /* 1 — Fetch listing + téléchargement images côté serveur → base64 */
+      const importRes = await fetch('/api/import-vinted', {
+        method:  'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body:    JSON.stringify({ url: vintedUrl.trim() }),
+      })
+      const importData = await importRes.json() as { photos?: string[]; error?: string }
+
+      if (!importRes.ok || !importData.photos?.length) {
+        const err = importData.error ?? 'no_photos'
+        const t = PLAN_I18N[lang] ?? PLAN_I18N.fr
+        setImportError(
+          err === 'invalid_url' ? t.importVintedErrInvalid :
+          err === 'no_photos'   ? t.importVintedErrNoPhotos :
+          t.importVintedErrFetch,
+        )
+        return
+      }
+
+      /* 2 — Convertit chaque data URL base64 en File (pas de fetch externe côté navigateur) */
+      const files: File[] = []
+      for (let i = 0; i < importData.photos.length; i++) {
+        try {
+          const res  = await fetch(importData.photos[i])
+          const blob = await res.blob()
+          files.push(new File([blob], `vinted-${i + 1}.jpg`, { type: blob.type || 'image/webp' }))
+        } catch { /* skip */ }
+      }
+
+      if (files.length === 0) {
+        setImportError((PLAN_I18N[lang] ?? PLAN_I18N.fr).importVintedErrNoPhotos)
+        return
+      }
+
+      setImportSuccess((PLAN_I18N[lang] ?? PLAN_I18N.fr).importVintedSuccess(files.length))
+      setVintedUrl('')
+      handleMultipleFiles(files)
+    } catch (err) {
+      console.error('[import-vinted] error:', err)
+      setImportError((PLAN_I18N[lang] ?? PLAN_I18N.fr).importVintedErrFetch)
+    } finally {
+      setIsImporting(false)
+    }
+  }, [vintedUrl, isImporting, lang, handleMultipleFiles])
+
   /* ── Swap — désactivé après remove-bg ── */
   const swapSlots = useCallback(
     (sourceId: number, targetId: number) => {
@@ -1025,6 +1156,75 @@ export default function PhotoUploadStep({ slots, setSlots, aiPhotos, setAiPhotos
           {dropI18n.title}
         </h2>
         <p className="text-sm text-gray-500">{dropI18n.subtitle}</p>
+      </div>
+
+      {/* ── Import URL Vinted ── */}
+      <div className={`rounded-2xl border p-4 space-y-3 ${plan === 'pro' ? 'bg-emerald-50 border-emerald-100' : 'bg-gray-50 border-gray-100 opacity-70'}`}>
+        <div className="flex items-center gap-2">
+          <div className="w-7 h-7 rounded-lg bg-emerald-100 flex items-center justify-center shrink-0">
+            <Link className="w-3.5 h-3.5 text-emerald-600" />
+          </div>
+          <p className="font-display font-extrabold text-sm text-emerald-900">{planI18n.importVintedTitle}</p>
+          {plan !== 'pro' && (
+            <span className="text-[9px] font-bold bg-indigo-100 text-indigo-600 px-1.5 py-0.5 rounded-full uppercase tracking-wide ml-1">Pro</span>
+          )}
+        </div>
+
+        {plan !== 'pro' ? (
+          <p className="text-xs text-gray-400 flex items-center gap-1.5">
+            <Lock className="w-3 h-3 shrink-0" />
+            {planI18n.importVintedLocked}
+          </p>
+        ) : (
+          <>
+            <div className="flex gap-2">
+              <input
+                type="url"
+                value={vintedUrl}
+                onChange={e => { setVintedUrl(e.target.value); setImportError(null); setImportSuccess(null) }}
+                onKeyDown={e => e.key === 'Enter' && handleImportFromVinted()}
+                placeholder={planI18n.importVintedPlaceholder}
+                disabled={isImporting}
+                className="flex-1 text-sm rounded-xl border border-emerald-200 bg-white px-3 py-2.5 text-gray-700 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-emerald-300 disabled:opacity-50"
+              />
+              <button
+                onClick={handleImportFromVinted}
+                disabled={isImporting || !vintedUrl.trim()}
+                className={`shrink-0 flex items-center gap-1.5 font-semibold text-sm px-4 py-2.5 rounded-xl transition-all ${
+                  isImporting || !vintedUrl.trim()
+                    ? 'bg-emerald-100 text-emerald-400 cursor-not-allowed'
+                    : 'bg-emerald-600 hover:bg-emerald-700 text-white active:scale-[0.98]'
+                }`}
+              >
+                {isImporting ? (
+                  <div className="w-4 h-4 border-2 border-emerald-400 border-t-transparent rounded-full animate-spin" />
+                ) : (
+                  <Upload className="w-4 h-4" />
+                )}
+                {isImporting ? planI18n.importVintedLoading : planI18n.importVintedBtn}
+              </button>
+            </div>
+
+            {importError && (
+              <div className="flex items-center gap-2 text-xs text-red-700 bg-red-50 border border-red-200 rounded-xl px-3 py-2">
+                <AlertTriangle className="w-3.5 h-3.5 shrink-0" />
+                <span className="font-semibold">{importError}</span>
+                <button onClick={() => setImportError(null)} className="ml-auto text-red-400 hover:text-red-600">
+                  <X className="w-3 h-3" />
+                </button>
+              </div>
+            )}
+            {importSuccess && (
+              <div className="flex items-center gap-2 text-xs text-emerald-700 bg-emerald-50 border border-emerald-200 rounded-xl px-3 py-2">
+                <Check className="w-3.5 h-3.5 shrink-0" />
+                <span className="font-semibold">{importSuccess}</span>
+                <button onClick={() => setImportSuccess(null)} className="ml-auto text-emerald-400 hover:text-emerald-600">
+                  <X className="w-3 h-3" />
+                </button>
+              </div>
+            )}
+          </>
+        )}
       </div>
 
       {/* ── Zone d'import multiple ── */}

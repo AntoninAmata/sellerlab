@@ -2,6 +2,22 @@ import { NextRequest, NextResponse } from 'next/server'
 import Anthropic from '@anthropic-ai/sdk'
 
 const VALID_MEDIA_TYPES = new Set(['image/jpeg', 'image/png', 'image/webp', 'image/gif'])
+type MediaType = 'image/jpeg' | 'image/png' | 'image/webp' | 'image/gif'
+
+type ImageItem = { b64: string; mediaType: MediaType }
+
+const toBase64 = async (url: string): Promise<ImageItem> => {
+  const res = await fetch(url, {
+    headers: {
+      'User-Agent': 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/124.0.0.0 Safari/537.36',
+      'Referer': 'https://www.vinted.fr/',
+    },
+  })
+  const buffer = await res.arrayBuffer()
+  const ct = res.headers.get('content-type')?.split(';')[0] ?? 'image/webp'
+  const mediaType: MediaType = VALID_MEDIA_TYPES.has(ct) ? (ct as MediaType) : 'image/webp'
+  return { b64: Buffer.from(buffer).toString('base64'), mediaType }
+}
 
 export async function POST(request: NextRequest) {
   const apiKey = process.env.ANTHROPIC_API_KEY
@@ -9,11 +25,31 @@ export async function POST(request: NextRequest) {
     return NextResponse.json({ error: 'ANTHROPIC_API_KEY non configurée' }, { status: 503 })
   }
 
-  const formData = await request.formData()
-  const files = formData.getAll('files') as File[]
+  const contentType = request.headers.get('content-type') ?? ''
+  let count = 0
+  let imageItems: ImageItem[] = []
 
-  if (!files.length) {
-    return NextResponse.json({ error: 'Aucun fichier' }, { status: 400 })
+  if (contentType.includes('application/json')) {
+    /* ── Mode URL : le serveur télécharge les images (Vinted import) ── */
+    const { urls } = await request.json() as { urls: string[] }
+    if (!urls?.length) return NextResponse.json({ error: 'No URLs' }, { status: 400 })
+    count = urls.length
+    imageItems = await Promise.all(
+      urls.map(url => toBase64(url).catch(() => ({ b64: '', mediaType: 'image/jpeg' as const }))),
+    )
+  } else {
+    /* ── Mode FormData : fichiers uploadés par le client (flux classique) ── */
+    const formData = await request.formData()
+    const files = formData.getAll('files') as File[]
+    if (!files.length) return NextResponse.json({ error: 'Aucun fichier' }, { status: 400 })
+    count = files.length
+    imageItems = await Promise.all(
+      files.map(async (file) => {
+        const mediaType = (VALID_MEDIA_TYPES.has(file.type) ? file.type : 'image/jpeg') as MediaType
+        const b64 = Buffer.from(await file.arrayBuffer()).toString('base64')
+        return { b64, mediaType }
+      }),
+    )
   }
 
   const client = new Anthropic({ apiKey })
@@ -23,17 +59,15 @@ export async function POST(request: NextRequest) {
     const content: Block[] = [
       {
         type: 'text',
-        text: `Ci-dessous ${files.length} photo${files.length > 1 ? 's' : ''} d'articles vestimentaires, numérotées de 0 à ${files.length - 1}.`,
+        text: `Ci-dessous ${count} photo${count > 1 ? 's' : ''} d'articles vestimentaires, numérotées de 0 à ${count - 1}.`,
       },
     ]
 
-    for (let i = 0; i < files.length; i++) {
-      const file  = files[i]
-      const media = (VALID_MEDIA_TYPES.has(file.type) ? file.type : 'image/jpeg') as
-        'image/jpeg' | 'image/png' | 'image/webp' | 'image/gif'
-      const b64   = Buffer.from(await file.arrayBuffer()).toString('base64')
+    for (let i = 0; i < imageItems.length; i++) {
+      const { b64, mediaType } = imageItems[i]
+      if (!b64) continue
       content.push({ type: 'text',  text: `[Photo ${i}]` })
-      content.push({ type: 'image', source: { type: 'base64', media_type: media, data: b64 } })
+      content.push({ type: 'image', source: { type: 'base64', media_type: mediaType, data: b64 } })
     }
 
     content.push({
@@ -57,7 +91,7 @@ Réponds UNIQUEMENT avec ce JSON array (sans texte avant ni après) :
 
     const msg = await client.messages.create({
       model:      'claude-haiku-4-5-20251001',
-      max_tokens: 60 + files.length * 40,
+      max_tokens: 60 + count * 40,
       messages:   [{ role: 'user', content }],
     })
 
@@ -71,7 +105,7 @@ Réponds UNIQUEMENT avec ce JSON array (sans texte avant ni après) :
       if (match) {
         const parsed = JSON.parse(match[0]) as Array<{ index: number; type: string; detailSlot: number }>
         for (const item of parsed) {
-          if (typeof item.index === 'number' && item.index >= 0 && item.index < files.length) {
+          if (typeof item.index === 'number' && item.index >= 0 && item.index < count) {
             const t: 'flat' | 'worn' | 'detail' = ['flat', 'worn', 'detail'].includes(item.type)
               ? (item.type as 'flat' | 'worn' | 'detail')
               : 'flat'
@@ -82,9 +116,9 @@ Réponds UNIQUEMENT avec ce JSON array (sans texte avant ni après) :
       }
     } catch { /* fallback below */ }
 
-    /* Ensure every file index has an entry */
+    /* Ensure every index has an entry */
     const covered = new Set(results.map(r => r.fileIndex))
-    for (let i = 0; i < files.length; i++) {
+    for (let i = 0; i < count; i++) {
       if (!covered.has(i)) results.push({ fileIndex: i, type: 'flat', detailSlot: 6 })
     }
 
@@ -92,7 +126,7 @@ Réponds UNIQUEMENT avec ce JSON array (sans texte avant ni après) :
   } catch (err) {
     console.error('[classify] batch error:', err)
     return NextResponse.json({
-      results: files.map((_, i) => ({ fileIndex: i, type: 'flat', detailSlot: 6 })),
+      results: Array.from({ length: count }, (_, i) => ({ fileIndex: i, type: 'flat', detailSlot: 6 })),
     })
   }
 }
