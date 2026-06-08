@@ -17,83 +17,82 @@ export async function POST(request: NextRequest) {
   }
 
   const client = new Anthropic({ apiKey })
-  const results: { fileIndex: number; type: 'flat' | 'worn' | 'detail'; detailSlot: number }[] = []
 
-  for (let i = 0; i < files.length; i++) {
-    const file = files[i]
-    const mediaType = VALID_MEDIA_TYPES.has(file.type) ? file.type : 'image/jpeg'
+  try {
+    type Block = Anthropic.TextBlockParam | Anthropic.ImageBlockParam
+    const content: Block[] = [
+      {
+        type: 'text',
+        text: `Ci-dessous ${files.length} photo${files.length > 1 ? 's' : ''} d'articles vestimentaires, numérotées de 0 à ${files.length - 1}.`,
+      },
+    ]
+
+    for (let i = 0; i < files.length; i++) {
+      const file  = files[i]
+      const media = (VALID_MEDIA_TYPES.has(file.type) ? file.type : 'image/jpeg') as
+        'image/jpeg' | 'image/png' | 'image/webp' | 'image/gif'
+      const b64   = Buffer.from(await file.arrayBuffer()).toString('base64')
+      content.push({ type: 'text',  text: `[Photo ${i}]` })
+      content.push({ type: 'image', source: { type: 'base64', media_type: media, data: b64 } })
+    }
+
+    content.push({
+      type: 'text',
+      text: `Classifie chaque photo d'article vestimentaire. Réponds UNIQUEMENT avec du JSON valide, sans markdown ni texte supplémentaire.
+
+RÈGLES (applique la première qui correspond) :
+1. Une personne porte l'article sur elle → type "worn"
+2. L'article entier est visible à plat ou sur cintre, sans personne → type "flat"
+3. Du texte lisible apparaît sur une étiquette cousue/imprimée → type "detail"
+4. Sinon (gros plan, défaut, emballage, accessoire) → type "detail"
+
+Si type = "detail", détermine detailSlot :
+3 = étiquette marque  |  4 = étiquette taille/compo  |  5 = compo seule
+6 = gros plan  |  7 = défaut visible  |  8 = emballage/accessoire
+Si type = "flat" ou "worn" → detailSlot = 6 (champ ignoré)
+
+Réponds UNIQUEMENT avec ce JSON array (sans texte avant ni après) :
+[{"index":0,"type":"flat"|"worn"|"detail","detailSlot":3|4|5|6|7|8},{"index":1,...},...]`,
+    })
+
+    const msg = await client.messages.create({
+      model:      'claude-haiku-4-5-20251001',
+      max_tokens: 60 + files.length * 40,
+      messages:   [{ role: 'user', content }],
+    })
+
+    const raw = msg.content[0].type === 'text' ? msg.content[0].text.trim() : '[]'
+    console.log('[classify] batch raw:', JSON.stringify(raw))
+
+    const results: { fileIndex: number; type: 'flat' | 'worn' | 'detail'; detailSlot: number }[] = []
 
     try {
-      const buffer = Buffer.from(await file.arrayBuffer())
-      const base64 = buffer.toString('base64')
-
-      const msg = await client.messages.create({
-        model: 'claude-haiku-4-5-20251001',
-        max_tokens: 40,
-        messages: [
-          {
-            role: 'user',
-            content: [
-              {
-                type: 'image',
-                source: {
-                  type: 'base64',
-                  media_type: mediaType as 'image/jpeg' | 'image/png' | 'image/webp' | 'image/gif',
-                  data: base64,
-                },
-              },
-              {
-                type: 'text',
-                text: `Analyse cette photo d'article vestimentaire. Réponds UNIQUEMENT avec du JSON valide, sans markdown ni texte supplémentaire.
-
-ÉTAPE 1 — Détermine le type (ordre de priorité strict, applique la première règle qui correspond) :
-1. Une personne porte l'article sur elle (vêtement sur le corps, chaussures aux pieds, sac tenu en main ou à l'épaule) ? → type "worn"
-2. L'article entier est visible à plat ou sur cintre, sans aucune personne ? → type "flat"
-3. Du texte lisible apparaît au premier plan sur une étiquette cousue, imprimée ou collée sur l'article ? → type "detail"
-4. Sinon (gros plan, défaut visible, emballage, accessoire) ? → type "detail"
-
-ÉTAPE 2 — Si et SEULEMENT SI type = "detail", détermine detailSlot :
-3 = étiquette marque (nom ou logo : KENZO, Nike, Zara…)
-4 = étiquette taille et/ou composition (M, 42, L/XL… avec ou sans matières)
-5 = étiquette composition seule (matières ou instructions d'entretien, sans taille)
-6 = gros plan sur l'article (zip, bouton, couture, texture, doublure…)
-7 = défaut visible (décoloration, trou, fil tiré, usure, trace…)
-8 = emballage ou accessoire séparé (boîte, sac de rangement, ceinture, lacets…)
-Si type = "flat" ou type = "worn" → detailSlot = 6 (champ ignoré)
-
-Réponds UNIQUEMENT avec ce JSON (sans texte avant ni après) :
-{"type":"flat"|"worn"|"detail","detailSlot":3|4|5|6|7|8}`,
-              },
-            ],
-          },
-        ],
-      })
-
-      const raw = msg.content[0].type === 'text' ? msg.content[0].text.trim() : ''
-      console.log(`[classify] file ${i} raw:`, JSON.stringify(raw))
-      let type: 'flat' | 'worn' | 'detail' = 'flat'
-      let detailSlot = 6
-
-      try {
-        const jsonMatch = raw.replace(/```(?:json)?/g, '').trim().match(/\{[^}]+\}/)
-        if (jsonMatch) {
-          const parsed = JSON.parse(jsonMatch[0])
-          if (['flat', 'worn', 'detail'].includes(parsed.type)) {
-            type = parsed.type as 'flat' | 'worn' | 'detail'
+      const match = raw.replace(/```(?:json)?/g, '').trim().match(/\[[\s\S]*\]/)
+      if (match) {
+        const parsed = JSON.parse(match[0]) as Array<{ index: number; type: string; detailSlot: number }>
+        for (const item of parsed) {
+          if (typeof item.index === 'number' && item.index >= 0 && item.index < files.length) {
+            const t: 'flat' | 'worn' | 'detail' = ['flat', 'worn', 'detail'].includes(item.type)
+              ? (item.type as 'flat' | 'worn' | 'detail')
+              : 'flat'
+            const ds = parseInt(String(item.detailSlot))
+            results.push({ fileIndex: item.index, type: t, detailSlot: [3, 4, 5, 6, 7, 8].includes(ds) ? ds : 6 })
           }
-          const ds = parseInt(String(parsed.detailSlot))
-          if ([3, 4, 5, 6, 7, 8].includes(ds)) detailSlot = ds
         }
-      } catch {
-        // keep defaults
       }
+    } catch { /* fallback below */ }
 
-      results.push({ fileIndex: i, type, detailSlot })
-    } catch (err) {
-      console.error(`Classify error for file ${i}:`, err)
-      results.push({ fileIndex: i, type: 'flat', detailSlot: 6 })
+    /* Ensure every file index has an entry */
+    const covered = new Set(results.map(r => r.fileIndex))
+    for (let i = 0; i < files.length; i++) {
+      if (!covered.has(i)) results.push({ fileIndex: i, type: 'flat', detailSlot: 6 })
     }
-  }
 
-  return NextResponse.json({ results })
+    return NextResponse.json({ results })
+  } catch (err) {
+    console.error('[classify] batch error:', err)
+    return NextResponse.json({
+      results: files.map((_, i) => ({ fileIndex: i, type: 'flat', detailSlot: 6 })),
+    })
+  }
 }

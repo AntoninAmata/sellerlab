@@ -115,6 +115,7 @@ const UI: Record<Lang, {
 
 interface Props {
   slots: PhotoSlot[]
+  aiPhotos: string[]
   recognition: RecognitionResult | null
   pricing: PriceResult | null
   annonce: GenerateResult | null
@@ -182,16 +183,17 @@ function CopyBtn({ text, label, copiedLabel }: { text: string; label: string; co
 
 /* ─── Composant principal ────────────────────────────────────────────────── */
 
-export default function ExportStep({ slots, recognition, pricing, annonce }: Props) {
+export default function ExportStep({ slots, aiPhotos, recognition, pricing, annonce }: Props) {
   const { lang } = useLang()
   const t = UI[lang] ?? UI.fr
   const [downloading, setDownloading] = useState(false)
   const filledSlots = slots.filter(s => s.file !== null)
+  const totalPhotos = filledSlots.length + aiPhotos.length
   const pkg = suggestPackage(recognition?.categorie.value ?? '', t)
 
   /* ── Téléchargement ZIP des photos ── */
   async function downloadZip() {
-    if (filledSlots.length === 0) return
+    if (totalPhotos === 0) return
     setDownloading(true)
     try {
       const JSZip = (await import('jszip')).default
@@ -199,14 +201,20 @@ export default function ExportStep({ slots, recognition, pricing, annonce }: Pro
       const folder = zip.folder('photos-vinted')!
 
       for (const slot of filledSlots) {
-        /* Slot 0 : préférer l'URL traitée (fond supprimé) si disponible */
-        const url = slot.id === 0
-          ? (slot.processedUrl ?? slot.preview)
-          : slot.preview
+        const url = slot.compositedUrl ?? slot.processedUrl ?? slot.preview
         if (!url) continue
-        const blob = await fetch(url).then(r => r.blob())
+        const fetchUrl = url.startsWith('http') ? `/api/proxy-image?url=${encodeURIComponent(url)}` : url
+        const blob = await fetch(fetchUrl).then(r => r.blob())
         const ext = blob.type === 'image/png' ? 'png' : 'jpg'
         folder.file(`photo-${String(slot.id + 1).padStart(2, '0')}.${ext}`, blob)
+      }
+
+      for (let i = 0; i < aiPhotos.length; i++) {
+        const url = aiPhotos[i]
+        const fetchUrl = `/api/proxy-image?url=${encodeURIComponent(url)}`
+        const blob = await fetch(fetchUrl).then(r => r.blob())
+        const ext = blob.type === 'image/png' ? 'png' : 'jpg'
+        folder.file(`ia-${String(i + 1).padStart(2, '0')}.${ext}`, blob)
       }
 
       const content = await zip.generateAsync({ type: 'blob' })
@@ -255,10 +263,10 @@ export default function ExportStep({ slots, recognition, pricing, annonce }: Pro
               <div className="flex items-center gap-2">
                 <Image className="w-4 h-4 text-indigo-500" />
                 <p className="text-xs font-bold text-gray-400 uppercase tracking-widest">
-                  {t.photos(filledSlots.length)}
+                  {t.photos(totalPhotos)}
                 </p>
               </div>
-              {filledSlots.length > 0 && (
+              {totalPhotos > 0 && (
                 <button
                   onClick={downloadZip}
                   disabled={downloading}
@@ -269,15 +277,25 @@ export default function ExportStep({ slots, recognition, pricing, annonce }: Pro
                 </button>
               )}
             </div>
-            {filledSlots.length > 0 ? (
+            {totalPhotos > 0 ? (
               <div className="flex gap-2 overflow-x-auto pb-1">
                 {filledSlots.map(slot => (
                   <img
                     key={slot.id}
-                    src={slot.id === 0 ? (slot.processedUrl ?? slot.preview ?? '') : (slot.preview ?? '')}
+                    src={slot.compositedUrl ?? slot.processedUrl ?? slot.preview ?? ''}
                     alt={`Photo ${slot.id + 1}`}
-                    className="w-14 h-14 object-cover rounded-lg border border-gray-100 shrink-0"
+                    className="w-14 h-14 object-contain bg-gray-50 rounded-lg border border-gray-100 shrink-0"
                   />
+                ))}
+                {aiPhotos.map((url, i) => (
+                  <div key={`ai-${i}`} className="relative shrink-0">
+                    <img
+                      src={url}
+                      alt={`IA ${i + 1}`}
+                      className="w-14 h-14 object-contain bg-purple-50 rounded-lg border border-purple-200"
+                    />
+                    <span className="absolute top-0.5 left-0.5 bg-purple-600 text-white text-[7px] font-bold px-1 py-0.5 rounded leading-none">IA</span>
+                  </div>
                 ))}
               </div>
             ) : (

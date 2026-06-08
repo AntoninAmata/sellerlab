@@ -1,6 +1,6 @@
 'use client'
 
-import { useState } from 'react'
+import { useState, useEffect, useRef } from 'react'
 import Link from 'next/link'
 import { Camera, ScanLine, Tag, FileText, Send, ArrowLeft, ChevronRight } from 'lucide-react'
 import PhotoUploadStep from './components/PhotoUploadStep'
@@ -161,9 +161,21 @@ export default function AppPage() {
 
   const [step, setStep] = useState(1)
   const [slots, setSlots] = useState<PhotoSlot[]>(makeSlots)
+  const [aiPhotos, setAiPhotos] = useState<string[]>([])
   const [recognitionResult, setRecognitionResult] = useState<RecognitionResult | null>(null)
   const [pricingResult, setPricingResult] = useState<PriceResult | null>(null)
   const [annonceResult, setAnnonceResult] = useState<GenerateResult | null>(null)
+
+  /* Reset de la génération quand l'utilisateur ajoute des infos complémentaires à l'étape 2 */
+  const prevMissingCountRef = useRef(0)
+  useEffect(() => {
+    const newCount = recognitionResult?.extraInfo?.missingInfos?.length ?? 0
+    if (newCount > prevMissingCountRef.current && annonceResult) {
+      setAnnonceResult(null)
+    }
+    prevMissingCountRef.current = newCount
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [recognitionResult?.extraInfo?.missingInfos?.length])
 
   const mainPhotoReady = slots[0].file !== null
     && slots[0].status !== 'uploading'
@@ -253,7 +265,7 @@ export default function AppPage() {
       {/* ── Contenu de l'étape ── */}
       <main className="flex-1 max-w-5xl w-full mx-auto px-4 sm:px-6 py-8">
         {step === 1 && (
-          <PhotoUploadStep slots={slots} setSlots={setSlots} />
+          <PhotoUploadStep slots={slots} setSlots={setSlots} aiPhotos={aiPhotos} setAiPhotos={setAiPhotos} />
         )}
 
         {step === 2 && (
@@ -283,6 +295,7 @@ export default function AppPage() {
         {step === 5 && (
           <ExportStep
             slots={slots}
+            aiPhotos={aiPhotos}
             recognition={recognitionResult}
             pricing={pricingResult}
             annonce={annonceResult}

@@ -178,10 +178,16 @@ Applique le ratio selon l'état ET le segment "${seg}" :
 ÉTAPE 2 — Pondération avec les données marché :
 ${existingMarche.prixMedianVinted !== null
   ? `Médiane = ${existingMarche.prixMedianVinted}€, annonces = ${existingMarche.nbAnnonces ?? 'N/D'}
-${(existingMarche.nbAnnonces ?? 3) >= 3
-    ? `→ Données suffisantes : prixSuggere = round(0.70 × ${existingMarche.prixMedianVinted} + 0.30 × prix_décote)`
-    : `→ Données partielles (peu d'annonces) : prixSuggere = round(0.50 × ${existingMarche.prixMedianVinted} + 0.50 × prix_décote)`}`
-  : '→ Pas de médiane : utilise uniquement le prix décote (ÉTAPE 1)'}
+${(prixAchatNeuf || existingMarche.prixNeufMarque)
+    ? (existingMarche.nbAnnonces ?? 0) >= 5
+      ? `→ Prix neuf disponible + ≥5 annonces : prixSuggere = round(0.60 × ${existingMarche.prixMedianVinted} + 0.40 × prix_décote)`
+      : (existingMarche.nbAnnonces ?? 0) >= 1
+      ? `→ Prix neuf disponible + 1-4 annonces : prixSuggere = round(0.40 × ${existingMarche.prixMedianVinted} + 0.60 × prix_décote)`
+      : `→ Prix neuf disponible + 0 annonces : prixSuggere = prix_décote`
+    : `→ Prix neuf non disponible, médiane disponible : prixSuggere = round(0.90 × ${existingMarche.prixMedianVinted})`}`
+  : (prixAchatNeuf || existingMarche.prixNeufMarque)
+    ? '→ Pas de médiane : prixSuggere = prix_décote'
+    : '→ Aucune donnée disponible : estimation IA basée sur catégorie + marque + état, confidence = "low"'}
 
 ${plateforme ? `AJUSTEMENT PLATEFORME (${plateforme}) :
 - Boutique officielle, Zalando, ASOS → qualité souvent supérieure, +5–10% possible
@@ -226,6 +232,29 @@ Réponds UNIQUEMENT avec ce JSON (sans markdown) :
         brand_segment: inputBrandSegment,
         marche: existingMarche,
       }
+
+      /* Bornes de sécurité : ±20%/+30% autour de la décote */
+      {
+        const decoteRatio = DECOTE_TABLE[body.etat]?.[seg] ?? null
+        let prixNeuf: number | null = prixAchatNeuf ?? null
+        if (!prixNeuf && existingMarche.prixNeufMarque) {
+          const raw = existingMarche.prixNeufMarque
+          if (raw.includes('-')) {
+            const [lo, hi] = raw.split('-').map(Number)
+            prixNeuf = Math.round((lo + hi) / 2)
+          } else {
+            prixNeuf = parseFloat(raw)
+          }
+        }
+        if (prixNeuf && decoteRatio) {
+          const prixDecote = Math.round(prixNeuf * decoteRatio)
+          result.prixSuggere = Math.max(
+            Math.round(prixDecote * 0.80),
+            Math.min(Math.round(prixDecote * 1.30), result.prixSuggere),
+          )
+        }
+      }
+
       logPricing(body, result, 'recalcul_rapide')
       return NextResponse.json(result)
     }
@@ -277,13 +306,17 @@ Applique le ratio selon l'état ET le segment de la marque classifiée :
 - La médiane est calculée sur les prix réellement vendus, pas les prix affichés
 - Si seulement 1 ou 2 annonces trouvées → confidence "medium" obligatoire
 
-ÉTAPE 3 — Pondération finale (LE MARCHÉ PRIME) :
-Si médiane Vinted disponible ET données suffisantes (≥3 annonces) :
-  prixSuggere = round(0.70 × médiane + 0.30 × prix_décote)
-Si médiane disponible mais données partielles (1-2 annonces) :
-  prixSuggere = round(0.50 × médiane + 0.50 × prix_décote)
-Si médiane non disponible :
+ÉTAPE 3 — Pondération finale :
+Si prix neuf disponible (déclaré ou trouvé) ET médiane Vinted disponible ET ≥5 annonces :
+  prixSuggere = round(0.60 × médiane + 0.40 × prix_décote)
+Si prix neuf disponible ET médiane Vinted disponible ET 1-4 annonces :
+  prixSuggere = round(0.40 × médiane + 0.60 × prix_décote)
+Si prix neuf disponible ET aucune annonce trouvée :
   prixSuggere = prix_décote
+Si prix neuf non disponible ET médiane Vinted disponible (quelle que soit la quantité d'annonces) :
+  prixSuggere = round(0.90 × médiane)
+Si aucune donnée disponible (ni prix neuf, ni médiane Vinted) :
+  prixSuggere = estimation IA basée sur catégorie + marque + état, confidence = "low"
 
 ${plateforme ? `AJUSTEMENT PLATEFORME (${plateforme}) :
 - Boutique officielle, Zalando, ASOS → qualité souvent supérieure, +5–10% possible
@@ -386,6 +419,29 @@ Réponds UNIQUEMENT avec ce JSON (sans markdown, sans texte avant ou après) :
 
     if (!result.prixSuggere || result.prixSuggere <= 0) {
       result.prixSuggere = 1
+    }
+
+    /* Bornes de sécurité : ±20%/+30% autour de la décote */
+    {
+      const seg = result.brand_segment ?? body.brand_segment ?? 'standard'
+      const decoteRatio = DECOTE_TABLE[body.etat]?.[seg] ?? null
+      let prixNeuf: number | null = body.prixAchatNeuf ?? null
+      if (!prixNeuf && result.marche?.prixNeufMarque) {
+        const raw = result.marche.prixNeufMarque
+        if (raw.includes('-')) {
+          const [lo, hi] = raw.split('-').map(Number)
+          prixNeuf = Math.round((lo + hi) / 2)
+        } else {
+          prixNeuf = parseFloat(raw)
+        }
+      }
+      if (prixNeuf && decoteRatio) {
+        const prixDecote = Math.round(prixNeuf * decoteRatio)
+        result.prixSuggere = Math.max(
+          Math.round(prixDecote * 0.80),
+          Math.min(Math.round(prixDecote * 1.30), result.prixSuggere),
+        )
+      }
     }
 
     logPricing(body, result, 'web_search')

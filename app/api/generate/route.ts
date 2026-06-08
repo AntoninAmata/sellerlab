@@ -125,18 +125,27 @@ export async function POST(req: NextRequest) {
     const tailleEquiv = computeEquivalences(taille, tailleSysteme ?? '')
 
     /* ── Lignes infos complémentaires ── */
-    const extraLines: string[] = []
-    if (extraInfo?.prixAchatNeuf) extraLines.push(`- Prix neuf : ${extraInfo.prixAchatNeuf}€`)
-    extraInfo?.missingInfos?.forEach(({ label, value }) => extraLines.push(`- ${label} : ${value}`))
+    const generalInfoLines: string[] = []
+    extraInfo?.missingInfos?.forEach(({ label, value }) => generalInfoLines.push(`- ${label} : ${value}`))
+
+    const dimLines: string[] = []
     if (extraInfo?.dimensions?.length) {
       const dimFR = extraInfo.dimensions.map(d => `${d.nom} ${d.valeur} cm`).join(' · ')
       const dimEN = extraInfo.dimensions.map(d => `${d.nomEN} ${d.valeur} cm`).join(' · ')
-      extraLines.push(`- Dimensions (FR) : ${dimFR}`)
-      extraLines.push(`- Dimensions (EN) : ${dimEN}`)
+      dimLines.push(`- Dimensions (FR) : ${dimFR}`)
+      dimLines.push(`- Dimensions (EN) : ${dimEN}`)
     }
-    const hasPrixNeuf    = !!(extraInfo?.prixAchatNeuf)
-    const hasOtherExtra  = !!(extraInfo?.missingInfos?.length || extraInfo?.dimensions?.length)
-    const hasExtraInfo   = extraLines.length > 0
+
+    const hasPrixNeuf     = !!(extraInfo?.prixAchatNeuf)
+    const hasGeneralInfos = generalInfoLines.length > 0
+    const hasDimensions   = dimLines.length > 0
+    const hasExtraInfo    = hasPrixNeuf || hasGeneralInfos || hasDimensions
+
+    const extraArticleBlock = [
+      extraInfo?.prixAchatNeuf ? `- Prix neuf : ${extraInfo.prixAchatNeuf}€` : '',
+      ...generalInfoLines,
+      ...dimLines,
+    ].filter(Boolean).join('\n')
     const tailleInfo = taille
       ? `${taille}${tailleEquiv ? ` (équivalences : ${tailleEquiv})` : ''}`
       : 'Non précisée'
@@ -145,7 +154,7 @@ export async function POST(req: NextRequest) {
 
     const prompt = `Tu es un expert en copywriting pour Vinted. Rédige une annonce optimisée pour vendre rapidement.
 
-Article :
+Contexte article (NE PAS copier ces champs en brut dans la description — les intégrer naturellement dans les bullets emoji) :
 - Marque : ${marque || 'Inconnue'}
 - Genre : ${genre}
 - Catégorie : ${categorie} > ${sousCategorie}
@@ -156,19 +165,20 @@ Article :
 - Style : ${style || 'Non précisé'}
 - Motif : ${motif || 'Non précisé'}
 ${defauts ? `- Défauts : ${defauts}` : ''}
-${hasExtraInfo ? extraLines.join('\n') : ''}
+${hasExtraInfo ? `\nInformations à reprendre TELLES QUELLES dans la description (bullets dédiés ci-dessous) :\n${extraArticleBlock}` : ''}
 
 FORMAT OBLIGATOIRE pour la description (emojis + bullet points aérés) :
 ✅ [État de l'article${defauts ? ' — mentionner les défauts honnêtement mais succinctement' : ''}]
 👕 [Description : type, coupe, couleur, style${style && style !== 'Non précisé' ? ` — terminer par une courte note d'occasion : "Idéal pour un look ${style}"` : ''}]
 🧵 [Composition : matières principales — OMETTRE ENTIÈREMENT cette ligne si la composition est inconnue]
 📏 [Taille : avec équivalences si disponibles — utiliser celles fournies ci-dessus]
-${hasPrixNeuf ? `💰 [Prix neuf : reprendre exactement le montant fourni (${extraInfo?.prixAchatNeuf}€)]\n` : ''}${hasOtherExtra ? '📐 Informations complémentaires : [reprendre exactement les données fournies ci-dessus — dimensions en cm, autres infos ; traduire les labels pour descriptionEN]\n' : ''}[🍂 Parfait pour l'automne/hiver OU ☀️ Idéal pour l'été — ajouter UNIQUEMENT si la saison est clairement pertinente selon le type d'article et les matières ; omettre sinon]
+${hasPrixNeuf ? `💰 [Prix neuf : reprendre exactement le montant fourni (${extraInfo?.prixAchatNeuf}€)]\n` : ''}${hasGeneralInfos ? '📋 Infos complémentaires : [reprendre EXACTEMENT chaque info de la liste ci-dessus — une par ligne, format "Label : Valeur" ; traduire les labels dans la langue de chaque description]\n' : ''}${hasDimensions ? '📐 Dimensions : [reprendre EXACTEMENT les mesures fournies ci-dessus en cm]\n' : ''}[🍂 Parfait pour l'automne/hiver OU ☀️ Idéal pour l'été — ajouter UNIQUEMENT si la saison est clairement pertinente selon le type d'article et les matières ; omettre sinon]
 📦 Envoi soigné et rapide
 💬 N'hésitez pas à me contacter si vous avez la moindre question !
 
 RÈGLES STRICTES :
 - Titre : maximum 60 caractères, OBLIGATOIREMENT en ${nativeLang} (${lang.toUpperCase()}), format : Marque + Type d'article + Matière + Couleur + Taille — adapter sans laisser de trous si certains éléments sont inconnus
+- JAMAIS de liste brute des champs contexte (Marque, Genre, Catégorie, État, Couleurs, Matières, Style, Motif) dans la description — ces infos sont intégrées naturellement dans les bullets emoji
 - JAMAIS d'information incertaine dans la description
 - Bullet points aérés, lisibles, 1 ligne par bullet
 - ${defauts ? 'Ne pas répéter les défauts dans la ligne 👕 si déjà dans ✅' : 'Ne mentionner aucun défaut'}

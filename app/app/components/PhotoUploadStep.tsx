@@ -3,11 +3,15 @@
 import { useState, useRef, useCallback, useEffect } from 'react'
 import {
   Camera, Tag, X, Lock, Upload, Sparkles,
-  GripVertical, AlertTriangle, Check, Wand2,
+  GripVertical, AlertTriangle, Check, Wand2, User,
 } from 'lucide-react'
 import type { PhotoSlot } from '../types'
 import type { Lang } from '@/lib/i18n'
 import { useLang } from '@/app/providers'
+
+/* ─── Plan tarifaire ─────────────────────────────────────────────────────── */
+
+type Plan = 'freemium' | 'premium' | 'pro'
 
 /* ─── Titres des 2 sections — 7 langues ──────────────────────────────────── */
 
@@ -89,47 +93,47 @@ const SLOT_LABELS: Record<Lang, string[]> = {
   ],
 }
 
-/* ─── Traductions bannière — 7 langues ───────────────────────────────────── */
+/* ─── Traductions bannière validation (freemium) — 7 langues ─────────────── */
 
 const BANNER_I18N: Record<Lang, { title: string; desc: string; btn: string }> = {
   fr: {
     title: "Vérifiez l'ordre de vos photos",
-    desc:  'Réorganisez par glisser-déposer si besoin, puis choisissez votre fond et lancez le traitement.',
+    desc:  'Réorganisez par glisser-déposer si besoin, puis lancez le traitement.',
     btn:   'Traiter les photos — Supprimer le fond',
   },
   en: {
     title: 'Check your photo order',
-    desc:  'Drag and drop to reorder if needed, then choose your background and start processing.',
+    desc:  'Drag and drop to reorder if needed, then start processing.',
     btn:   'Process photos — Remove background',
   },
   es: {
     title: 'Verifica el orden de tus fotos',
-    desc:  'Reorganiza arrastrando si es necesario, elige tu fondo y lanza el procesamiento.',
+    desc:  'Reorganiza arrastrando si es necesario, luego lanza el procesamiento.',
     btn:   'Procesar fotos — Eliminar fondo',
   },
   de: {
     title: 'Überprüfe deine Fotoreihenfolge',
-    desc:  'Bei Bedarf per Drag & Drop neu anordnen, Hintergrund wählen und Verarbeitung starten.',
+    desc:  'Bei Bedarf per Drag & Drop neu anordnen, dann Verarbeitung starten.',
     btn:   'Fotos verarbeiten — Hintergrund entfernen',
   },
   it: {
     title: "Verifica l'ordine delle foto",
-    desc:  'Riorganizza con drag & drop se necessario, scegli lo sfondo e avvia l\'elaborazione.',
+    desc:  "Riorganizza con drag & drop se necessario, poi avvia l'elaborazione.",
     btn:   'Elabora foto — Rimuovi sfondo',
   },
   nl: {
     title: "Controleer de volgorde van je foto's",
-    desc:  'Herorden indien nodig via slepen, kies je achtergrond en start de verwerking.',
+    desc:  'Herorden indien nodig via slepen, start dan de verwerking.',
     btn:   "Foto's verwerken — Achtergrond verwijderen",
   },
   pl: {
     title: 'Sprawdź kolejność zdjęć',
-    desc:  'Przeciągnij, aby zmienić kolejność, wybierz tło i uruchom przetwarzanie.',
+    desc:  'Przeciągnij, aby zmienić kolejność, następnie uruchom przetwarzanie.',
     btn:   'Przetwórz zdjęcia — Usuń tło',
   },
 }
 
-/* ─── Traductions zone de dépôt / import — 7 langues ────────────────────── */
+/* ─── Traductions zone d'import — 7 langues ─────────────────────────────── */
 
 const DROP_I18N: Record<Lang, {
   title: string
@@ -141,7 +145,6 @@ const DROP_I18N: Record<Lang, {
   importHint: string
   classified: (n: number) => string
   overflow: (kept: number, ignored: number) => string
-  bgPickerTitle: string
 }> = {
   fr: {
     title:          "Photos de l'article",
@@ -154,7 +157,6 @@ const DROP_I18N: Record<Lang, {
     classified:     (n) => `${n} photo${n > 1 ? 's' : ''} classée${n > 1 ? 's' : ''} par l'IA`,
     overflow:       (kept, ignored) =>
       `Seules les ${kept} premières photos ont été importées, ${ignored} photo${ignored > 1 ? 's ont' : ' a'} été ignorée${ignored > 1 ? 's' : ''}.`,
-    bgPickerTitle:  'Fond de la photo principale',
   },
   en: {
     title:          'Item photos',
@@ -167,7 +169,6 @@ const DROP_I18N: Record<Lang, {
     classified:     (n) => `${n} photo${n > 1 ? 's' : ''} classified by AI`,
     overflow:       (kept, ignored) =>
       `Only the first ${kept} photos were imported, ${ignored} photo${ignored > 1 ? 's were' : ' was'} skipped.`,
-    bgPickerTitle:  'Main photo background',
   },
   es: {
     title:          'Fotos del artículo',
@@ -180,7 +181,6 @@ const DROP_I18N: Record<Lang, {
     classified:     (n) => `${n} foto${n > 1 ? 's' : ''} clasificada${n > 1 ? 's' : ''} por la IA`,
     overflow:       (kept, ignored) =>
       `Solo se importaron las primeras ${kept} fotos, ${ignored} foto${ignored > 1 ? 's fueron' : ' fue'} ignorada${ignored > 1 ? 's' : ''}.`,
-    bgPickerTitle:  'Fondo de la foto principal',
   },
   de: {
     title:          'Artikelfotos',
@@ -193,7 +193,6 @@ const DROP_I18N: Record<Lang, {
     classified:     (n) => `${n} Foto${n > 1 ? 's' : ''} von der KI klassifiziert`,
     overflow:       (kept, ignored) =>
       `Nur die ersten ${kept} Fotos wurden importiert, ${ignored} Foto${ignored > 1 ? 's wurden' : ' wurde'} ignoriert.`,
-    bgPickerTitle:  'Hintergrund des Hauptfotos',
   },
   it: {
     title:          "Foto dell'articolo",
@@ -206,7 +205,6 @@ const DROP_I18N: Record<Lang, {
     classified:     (n) => `${n} foto classificat${n > 1 ? 'e' : 'a'} dall'IA`,
     overflow:       (kept, ignored) =>
       `Solo le prime ${kept} foto sono state importate, ${ignored} foto sono state ignorate.`,
-    bgPickerTitle:  'Sfondo della foto principale',
   },
   nl: {
     title:          "Foto's van het artikel",
@@ -219,7 +217,6 @@ const DROP_I18N: Record<Lang, {
     classified:     (n) => `${n} foto${n > 1 ? "'s" : ''} geclassificeerd door AI`,
     overflow:       (kept, ignored) =>
       `Alleen de eerste ${kept} foto's zijn geïmporteerd, ${ignored} foto${ignored > 1 ? "'s zijn" : ' is'} overgeslagen.`,
-    bgPickerTitle:  'Achtergrond hoofdfoto',
   },
   pl: {
     title:          'Zdjęcia przedmiotu',
@@ -232,7 +229,6 @@ const DROP_I18N: Record<Lang, {
     classified:     (n) => `${n} zdjęci${n === 1 ? 'e' : n < 5 ? 'a' : 'e'} sklasyfikowane przez AI`,
     overflow:       (kept, ignored) =>
       `Zaimportowano tylko pierwsze ${kept} zdjęcia, ${ignored} zdjęci${ignored === 1 ? 'e' : 'a'} zostało pominiętych.`,
-    bgPickerTitle:  'Tło głównego zdjęcia',
   },
 }
 
@@ -254,17 +250,26 @@ const BADGE_CLS = {
   optional:    'bg-gray-50 text-gray-400',
 } as const
 
-/* ─── Traductions astuce — 7 langues ─────────────────────────────────────── */
+/* ─── Traductions chargement + statut fond — 7 langues ───────────────────── */
 
-const LOADING_I18N: Record<Lang, { removingBg: string; applyingBg: string; loading: string }> = {
-  fr: { removingBg: 'Suppression fond…', applyingBg: 'Application fond…', loading: 'Chargement…' },
-  en: { removingBg: 'Removing background…', applyingBg: 'Applying background…', loading: 'Loading…' },
-  es: { removingBg: 'Eliminando fondo…', applyingBg: 'Aplicando fondo…', loading: 'Cargando…' },
-  de: { removingBg: 'Hintergrund entfernen…', applyingBg: 'Hintergrund anwenden…', loading: 'Laden…' },
-  it: { removingBg: 'Rimozione sfondo…', applyingBg: 'Applicazione sfondo…', loading: 'Caricamento…' },
-  nl: { removingBg: 'Achtergrond verwijderen…', applyingBg: 'Achtergrond toepassen…', loading: 'Laden…' },
-  pl: { removingBg: 'Usuwanie tła…', applyingBg: 'Stosowanie tła…', loading: 'Ładowanie…' },
+const LOADING_I18N: Record<Lang, {
+  removingBg: string
+  applyingBg: string
+  loading: string
+  bgRemoved: string
+  bgFailed: string
+  bgPro: string
+}> = {
+  fr: { removingBg: 'Suppression fond…', applyingBg: 'Application fond…', loading: 'Chargement…', bgRemoved: 'Fond supprimé', bgFailed: 'Fond indisponible', bgPro: 'Fond Pro' },
+  en: { removingBg: 'Removing background…', applyingBg: 'Applying background…', loading: 'Loading…', bgRemoved: 'Background removed', bgFailed: 'Background unavailable', bgPro: 'Pro background' },
+  es: { removingBg: 'Eliminando fondo…', applyingBg: 'Aplicando fondo…', loading: 'Cargando…', bgRemoved: 'Fondo eliminado', bgFailed: 'Fondo no disponible', bgPro: 'Fondo Pro' },
+  de: { removingBg: 'Hintergrund entfernen…', applyingBg: 'Hintergrund anwenden…', loading: 'Laden…', bgRemoved: 'Hintergrund entfernt', bgFailed: 'Hintergrund nicht verfügbar', bgPro: 'Pro-Hintergrund' },
+  it: { removingBg: 'Rimozione sfondo…', applyingBg: 'Applicazione sfondo…', loading: 'Caricamento…', bgRemoved: 'Sfondo rimosso', bgFailed: 'Sfondo non disponibile', bgPro: 'Sfondo Pro' },
+  nl: { removingBg: 'Achtergrond verwijderen…', applyingBg: 'Achtergrond toepassen…', loading: 'Laden…', bgRemoved: 'Achtergrond verwijderd', bgFailed: 'Achtergrond niet beschikbaar', bgPro: 'Pro-achtergrond' },
+  pl: { removingBg: 'Usuwanie tła…', applyingBg: 'Stosowanie tła…', loading: 'Ładowanie…', bgRemoved: 'Tło usunięte', bgFailed: 'Tło niedostępne', bgPro: 'Tło Pro' },
 }
+
+/* ─── Traductions astuce ──────────────────────────────────────────────────── */
 
 const TIP_I18N: Record<Lang, { unlock: string; lock: string }> = {
   fr: {
@@ -297,6 +302,194 @@ const TIP_I18N: Record<Lang, { unlock: string; lock: string }> = {
   },
 }
 
+/* ─── Traductions interface plans — 7 langues ────────────────────────────── */
+
+const PLAN_I18N: Record<Lang, {
+  bgPanelTitle: string
+  freemiumLockMsg: string
+  checkboxHint: string
+  processBtn: (n: number) => string
+  processing: string
+  mannequinTitle: string
+  mannequinMen: string
+  mannequinWomen: string
+  mannequinGenerate: string
+  mannequinGenerating: string
+  mannequinLockedMsg: string
+  mannequinCustomPromptLabel: string
+  teaserTitle: string
+  teaserDesc: string
+  badgeAI: string
+  noSlot0Msg: string
+  noMannequinMsg: string
+  rendTitle: string
+  modalClose: string
+  modalConfirmBg: string
+  modalConfirmMannequin: string
+}> = {
+  fr: {
+    bgPanelTitle:          'Fond des photos',
+    freemiumLockMsg:       'Passez au Premium pour tous les fonds',
+    checkboxHint:          'Cliquez sur une photo pour la sélectionner · puis traitez',
+    processBtn:            (n) => `Traiter ${n} photo${n > 1 ? 's' : ''} sélectionnée${n > 1 ? 's' : ''}`,
+    processing:            'Traitement en cours…',
+    mannequinTitle:        'Mannequin IA · 2 photos générées',
+    mannequinMen:          'Homme',
+    mannequinWomen:        'Femme',
+    mannequinGenerate:     'Générer 2 photos portées',
+    mannequinGenerating:   'Génération en cours…',
+    mannequinLockedMsg:    'Disponible avec le plan Pro',
+    mannequinCustomPromptLabel: 'Personnaliser la tenue',
+    teaserTitle:           'Mannequin IA',
+    teaserDesc:            "Générez automatiquement des photos portées avec l'IA",
+    badgeAI:               'IA',
+    noSlot0Msg:            "Ajoutez d'abord la photo principale",
+    noMannequinMsg:        'Sélectionnez un mannequin',
+    rendTitle:             '📸 RENDU — PHOTOS TRAITÉES',
+    modalClose:            'Fermer',
+    modalConfirmBg:        'Utiliser ce fond',
+    modalConfirmMannequin: 'Choisir ce style',
+  },
+  en: {
+    bgPanelTitle:          'Photo background',
+    freemiumLockMsg:       'Upgrade to Premium for all backgrounds',
+    checkboxHint:          'Click a photo to select it · then process',
+    processBtn:            (n) => `Process ${n} selected photo${n > 1 ? 's' : ''}`,
+    processing:            'Processing…',
+    mannequinTitle:        'AI Model · 2 photos generated',
+    mannequinMen:          'Men',
+    mannequinWomen:        'Women',
+    mannequinGenerate:     'Generate 2 worn photos',
+    mannequinGenerating:   'Generating…',
+    mannequinLockedMsg:    'Available with Pro plan',
+    mannequinCustomPromptLabel: 'Customize the outfit',
+    teaserTitle:           'AI Model',
+    teaserDesc:            'Automatically generate worn photos with AI',
+    badgeAI:               'AI',
+    noSlot0Msg:            'Add the main photo first',
+    noMannequinMsg:        'Select a model',
+    rendTitle:             '📸 RENDER — PROCESSED PHOTOS',
+    modalClose:            'Close',
+    modalConfirmBg:        'Use this background',
+    modalConfirmMannequin: 'Choose this style',
+  },
+  es: {
+    bgPanelTitle:          'Fondo de las fotos',
+    freemiumLockMsg:       'Pasa al Premium para todos los fondos',
+    checkboxHint:          'Haz clic en una foto para seleccionarla · luego procesa',
+    processBtn:            (n) => `Procesar ${n} foto${n > 1 ? 's' : ''} seleccionada${n > 1 ? 's' : ''}`,
+    processing:            'Procesando…',
+    mannequinTitle:        'Maniquí IA · 2 fotos generadas',
+    mannequinMen:          'Hombre',
+    mannequinWomen:        'Mujer',
+    mannequinGenerate:     'Generar 2 fotos vestidas',
+    mannequinGenerating:   'Generando…',
+    mannequinLockedMsg:    'Disponible con el plan Pro',
+    mannequinCustomPromptLabel: 'Personalizar el atuendo',
+    teaserTitle:           'Maniquí IA',
+    teaserDesc:            'Genera automáticamente fotos vestidas con IA',
+    badgeAI:               'IA',
+    noSlot0Msg:            'Añade primero la foto principal',
+    noMannequinMsg:        'Selecciona un maniquí',
+    rendTitle:             '📸 RESULTADO — FOTOS PROCESADAS',
+    modalClose:            'Cerrar',
+    modalConfirmBg:        'Usar este fondo',
+    modalConfirmMannequin: 'Elegir este estilo',
+  },
+  de: {
+    bgPanelTitle:          'Foto-Hintergrund',
+    freemiumLockMsg:       'Upgrade auf Premium für alle Hintergründe',
+    checkboxHint:          'Klicke ein Foto an · dann verarbeiten',
+    processBtn:            (n) => `${n} Foto${n > 1 ? 's' : ''} verarbeiten`,
+    processing:            'Wird verarbeitet…',
+    mannequinTitle:        'KI-Modell · 2 generierte Fotos',
+    mannequinMen:          'Männer',
+    mannequinWomen:        'Frauen',
+    mannequinGenerate:     '2 Anzieh-Fotos generieren',
+    mannequinGenerating:   'Wird generiert…',
+    mannequinLockedMsg:    'Verfügbar mit dem Pro-Plan',
+    mannequinCustomPromptLabel: 'Outfit anpassen',
+    teaserTitle:           'KI-Modell',
+    teaserDesc:            'Erstelle automatisch Anzieh-Fotos mit KI',
+    badgeAI:               'KI',
+    noSlot0Msg:            'Füge zuerst das Hauptfoto hinzu',
+    noMannequinMsg:        'Wähle ein Modell',
+    rendTitle:             '📸 VORSCHAU — BEARBEITETE FOTOS',
+    modalClose:            'Schließen',
+    modalConfirmBg:        'Hintergrund verwenden',
+    modalConfirmMannequin: 'Diesen Stil wählen',
+  },
+  it: {
+    bgPanelTitle:          'Sfondo delle foto',
+    freemiumLockMsg:       'Passa al Premium per tutti gli sfondi',
+    checkboxHint:          'Clicca una foto per selezionarla · poi elabora',
+    processBtn:            (n) => `Elabora ${n} foto selezionat${n > 1 ? 'e' : 'a'}`,
+    processing:            'Elaborazione in corso…',
+    mannequinTitle:        'Manichino IA · 2 foto generate',
+    mannequinMen:          'Uomo',
+    mannequinWomen:        'Donna',
+    mannequinGenerate:     'Genera 2 foto indossate',
+    mannequinGenerating:   'Generazione in corso…',
+    mannequinLockedMsg:    'Disponibile con il piano Pro',
+    mannequinCustomPromptLabel: "Personalizza l'outfit",
+    teaserTitle:           'Manichino IA',
+    teaserDesc:            "Genera automaticamente foto indossate con l'IA",
+    badgeAI:               'IA',
+    noSlot0Msg:            'Aggiungi prima la foto principale',
+    noMannequinMsg:        'Seleziona un manichino',
+    rendTitle:             '📸 RISULTATO — FOTO ELABORATE',
+    modalClose:            'Chiudi',
+    modalConfirmBg:        'Usa questo sfondo',
+    modalConfirmMannequin: 'Scegli questo stile',
+  },
+  nl: {
+    bgPanelTitle:          "Achtergrond foto's",
+    freemiumLockMsg:       'Upgrade naar Premium voor alle achtergronden',
+    checkboxHint:          "Klik op een foto om te selecteren · dan verwerken",
+    processBtn:            (n) => `Verwerk ${n} geselecteerde foto${n > 1 ? "'s" : ''}`,
+    processing:            'Bezig met verwerken…',
+    mannequinTitle:        "AI-model · 2 gegenereerde foto's",
+    mannequinMen:          'Man',
+    mannequinWomen:        'Vrouw',
+    mannequinGenerate:     "2 gedragen foto's genereren",
+    mannequinGenerating:   'Bezig met genereren…',
+    mannequinLockedMsg:    'Beschikbaar met het Pro-plan',
+    mannequinCustomPromptLabel: 'Outfit aanpassen',
+    teaserTitle:           'AI-model',
+    teaserDesc:            "Genereer automatisch gedragen foto's met AI",
+    badgeAI:               'AI',
+    noSlot0Msg:            'Voeg eerst de hoofdfoto toe',
+    noMannequinMsg:        'Selecteer een model',
+    rendTitle:             "📸 WEERGAVE — BEWERKTE FOTO'S",
+    modalClose:            'Sluiten',
+    modalConfirmBg:        'Gebruik achtergrond',
+    modalConfirmMannequin: 'Kies deze stijl',
+  },
+  pl: {
+    bgPanelTitle:          'Tło zdjęć',
+    freemiumLockMsg:       'Przejdź na Premium dla wszystkich teł',
+    checkboxHint:          'Kliknij zdjęcie aby wybrać · następnie przetwórz',
+    processBtn:            (n) => `Przetwórz ${n} wybrane zdjęci${n === 1 ? 'e' : 'a'}`,
+    processing:            'Przetwarzanie…',
+    mannequinTitle:        'Manekin IA · 2 wygenerowane zdjęcia',
+    mannequinMen:          'Mężczyzna',
+    mannequinWomen:        'Kobieta',
+    mannequinGenerate:     'Generuj 2 zdjęcia noszone',
+    mannequinGenerating:   'Generowanie…',
+    mannequinLockedMsg:    'Dostępne w planie Pro',
+    mannequinCustomPromptLabel: 'Dostosuj strój',
+    teaserTitle:           'Manekin IA',
+    teaserDesc:            'Automatycznie generuj zdjęcia noszone z AI',
+    badgeAI:               'AI',
+    noSlot0Msg:            'Najpierw dodaj główne zdjęcie',
+    noMannequinMsg:        'Wybierz manekin',
+    rendTitle:             '📸 PODGLĄD — PRZETWORZONE ZDJĘCIA',
+    modalClose:            'Zamknij',
+    modalConfirmBg:        'Użyj tego tła',
+    modalConfirmMannequin: 'Wybierz ten styl',
+  },
+}
+
 /* ─── Backgrounds — 23 choix (blanc CSS + 22 images IA bg-01…bg-22) ─────── */
 
 type BgDef =
@@ -312,9 +505,45 @@ const _IMAGE_BACKGROUNDS: BgDef[] = Array.from({ length: 22 }, (_, i) => ({
 }))
 
 const BACKGROUNDS: BgDef[] = [
-  { id: 0, label: 'Blanc pur', type: 'color', color: '#FFFFFF', preview: '#FFFFFF' },
+  { id: 0, label: 'Blanc pur', type: 'image', src: '/backgrounds/bg-white.jpg', preview: '/backgrounds/bg-white.jpg' },
   ..._IMAGE_BACKGROUNDS,
 ]
+
+/* ─── Mannequins — 20 hommes + 20 femmes ─────────────────────────────────── */
+
+const MEN_MANNEQUINS: string[] = [
+  'man-01', 'man-02', 'man-05', 'man-06', 'man-07',
+  'man-09', 'man-13', 'man-16', 'man-18', 'man-20',
+]
+const WOMEN_MANNEQUINS: string[] = [
+  'woman-01', 'woman-02', 'woman-04', 'woman-06', 'woman-07',
+  'woman-10', 'woman-13', 'woman-16', 'woman-18', 'woman-20',
+]
+
+/* ─── Resize image to max dimension (storage + classification) ───────────── */
+
+async function resizeImage(file: File | Blob, maxPx = 1024): Promise<Blob> {
+  return new Promise((resolve, reject) => {
+    const img = new Image()
+    const url = URL.createObjectURL(file)
+    img.onload = () => {
+      URL.revokeObjectURL(url)
+      const scale = Math.min(1, maxPx / Math.max(img.naturalWidth, img.naturalHeight))
+      const w     = Math.round(img.naturalWidth  * scale)
+      const h     = Math.round(img.naturalHeight * scale)
+      const canvas = document.createElement('canvas')
+      canvas.width  = w
+      canvas.height = h
+      canvas.getContext('2d')!.drawImage(img, 0, 0, w, h)
+      canvas.toBlob(
+        blob => blob ? resolve(blob) : reject(new Error('toBlob failed')),
+        'image/jpeg', 0.85,
+      )
+    }
+    img.onerror = () => { URL.revokeObjectURL(url); reject(new Error('img load failed')) }
+    img.src = url
+  })
+}
 
 /* ─── Compositing canvas : cutout PNG + fond ──────────────────────────────── */
 
@@ -342,7 +571,6 @@ async function compositeWithBackground(cutoutUrl: string, bg: BgDef): Promise<st
       } else {
         const bgImg = new Image()
         bgImg.onload = () => {
-          /* Couvre le canvas (cover) */
           const s  = Math.max(canvas.width / bgImg.naturalWidth, canvas.height / bgImg.naturalHeight)
           const bw = bgImg.naturalWidth  * s
           const bh = bgImg.naturalHeight * s
@@ -350,7 +578,6 @@ async function compositeWithBackground(cutoutUrl: string, bg: BgDef): Promise<st
           draw()
         }
         bgImg.onerror = () => {
-          /* Fallback blanc si image non trouvée */
           ctx.fillStyle = '#FFFFFF'
           ctx.fillRect(0, 0, canvas.width, canvas.height)
           draw()
@@ -366,7 +593,6 @@ async function compositeWithBackground(cutoutUrl: string, bg: BgDef): Promise<st
 /* ─── Définition des 15 slots ─────────────────────────────────────────────── */
 
 const SLOT_DEFS = [
-  /* Section 1 — Non portées (0-8) */
   { id: 0,  label: 'Photo recto — à plat ou sur cintre',        badge: 'required',    type: 'garment', bgRemoval: 'free' },
   { id: 1,  label: 'Photo verso',                                badge: 'recommended', type: 'garment', bgRemoval: 'pro'  },
   { id: 2,  label: 'Autre vue non portée',                       badge: 'recommended', type: 'garment', bgRemoval: 'pro'  },
@@ -376,7 +602,6 @@ const SLOT_DEFS = [
   { id: 6,  label: 'Autre photo (détail, défaut, emballage...)', badge: 'optional',    type: 'detail',  bgRemoval: 'none' },
   { id: 7,  label: 'Autre photo (détail, défaut, emballage...)', badge: 'optional',    type: 'detail',  bgRemoval: 'none' },
   { id: 8,  label: 'Autre photo (détail, défaut, emballage...)', badge: 'optional',    type: 'detail',  bgRemoval: 'none' },
-  /* Section 2 — Portées (9-14) */
   { id: 9,  label: 'Vue portée 1',                               badge: 'recommended', type: 'garment', bgRemoval: 'pro'  },
   { id: 10, label: 'Vue portée 2',                               badge: 'recommended', type: 'garment', bgRemoval: 'pro'  },
   { id: 11, label: 'Vue portée 3',                               badge: 'recommended', type: 'garment', bgRemoval: 'pro'  },
@@ -395,10 +620,6 @@ interface ClassifyResult {
   detailSlot: number
 }
 
-/* Assigne les slots selon le type détecté (ordre de priorité strict) :
-   - flat   → 0, 1, 2 dans l'ordre ; débordement → 6, 7, 8
-   - worn   → 9-14 dans l'ordre    ; débordement → 6, 7, 8
-   - detail → slot exact (3-8) si libre ; sinon → 6, 7, 8 */
 function assignSlots(
   classifications: ClassifyResult[],
   taken: Set<number>,
@@ -436,29 +657,44 @@ function assignSlots(
 interface Props {
   slots: PhotoSlot[]
   setSlots: React.Dispatch<React.SetStateAction<PhotoSlot[]>>
+  aiPhotos: string[]
+  setAiPhotos: (urls: string[]) => void
 }
 
 /* ─── Composant principal ─────────────────────────────────────────────────── */
 
-export default function PhotoUploadStep({ slots, setSlots }: Props) {
+export default function PhotoUploadStep({ slots, setSlots, aiPhotos, setAiPhotos }: Props) {
   const { lang } = useLang()
-  const [dragOverId, setDragOverId]           = useState<number | null>(null)
-  const [isClassifying, setIsClassifying]     = useState(false)
-  const [classifiedCount, setClassifiedCount] = useState<number | null>(null)
-  const [overflowCount, setOverflowCount]     = useState(0)
-  const [globalDragOver, setGlobalDragOver]   = useState(false)
-  const [selectedBg, setSelectedBg]           = useState(0)
+
+  /* Plan tarifaire (simulé — sera branché Stripe plus tard) */
+  const [plan, setPlan]                           = useState<Plan>('freemium')
+
+  const [dragOverId, setDragOverId]               = useState<number | null>(null)
+  const [isClassifying, setIsClassifying]         = useState(false)
+  const [classifiedCount, setClassifiedCount]     = useState<number | null>(null)
+  const [overflowCount, setOverflowCount]         = useState(0)
+  const [globalDragOver, setGlobalDragOver]       = useState(false)
+  const [selectedBg, setSelectedBg]               = useState(0)
   const [showValidationBanner, setShowValidationBanner] = useState(false)
 
-  /* URL du composite fond + cutout PNG pour le slot 0 */
-  const [compositedUrl, setCompositedUrl]     = useState<string | null>(null)
-  const [isCompositing, setIsCompositing]     = useState(false)
+  /* Premium / Pro — checkboxes suppression fond */
+  const [bgCheckedSlots, setBgCheckedSlots]       = useState<Set<number>>(new Set())
+  const [isProcessingBg, setIsProcessingBg]       = useState(false)
+
+  /* Pro — mannequin IA */
+  const [selectedMannequin, setSelectedMannequin] = useState<string | null>(null)
+  const [isGeneratingMannequin, setIsGeneratingMannequin] = useState(false)
+  const [mannequinCustomPrompt, setMannequinCustomPrompt] = useState('outfit adapted to the garment, contemporary 2026 casual style')
+
+  /* Compositing fond sur tous les slots traités */
+  const [compositedUrls, setCompositedUrls]       = useState<Record<number, string>>({})
+  const [isCompositing, setIsCompositing]         = useState(false)
 
   const dragSourceId = useRef<number | null>(null)
   const slotsRef     = useRef<PhotoSlot[]>(slots)
   useEffect(() => { slotsRef.current = slots }, [slots])
 
-  /* Charge la préférence fond depuis localStorage */
+  /* Charge la préférence fond */
   useEffect(() => {
     const saved = localStorage.getItem('sellerlab_bg_choice')
     if (saved !== null) setSelectedBg(parseInt(saved) || 0)
@@ -469,61 +705,100 @@ export default function PhotoUploadStep({ slots, setSlots }: Props) {
     localStorage.setItem('sellerlab_bg_choice', String(id))
   }
 
-  /* ── Compositing : se relance quand processedUrl ou fond change ── */
-  const slot0ProcessedUrl = slots[0]?.processedUrl ?? null
+  /* ── Compositing : recomposite tous les slots avec processedUrl ── */
+  const processedSlotKey = slots
+    .filter(s => s.processedUrl)
+    .map(s => `${s.id}:${s.processedUrl}`)
+    .join('|')
 
   useEffect(() => {
-    if (!slot0ProcessedUrl) { setCompositedUrl(null); return }
+    const processedSlots = slots.filter(s => s.processedUrl !== null)
+    if (processedSlots.length === 0) {
+      setCompositedUrls(prev => {
+        Object.values(prev).forEach(u => u && URL.revokeObjectURL(u))
+        return {}
+      })
+      setIsCompositing(false)
+      return
+    }
 
     let cancelled = false
     setIsCompositing(true)
 
-    compositeWithBackground(slot0ProcessedUrl, BACKGROUNDS[selectedBg]).then((url) => {
-      if (cancelled) { URL.revokeObjectURL(url); return }
-      setCompositedUrl((prev) => {
-        if (prev) URL.revokeObjectURL(prev)
-        return url
+    Promise.all(
+      processedSlots.map(slot =>
+        compositeWithBackground(slot.processedUrl!, BACKGROUNDS[selectedBg])
+          .then(url => ({ id: slot.id, url }))
+          .catch(() => ({ id: slot.id, url: '' }))
+      )
+    ).then(results => {
+      if (cancelled) return
+      const next: Record<number, string> = {}
+      results.forEach(({ id, url }) => { if (url) next[id] = url })
+
+      setCompositedUrls(prev => {
+        Object.values(prev).forEach(u => u && URL.revokeObjectURL(u))
+        return next
       })
+      /* Sync compositedUrl into slot state so ExportStep can use it */
+      setSlots(prev => prev.map(s => ({ ...s, compositedUrl: next[s.id] ?? undefined })))
+      setIsCompositing(false)
     }).catch(() => {
-      /* Fallback : affiche le PNG transparent */
-    }).finally(() => {
       if (!cancelled) setIsCompositing(false)
     })
 
     return () => { cancelled = true }
   // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [slot0ProcessedUrl, selectedBg])
+  }, [processedSlotKey, selectedBg])
 
-  const mainPhotoHasBg  = slot0ProcessedUrl !== null
-  const bannerI18n      = BANNER_I18N[lang] ?? BANNER_I18N.fr
-  const tipI18n         = TIP_I18N[lang]    ?? TIP_I18N.fr
-  const sectionTitles   = SECTION_TITLES[lang] ?? SECTION_TITLES.fr
-  const dropI18n        = DROP_I18N[lang]    ?? DROP_I18N.fr
-  const badgeI18n       = BADGE_I18N[lang]   ?? BADGE_I18N.fr
-  const loadingI18n     = LOADING_I18N[lang] ?? LOADING_I18N.fr
-  const filledCount     = slots.filter((s) => s.file !== null).length
+  /* ── Helpers i18n ── */
+  const planI18n      = PLAN_I18N[lang]      ?? PLAN_I18N.fr
+  const bannerI18n    = BANNER_I18N[lang]    ?? BANNER_I18N.fr
+  const tipI18n       = TIP_I18N[lang]       ?? TIP_I18N.fr
+  const sectionTitles = SECTION_TITLES[lang] ?? SECTION_TITLES.fr
+  const dropI18n      = DROP_I18N[lang]      ?? DROP_I18N.fr
+  const badgeI18n     = BADGE_I18N[lang]     ?? BADGE_I18N.fr
+  const loadingI18n   = LOADING_I18N[lang]   ?? LOADING_I18N.fr
+
+  const anySlotHasBg  = slots.some(s => s.processedUrl !== null)
+  const filledCount   = slots.filter(s => s.file !== null || (s.preview !== null && s.status !== 'empty')).length
+
+  /* Slots pouvant être sélectionnés pour le changement de fond */
+  const checkableSlotIds: number[] = (plan === 'premium' || plan === 'pro')
+    ? SLOT_DEFS.filter(d => d.type === 'garment').map(d => d.id)
+    : []
 
   /* ── Met à jour un seul slot ── */
   const updateSlot = useCallback(
     (id: number, patch: Partial<PhotoSlot>) =>
-      setSlots((prev) => prev.map((s) => (s.id === id ? { ...s, ...patch } : s))),
+      setSlots(prev => prev.map(s => s.id === id ? { ...s, ...patch } : s)),
     [setSlots],
   )
 
-  /* ── Charge un fichier dans un slot ── */
+  /* ── Charge un fichier dans un slot (plan-aware) ── */
   const loadFileInSlot = useCallback(
-    async (file: File, slotId: number, skipBgRemoval = false) => {
+    async (originalFile: File, slotId: number, skipBgRemoval = false) => {
+      /* Resize to max 1024 px before storing — prevents heavy files from breaking bg removal */
+      let file: File = originalFile
+      try {
+        const resized = await resizeImage(originalFile, 1024)
+        file = new File([resized], originalFile.name, { type: 'image/jpeg' })
+      } catch { /* keep original if canvas unavailable */ }
+
       const preview = URL.createObjectURL(file)
-      updateSlot(slotId, { file, preview, status: 'uploading', processedUrl: null, error: undefined })
-      await new Promise((r) => setTimeout(r, 200))
+      updateSlot(slotId, { file, preview, status: 'uploading', processedUrl: null, compositedUrl: undefined, error: undefined, isAiGenerated: undefined })
+      await new Promise(r => setTimeout(r, 200))
 
       const def = SLOT_DEFS[slotId as keyof typeof SLOT_DEFS] ?? SLOT_DEFS[0]
+      /* Auto-suppression fond uniquement pour freemium + slot 0 + upload individuel */
+      const shouldAutoRemove = plan === 'freemium' && (def as typeof SLOT_DEFS[0]).bgRemoval === 'free' && !skipBgRemoval
 
-      if ((def as typeof SLOT_DEFS[0]).bgRemoval === 'free' && !skipBgRemoval) {
+      if (shouldAutoRemove) {
         updateSlot(slotId, { status: 'processing-bg' })
         try {
           const { removeBackground } = await import('@imgly/background-removal')
-          const resultBlob = await removeBackground(file)
+          const blob = new Blob([await file.arrayBuffer()], { type: file.type || 'image/jpeg' })
+          const resultBlob = await removeBackground(blob)
           updateSlot(slotId, { status: 'done', processedUrl: URL.createObjectURL(resultBlob) })
         } catch (err) {
           console.error('Background removal failed:', err)
@@ -533,25 +808,94 @@ export default function PhotoUploadStep({ slots, setSlots }: Props) {
         updateSlot(slotId, { status: 'done' })
       }
     },
-    [updateSlot],
+    [updateSlot, plan],
   )
 
-  /* ── Validation : déclenche le remove-bg sur slot 0 ── */
+  /* ── Traiter les slots sélectionnés (premium / pro) ── */
+  const processCheckedSlots = useCallback(async () => {
+    if (isProcessingBg || bgCheckedSlots.size === 0) return
+    setIsProcessingBg(true)
+
+    const toProcess = Array.from(bgCheckedSlots)
+
+    /* Show loader on ALL selected photos at once */
+    setSlots(prev => prev.map(s =>
+      toProcess.includes(s.id) && s.file ? { ...s, status: 'processing-bg' as const } : s
+    ))
+
+    /* Process sequentially — WASM worker not designed for parallel calls */
+    for (const slotId of toProcess) {
+      const slot = slotsRef.current[slotId]
+      if (!slot?.file) continue
+      try {
+        const { removeBackground } = await import('@imgly/background-removal')
+        const blob = new Blob([await slot.file.arrayBuffer()], { type: slot.file.type || 'image/jpeg' })
+        const resultBlob = await removeBackground(blob)
+        updateSlot(slotId, { status: 'done', processedUrl: URL.createObjectURL(resultBlob) })
+      } catch (err) {
+        console.error(`Background removal failed (slot ${slotId}):`, err)
+        updateSlot(slotId, { status: 'done', processedUrl: null, error: 'bg_failed' })
+      }
+    }
+
+    setBgCheckedSlots(new Set())
+    setIsProcessingBg(false)
+  }, [isProcessingBg, bgCheckedSlots, updateSlot, setSlots])
+
+  /* ── Validation freemium : traite uniquement slot 0 ── */
   const handleValidateAndProcess = useCallback(async () => {
     const slot0 = slotsRef.current[0]
     if (slot0.file) {
       updateSlot(0, { status: 'processing-bg' })
       try {
         const { removeBackground } = await import('@imgly/background-removal')
-        const resultBlob = await removeBackground(slot0.file)
+        const blob = new Blob([await slot0.file.arrayBuffer()], { type: slot0.file.type || 'image/jpeg' })
+        const resultBlob = await removeBackground(blob)
         updateSlot(0, { status: 'done', processedUrl: URL.createObjectURL(resultBlob) })
       } catch (err) {
-        console.error('Background removal failed:', err)
+        console.error('Background removal failed (validate):', err)
         updateSlot(0, { status: 'done', processedUrl: null, error: 'bg_failed' })
       }
     }
     setShowValidationBanner(false)
   }, [updateSlot])
+
+  /* ── Génération mannequin IA (Pro) ── */
+  const handleGenerateMannequin = useCallback(async () => {
+    if (!selectedMannequin || isGeneratingMannequin) return
+    const slot0 = slotsRef.current[0]
+    if (!slot0.file) return
+
+    setIsGeneratingMannequin(true)
+    try {
+      const reader = new FileReader()
+      const base64 = await new Promise<string>((resolve, reject) => {
+        reader.onload  = () => resolve(reader.result as string)
+        reader.onerror = reject
+        reader.readAsDataURL(slot0.file!)
+      })
+
+      const res = await fetch('/api/generate-mannequin', {
+        method:  'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body:    JSON.stringify({
+          product_image: base64,
+          mannequin_id: selectedMannequin,
+          background_id: selectedBg,
+          outfit_prompt: mannequinCustomPrompt.trim() || undefined,
+        }),
+      })
+
+      if (!res.ok) throw new Error('Generation failed')
+      const { urls } = await res.json() as { urls: string[] }
+
+      setAiPhotos(urls.slice(0, 2))
+    } catch (err) {
+      console.error('Mannequin generation failed:', err)
+    } finally {
+      setIsGeneratingMannequin(false)
+    }
+  }, [selectedMannequin, isGeneratingMannequin, updateSlot, selectedBg, mannequinCustomPrompt])
 
   /* ── Upload multiple → classify → slots ── */
   const handleMultipleFiles = useCallback(
@@ -559,25 +903,36 @@ export default function PhotoUploadStep({ slots, setSlots }: Props) {
       if (!files.length) return
       setClassifiedCount(null)
       setOverflowCount(0)
+      setShowValidationBanner(false)
 
       if (files.length === 1) {
-        const firstEmpty = SLOT_DEFS.find((d) => !slotsRef.current[d.id]?.file)
+        const firstEmpty = SLOT_DEFS.find(d => !slotsRef.current[d.id]?.file)
         if (firstEmpty) loadFileInSlot(files[0], firstEmpty.id)
         return
       }
 
       setIsClassifying(true)
       try {
+        /* Resize all to 800 px then send in one batch (server now uses a single Claude call) */
+        const resizedBlobs = await Promise.all(
+          files.map(async (f, i) => {
+            try {
+              const b = await resizeImage(f, 800)
+              console.log(`[classify] file ${i}: ${f.name} → ${(b.size / 1024).toFixed(0)} KB`)
+              return b
+            } catch { return f }
+          })
+        )
         const fd = new FormData()
-        files.forEach((f) => fd.append('files', f))
-        const res = await fetch('/api/classify-photos', { method: 'POST', body: fd })
+        resizedBlobs.forEach((blob, i) => fd.append('files', blob, `photo_${i}.jpg`))
 
+        const res = await fetch('/api/classify-photos', { method: 'POST', body: fd })
         const rawResults: ClassifyResult[] = res.ok
           ? ((await res.json()) as { results: ClassifyResult[] }).results
           : files.map((_, i) => ({ fileIndex: i, type: 'flat' as const, detailSlot: 6 }))
 
         const taken = new Set<number>(
-          slotsRef.current.map((s, i) => (s.file ? i : -1)).filter((i) => i >= 0),
+          slotsRef.current.map((s, i) => (s.file ? i : -1)).filter(i => i >= 0),
         )
         const assignments = assignSlots(rawResults, taken)
         let ignored = 0
@@ -590,43 +945,51 @@ export default function PhotoUploadStep({ slots, setSlots }: Props) {
 
         setClassifiedCount(assignments.filter(a => a.slot !== null).length)
         if (ignored > 0) setOverflowCount(ignored)
-      } catch {
-        const empty = SLOT_DEFS.filter((d) => !slotsRef.current[d.id]?.file).map((d) => d.id)
+      } catch (err) {
+        console.error('[classify] handleMultipleFiles error:', err)
+        const empty = SLOT_DEFS.filter(d => !slotsRef.current[d.id]?.file).map(d => d.id)
         const batch = files.slice(0, empty.length)
         batch.forEach((f, i) => loadFileInSlot(f, empty[i], true))
         setClassifiedCount(batch.length)
         if (files.length > empty.length) setOverflowCount(files.length - empty.length)
       }
 
-      setShowValidationBanner(true)
+      /* Bannière validation uniquement en freemium */
+      if (plan === 'freemium') setShowValidationBanner(true)
       setIsClassifying(false)
     },
-    [loadFileInSlot],  // eslint-disable-line react-hooks/exhaustive-deps
+    [loadFileInSlot, plan],
   )
 
   /* ── Swap — désactivé après remove-bg ── */
   const swapSlots = useCallback(
     (sourceId: number, targetId: number) => {
-      if (mainPhotoHasBg || sourceId === targetId) return
-      setSlots((prev) => {
+      if (anySlotHasBg || sourceId === targetId) return
+      setSlots(prev => {
         const next = [...prev]
         next[sourceId] = { ...prev[targetId], id: sourceId }
         next[targetId] = { ...prev[sourceId], id: targetId }
         return next
       })
     },
-    [setSlots, mainPhotoHasBg],
+    [setSlots, anySlotHasBg],
   )
 
   const clearSlot = useCallback(
-    (slotId: number) =>
-      setSlots((prev) =>
-        prev.map((s) =>
+    (slotId: number) => {
+      setSlots(prev =>
+        prev.map(s =>
           s.id === slotId
-            ? { ...s, file: null, preview: null, processedUrl: null, status: 'empty', error: undefined }
+            ? { ...s, file: null, preview: null, processedUrl: null, status: 'empty', error: undefined, isAiGenerated: undefined }
             : s,
         ),
-      ),
+      )
+      setBgCheckedSlots(prev => {
+        const next = new Set(prev)
+        next.delete(slotId)
+        return next
+      })
+    },
     [setSlots],
   )
 
@@ -635,29 +998,33 @@ export default function PhotoUploadStep({ slots, setSlots }: Props) {
       e.preventDefault()
       setGlobalDragOver(false)
       if (e.dataTransfer.getData('slotId')) return
-      const images = Array.from(e.dataTransfer.files).filter((f) => f.type.startsWith('image/'))
+      const images = Array.from(e.dataTransfer.files).filter(f => f.type.startsWith('image/'))
       if (images.length) handleMultipleFiles(images)
     },
     [handleMultipleFiles],
   )
 
-  /* ── Style CSS du fond pour la bannière preview ── */
-  const bannerBgStyle: React.CSSProperties =
-    BACKGROUNDS[selectedBg].type === 'color'
-      ? { backgroundColor: (BACKGROUNDS[selectedBg] as { color: string }).color }
-      : { backgroundImage: `url(${(BACKGROUNDS[selectedBg] as { src: string }).src})`, backgroundSize: 'cover', backgroundPosition: 'center' }
+  const toggleBgCheck = (slotId: number) => {
+    setBgCheckedSlots(prev => {
+      const next = new Set(prev)
+      if (next.has(slotId)) next.delete(slotId)
+      else next.add(slotId)
+      return next
+    })
+  }
 
   return (
     <div className="space-y-3">
+
+      {/* ── Switcher plan (DEV uniquement — à retirer avant mise en prod) ── */}
+      <PlanSwitcher plan={plan} onChange={setPlan} />
 
       {/* ── En-tête ── */}
       <div>
         <h2 className="font-display font-extrabold text-2xl text-gray-900 mb-1">
           {dropI18n.title}
         </h2>
-        <p className="text-sm text-gray-500">
-          {dropI18n.subtitle}
-        </p>
+        <p className="text-sm text-gray-500">{dropI18n.subtitle}</p>
       </div>
 
       {/* ── Zone d'import multiple ── */}
@@ -688,7 +1055,7 @@ export default function PhotoUploadStep({ slots, setSlots }: Props) {
               <input
                 type="file" accept="image/*" multiple className="hidden"
                 onChange={(e) =>
-                  e.target.files && handleMultipleFiles(Array.from(e.target.files).filter((f) => f.type.startsWith('image/')))
+                  e.target.files && handleMultipleFiles(Array.from(e.target.files).filter(f => f.type.startsWith('image/')))
                 }
               />
               <div className="flex items-center gap-2 bg-white border border-gray-200 rounded-full px-5 py-2.5 hover:border-indigo-300 hover:shadow-sm transition-all text-sm font-semibold text-gray-700 select-none">
@@ -706,7 +1073,9 @@ export default function PhotoUploadStep({ slots, setSlots }: Props) {
         <div className="flex items-center gap-2 text-xs text-green-700 bg-green-50 border border-green-200 rounded-xl px-4 py-2.5 w-fit">
           <Check className="w-3.5 h-3.5 shrink-0" />
           <span className="font-semibold">{dropI18n.classified(classifiedCount)}</span>
-          <button onClick={() => setClassifiedCount(null)} className="ml-1 text-green-500 hover:text-green-700"><X className="w-3 h-3" /></button>
+          <button onClick={() => setClassifiedCount(null)} className="ml-1 text-green-500 hover:text-green-700">
+            <X className="w-3 h-3" />
+          </button>
         </div>
       )}
 
@@ -717,12 +1086,38 @@ export default function PhotoUploadStep({ slots, setSlots }: Props) {
           <span className="font-semibold">
             {dropI18n.overflow(classifiedCount ?? 15, overflowCount)}
           </span>
-          <button onClick={() => setOverflowCount(0)} className="ml-1 text-orange-400 hover:text-orange-700"><X className="w-3 h-3" /></button>
+          <button onClick={() => setOverflowCount(0)} className="ml-1 text-orange-400 hover:text-orange-700">
+            <X className="w-3 h-3" />
+          </button>
         </div>
       )}
 
-      {/* ── Bannière de validation ── */}
-      {showValidationBanner && !isClassifying && (
+      {/* ── Panneau fond — toujours visible ── */}
+      <BgPanel
+        plan={plan}
+        selectedBg={selectedBg}
+        onBgSelect={handleBgSelect}
+        checkedCount={bgCheckedSlots.size}
+        isProcessing={isProcessingBg}
+        onProcess={processCheckedSlots}
+        planI18n={planI18n}
+      />
+
+      {/* ── Panneau mannequin IA — actif en Pro, verrouillé en Freemium/Premium ── */}
+      <MannequinPanel
+        selectedMannequin={selectedMannequin}
+        onSelect={setSelectedMannequin}
+        onGenerate={handleGenerateMannequin}
+        isGenerating={isGeneratingMannequin}
+        hasSlot0Photo={!!slots[0]?.file}
+        isLocked={plan !== 'pro'}
+        planI18n={planI18n}
+        customPrompt={mannequinCustomPrompt}
+        onCustomPromptChange={setMannequinCustomPrompt}
+      />
+
+      {/* ── Bannière validation (freemium uniquement, après classification multiple) ── */}
+      {plan === 'freemium' && showValidationBanner && !isClassifying && (
         <div className="rounded-2xl border-2 border-indigo-200 bg-indigo-50 p-5 space-y-4">
           <div className="flex items-start gap-3">
             <div className="w-8 h-8 rounded-xl bg-indigo-100 flex items-center justify-center shrink-0">
@@ -732,22 +1127,13 @@ export default function PhotoUploadStep({ slots, setSlots }: Props) {
               <h3 className="font-display font-extrabold text-base text-indigo-900 mb-0.5">{bannerI18n.title}</h3>
               <p className="text-sm text-indigo-700">{bannerI18n.desc}</p>
             </div>
-            <button onClick={() => setShowValidationBanner(false)} className="ml-auto text-indigo-400 hover:text-indigo-600 transition-colors shrink-0">
+            <button
+              onClick={() => setShowValidationBanner(false)}
+              className="ml-auto text-indigo-400 hover:text-indigo-600 transition-colors shrink-0"
+            >
               <X className="w-4 h-4" />
             </button>
           </div>
-
-          {/* Fond + preview */}
-          <div>
-            <p className="text-[10px] font-bold text-indigo-400 uppercase tracking-widest mb-2">
-              {dropI18n.bgPickerTitle}
-            </p>
-
-            <div className="w-full h-16 rounded-xl overflow-hidden mb-3" style={bannerBgStyle} />
-
-            <BgPickerGrid selectedBg={selectedBg} onSelect={handleBgSelect} />
-          </div>
-
           <button
             onClick={handleValidateAndProcess}
             className="w-full flex items-center justify-center gap-2 bg-indigo-600 hover:bg-indigo-700 text-white font-semibold text-sm py-3.5 rounded-xl transition-all active:scale-[0.98]"
@@ -768,118 +1154,445 @@ export default function PhotoUploadStep({ slots, setSlots }: Props) {
             {filledCount > 0 && <p className="text-xs text-gray-400 font-medium">{filledCount}/15</p>}
           </div>
           <div className="grid grid-cols-3 gap-2 mb-2">
-            {SLOT_DEFS.slice(0, 3).map((def) => (
+            {SLOT_DEFS.slice(0, 3).map(def => (
               <SlotCard
                 key={def.id}
                 def={def}
                 slot={slots[def.id]}
                 isDragOver={dragOverId === def.id}
                 dragSourceId={dragSourceId}
-                locked={mainPhotoHasBg}
+                locked={anySlotHasBg}
                 displayLabel={SLOT_LABELS[lang]?.[def.id] ?? def.label}
                 badgeLabels={badgeI18n}
                 loadingLabels={loadingI18n}
-                overrideDisplayUrl={def.id === 0 ? (compositedUrl ?? undefined) : undefined}
-                isCompositedDisplay={def.id === 0 && compositedUrl !== null}
-                isCompositing={def.id === 0 && isCompositing}
-                onFileSelected={(file) => loadFileInSlot(file, def.id)}
+                showCheckbox={checkableSlotIds.includes(def.id) && !!slots[def.id]?.file && slots[def.id]?.status !== 'processing-bg'}
+                isChecked={bgCheckedSlots.has(def.id)}
+                onCheckToggle={() => toggleBgCheck(def.id)}
+                onFileSelected={file => loadFileInSlot(file, def.id)}
                 onSwap={swapSlots}
                 onClear={() => clearSlot(def.id)}
-                onDragOverChange={(over) => setDragOverId(over ? def.id : null)}
+                onDragOverChange={over => setDragOverId(over ? def.id : null)}
               />
             ))}
           </div>
           <div className="grid grid-cols-6 gap-2">
-            {SLOT_DEFS.slice(3, 9).map((def) => (
+            {SLOT_DEFS.slice(3, 9).map(def => (
               <SlotCard
                 key={def.id}
                 def={def}
                 slot={slots[def.id]}
                 isDragOver={dragOverId === def.id}
                 dragSourceId={dragSourceId}
-                locked={mainPhotoHasBg}
+                locked={anySlotHasBg}
                 displayLabel={SLOT_LABELS[lang]?.[def.id] ?? def.label}
                 badgeLabels={badgeI18n}
                 loadingLabels={loadingI18n}
-                onFileSelected={(file) => loadFileInSlot(file, def.id)}
+                onFileSelected={file => loadFileInSlot(file, def.id)}
                 onSwap={swapSlots}
                 onClear={() => clearSlot(def.id)}
-                onDragOverChange={(over) => setDragOverId(over ? def.id : null)}
+                onDragOverChange={over => setDragOverId(over ? def.id : null)}
               />
             ))}
           </div>
         </div>
-
-        {/* Sélecteur de fond (après remove-bg) */}
-        {mainPhotoHasBg && !showValidationBanner && (
-          <div className="bg-gray-50 border border-gray-100 rounded-2xl p-4">
-            <p className="text-xs font-bold text-gray-400 uppercase tracking-widest mb-3">Fond de la photo principale</p>
-            <BgPickerGrid selectedBg={selectedBg} onSelect={handleBgSelect} />
-          </div>
-        )}
 
         {/* SECTION 2 — Photos portées (slots 9–14) */}
         <div>
           <p className="text-[10px] font-bold text-gray-400 tracking-widest mb-1.5">{sectionTitles.s2}</p>
           <div className="grid grid-cols-6 gap-2">
-            {SLOT_DEFS.slice(9).map((def) => (
+            {SLOT_DEFS.slice(9).map(def => (
               <SlotCard
                 key={def.id}
                 def={def}
                 slot={slots[def.id]}
                 isDragOver={dragOverId === def.id}
                 dragSourceId={dragSourceId}
-                locked={mainPhotoHasBg}
+                locked={anySlotHasBg}
                 displayLabel={SLOT_LABELS[lang]?.[def.id] ?? def.label}
                 badgeLabels={badgeI18n}
                 loadingLabels={loadingI18n}
-                onFileSelected={(file) => loadFileInSlot(file, def.id)}
+                showCheckbox={checkableSlotIds.includes(def.id) && !!slots[def.id]?.file && slots[def.id]?.status !== 'processing-bg'}
+                isChecked={bgCheckedSlots.has(def.id)}
+                onCheckToggle={() => toggleBgCheck(def.id)}
+                onFileSelected={file => loadFileInSlot(file, def.id)}
                 onSwap={swapSlots}
                 onClear={() => clearSlot(def.id)}
-                onDragOverChange={(over) => setDragOverId(over ? def.id : null)}
+                onDragOverChange={over => setDragOverId(over ? def.id : null)}
               />
             ))}
           </div>
+
         </div>
+
+        {/* ── SECTION 3 — RENDU (photos traitées + mannequin IA) ── */}
+        {(Object.keys(compositedUrls).length > 0 || aiPhotos.length > 0) && (
+          <div>
+            <p className="text-[10px] font-bold text-gray-400 tracking-widest mb-1.5">{planI18n.rendTitle}</p>
+            <div className="grid grid-cols-4 gap-2">
+              {Object.entries(compositedUrls).map(([id, url]) => (
+                <div key={id} className="relative aspect-square rounded-xl overflow-hidden border border-green-200 shadow-sm bg-gray-50">
+                  <img src={url} alt={`Rendu ${id}`} className="w-full h-full object-contain" draggable={false} />
+                  <div className="absolute top-1 left-1">
+                    <span className="bg-green-500 text-white text-[8px] font-bold px-1.5 py-0.5 rounded shadow">✓</span>
+                  </div>
+                </div>
+              ))}
+              {aiPhotos.map((url, i) => (
+                <div key={`ai-${i}`} className="relative aspect-square rounded-xl overflow-hidden border border-purple-200 shadow-sm bg-gray-50">
+                  <img src={url} alt={`IA ${i + 1}`} className="w-full h-full object-contain" draggable={false} />
+                  <div className="absolute top-1 left-1">
+                    <span className="bg-purple-600 text-white text-[8px] font-bold px-1.5 py-0.5 rounded shadow">{planI18n.badgeAI}</span>
+                  </div>
+                </div>
+              ))}
+            </div>
+          </div>
+        )}
 
         {/* ── Astuce ── */}
         <p className="text-xs text-gray-400 text-center pb-2">
-          {mainPhotoHasBg ? tipI18n.lock : tipI18n.unlock}
+          {anySlotHasBg ? tipI18n.lock : tipI18n.unlock}
         </p>
 
-      </div>{/* /max-w-[500px] */}
+      </div>
     </div>
   )
 }
 
-/* ─── BgPickerGrid ────────────────────────────────────────────────────────── */
+/* ─── PlanSwitcher (dev uniquement) ──────────────────────────────────────── */
 
-function BgPickerGrid({ selectedBg, onSelect }: { selectedBg: number; onSelect: (id: number) => void }) {
+function PlanSwitcher({ plan, onChange }: { plan: Plan; onChange: (p: Plan) => void }) {
   return (
-    <div className="flex gap-2 overflow-x-auto pb-1 snap-x snap-mandatory">
-      {BACKGROUNDS.map((bg) => (
-        <button
-          key={bg.id}
-          onClick={() => onSelect(bg.id)}
-          title={bg.label}
-          className={`snap-start shrink-0 relative w-16 h-16 rounded-xl overflow-hidden transition-all ${
-            selectedBg === bg.id
-              ? 'ring-2 ring-indigo-500 ring-offset-2 scale-[1.06] shadow-md shadow-indigo-200'
-              : 'ring-1 ring-gray-200 hover:ring-indigo-300'
-          }`}
-        >
-          {bg.type === 'color' ? (
-            <div className="w-full h-full" style={{ backgroundColor: bg.color }} />
-          ) : (
-            <img src={bg.src} alt={bg.label} className="w-full h-full object-cover" draggable={false} />
+    <div className="flex items-center gap-2 bg-amber-50 border border-amber-200 rounded-xl px-3 py-2">
+      <span className="text-[10px] font-bold text-amber-500 uppercase tracking-wider shrink-0">DEV</span>
+      <div className="flex gap-1">
+        {(['freemium', 'premium', 'pro'] as Plan[]).map(p => (
+          <button
+            key={p}
+            onClick={() => onChange(p)}
+            className={`text-xs font-semibold px-3 py-1 rounded-lg transition-all ${
+              plan === p
+                ? 'bg-amber-400 text-white shadow-sm'
+                : 'text-amber-600 hover:bg-amber-100'
+            }`}
+          >
+            {p.charAt(0).toUpperCase() + p.slice(1)}
+          </button>
+        ))}
+      </div>
+    </div>
+  )
+}
+
+/* ─── BgPanel ─────────────────────────────────────────────────────────────── */
+
+interface BgPanelProps {
+  plan: Plan
+  selectedBg: number
+  onBgSelect: (id: number) => void
+  checkedCount: number
+  isProcessing: boolean
+  onProcess: () => void
+  planI18n: typeof PLAN_I18N.fr
+}
+
+function BgPanel({ plan, selectedBg, onBgSelect, checkedCount, isProcessing, onProcess, planI18n }: BgPanelProps) {
+  const [showPreview, setShowPreview] = useState(false)
+  const currentBg = BACKGROUNDS[selectedBg] ?? BACKGROUNDS[0]
+
+  return (
+    <div className="bg-blue-50 border border-blue-100 rounded-2xl p-4 space-y-3">
+      <p className="text-[10px] font-bold text-blue-400 uppercase tracking-widest">{planI18n.bgPanelTitle}</p>
+
+      <div className="flex gap-2 overflow-x-auto pb-1 snap-x snap-mandatory">
+        {BACKGROUNDS.map(bg => {
+          const isLocked = plan === 'freemium' && bg.id !== 0
+          return (
+            <button
+              key={bg.id}
+              onClick={() => { if (!isLocked) { onBgSelect(bg.id); setShowPreview(true) } }}
+              title={bg.label}
+              disabled={isLocked}
+              className={`relative snap-start shrink-0 w-16 h-16 rounded-xl overflow-hidden transition-all ${
+                isLocked ? 'cursor-not-allowed' : 'cursor-pointer'
+              } ${
+                selectedBg === bg.id && !isLocked
+                  ? 'ring-2 ring-indigo-500 ring-offset-2 scale-[1.06] shadow-md shadow-indigo-200'
+                  : isLocked
+                  ? 'ring-1 ring-gray-200 opacity-60'
+                  : 'ring-1 ring-gray-200 hover:ring-indigo-300'
+              }`}
+            >
+              {bg.type === 'color' ? (
+                <div className="w-full h-full" style={{ backgroundColor: bg.color }} />
+              ) : (
+                <img src={bg.src} alt={bg.label} className="w-full h-full object-cover" draggable={false} />
+              )}
+              {selectedBg === bg.id && !isLocked && (
+                <div className="absolute inset-0 flex items-center justify-center bg-indigo-600/20">
+                  <Check className="w-4 h-4 text-white drop-shadow-md" />
+                </div>
+              )}
+              {isLocked && (
+                <div className="absolute inset-0 flex items-center justify-center bg-black/25">
+                  <Lock className="w-3 h-3 text-white/90" />
+                </div>
+              )}
+            </button>
+          )
+        })}
+      </div>
+
+      {/* Inline preview — s'affiche au clic sur une vignette, se ferme sur CTA */}
+      {showPreview && plan !== 'freemium' && (
+        <div className="rounded-xl overflow-hidden border border-blue-200 shadow-sm">
+          <div className="w-full h-28">
+            {currentBg.type === 'color' ? (
+              <div className="w-full h-full" style={{ backgroundColor: currentBg.color }} />
+            ) : (
+              <img src={currentBg.src} alt={currentBg.label} className="w-full h-full object-contain" draggable={false} />
+            )}
+          </div>
+          <div className="p-2 border-t border-blue-100">
+            <button
+              onClick={() => setShowPreview(false)}
+              className="w-full flex items-center justify-center gap-2 font-semibold text-sm py-2.5 rounded-xl bg-indigo-600 hover:bg-indigo-700 text-white active:scale-[0.98] transition-all"
+            >
+              <Check className="w-4 h-4" />
+              {planI18n.modalConfirmBg}
+            </button>
+          </div>
+        </div>
+      )}
+
+      {plan === 'freemium' ? (
+        <p className="text-xs text-blue-500 flex items-center gap-1.5">
+          <Lock className="w-3 h-3 shrink-0" />
+          {planI18n.freemiumLockMsg}
+        </p>
+      ) : (
+        <>
+          <p className="text-xs text-blue-600">{planI18n.checkboxHint}</p>
+          {checkedCount > 0 && (
+            <button
+              onClick={onProcess}
+              disabled={isProcessing}
+              className={`w-full flex items-center justify-center gap-2 font-semibold text-sm py-3 rounded-xl transition-all ${
+                !isProcessing
+                  ? 'bg-indigo-600 hover:bg-indigo-700 text-white active:scale-[0.98]'
+                  : 'bg-indigo-100 text-indigo-400 cursor-wait'
+              }`}
+            >
+              {isProcessing ? (
+                <>
+                  <div className="w-4 h-4 border-2 border-indigo-400 border-t-transparent rounded-full animate-spin" />
+                  {planI18n.processing}
+                </>
+              ) : (
+                <>
+                  <Wand2 className="w-4 h-4" />
+                  {planI18n.processBtn(checkedCount)}
+                </>
+              )}
+            </button>
           )}
-          {selectedBg === bg.id && (
-            <div className="absolute inset-0 flex items-center justify-center bg-indigo-600/20">
-              <Check className="w-4 h-4 text-white drop-shadow-md" />
-            </div>
+        </>
+      )}
+    </div>
+  )
+}
+
+/* ─── MannequinPanel (Pro + teaser verrouillé Freemium/Premium) ────────────── */
+
+interface MannequinPanelProps {
+  selectedMannequin: string | null
+  onSelect: (id: string) => void
+  onGenerate: () => void
+  isGenerating: boolean
+  hasSlot0Photo: boolean
+  isLocked?: boolean
+  planI18n: typeof PLAN_I18N.fr
+  customPrompt: string
+  onCustomPromptChange: (v: string) => void
+}
+
+function MannequinPanel({ selectedMannequin, onSelect, onGenerate, isGenerating, hasSlot0Photo, isLocked = false, planI18n, customPrompt, onCustomPromptChange }: MannequinPanelProps) {
+  const [gender, setGender]             = useState<'men' | 'women'>('men')
+  const [previewId, setPreviewId]       = useState<string | null>(null)
+  const [showCustomPrompt, setShowCustomPrompt] = useState(false)
+  const canGenerate = !!selectedMannequin && hasSlot0Photo && !isLocked
+  const mannequins  = gender === 'men' ? MEN_MANNEQUINS : WOMEN_MANNEQUINS
+
+  return (
+    <div className={`bg-purple-50 border border-purple-100 rounded-2xl p-4 space-y-3 ${isLocked ? 'opacity-70' : ''}`}>
+      <div className="flex items-center gap-2">
+        <div className="w-8 h-8 rounded-xl bg-purple-100 flex items-center justify-center shrink-0">
+          <User className="w-4 h-4 text-purple-600" />
+        </div>
+        <h3 className="font-display font-extrabold text-base text-purple-900">{planI18n.mannequinTitle}</h3>
+        {isLocked && (
+          <span className="text-[9px] font-bold bg-indigo-100 text-indigo-600 px-1.5 py-0.5 rounded-full uppercase tracking-wide ml-1">Pro</span>
+        )}
+      </div>
+
+      {/* Gender pills — navigation autorisée sur tous les plans */}
+      <div className="flex gap-2">
+        {(['men', 'women'] as const).map(g => (
+          <button
+            key={g}
+            onClick={() => setGender(g)}
+            className={`flex-1 text-xs font-semibold py-2 rounded-xl transition-all ${
+              gender === g
+                ? 'bg-purple-600 text-white shadow-sm'
+                : 'bg-white text-purple-500 border border-purple-200 hover:border-purple-400'
+            }`}
+          >
+            {g === 'men' ? planI18n.mannequinMen : planI18n.mannequinWomen}
+          </button>
+        ))}
+      </div>
+
+      {/* Mannequin grid — thumbnails cropped to head */}
+      <div className="flex gap-2 overflow-x-auto pb-1 snap-x">
+        {mannequins.map(id => (
+          <button
+            key={id}
+            onClick={() => { if (!isLocked) { onSelect(id); setPreviewId(id) } }}
+            className={`relative snap-start shrink-0 w-16 h-16 rounded-xl overflow-hidden transition-all ${
+              selectedMannequin === id
+                ? 'ring-2 ring-purple-500 ring-offset-1 scale-[1.06]'
+                : 'ring-1 ring-purple-200 hover:ring-purple-400'
+            }`}
+          >
+            <img
+              src={`/mannequins/${id}.jpg`} alt={id}
+              className="w-full h-full object-cover"
+              style={{ objectPosition: '50% 0%' }}
+              draggable={false}
+            />
+            {isLocked && (
+              <div className="absolute inset-0 flex items-center justify-center bg-black/30">
+                <Lock className="w-3 h-3 text-white drop-shadow" />
+              </div>
+            )}
+            {!isLocked && selectedMannequin === id && (
+              <div className="absolute inset-0 flex items-center justify-center bg-purple-600/20">
+                <Check className="w-4 h-4 text-white drop-shadow" />
+              </div>
+            )}
+          </button>
+        ))}
+      </div>
+
+      {/* Inline full-body preview — shown below grid on click (Pro only) */}
+      {!isLocked && previewId && (
+        <div className="rounded-xl overflow-hidden border border-purple-200 bg-white shadow-sm">
+          <div className="relative">
+            <img
+              src={`/mannequins/${previewId}.jpg`}
+              alt={previewId}
+              className="w-full object-contain"
+              style={{ maxHeight: '220px' }}
+              draggable={false}
+            />
+            <button
+              onClick={() => setPreviewId(null)}
+              className="absolute top-2 right-2 bg-white/90 text-gray-500 text-[10px] font-bold w-6 h-6 rounded-full shadow hover:bg-white transition-colors flex items-center justify-center"
+            >
+              ×
+            </button>
+          </div>
+          <div className="p-2 border-t border-purple-100">
+            <button
+              onClick={() => setPreviewId(null)}
+              className="w-full flex items-center justify-center gap-2 font-semibold text-sm py-2.5 rounded-xl bg-indigo-600 hover:bg-indigo-700 text-white active:scale-[0.98] transition-all"
+            >
+              <Check className="w-4 h-4" />
+              {planI18n.modalConfirmMannequin}
+            </button>
+          </div>
+        </div>
+      )}
+
+      {/* Champ prompt personnalisé — Pro uniquement, replié par défaut */}
+      {!isLocked && (
+        <div>
+          <button
+            type="button"
+            onClick={() => setShowCustomPrompt(v => !v)}
+            className="w-full flex items-center justify-between gap-2 text-sm font-semibold text-purple-600 bg-purple-50 hover:bg-purple-100 border border-purple-200 rounded-xl px-3 py-2.5 transition-colors"
+          >
+            <span>{planI18n.mannequinCustomPromptLabel}</span>
+            <span className="text-purple-400 text-base leading-none">{showCustomPrompt ? '▾' : '▸'}</span>
+          </button>
+          {showCustomPrompt && (
+            <textarea
+              value={customPrompt}
+              onChange={e => onCustomPromptChange(e.target.value)}
+              rows={2}
+              className="mt-1.5 w-full text-xs rounded-xl border border-purple-200 bg-white px-3 py-2 text-gray-700 focus:outline-none focus:ring-2 focus:ring-purple-300 resize-none"
+            />
           )}
-        </button>
-      ))}
+        </div>
+      )}
+
+      {/* Bouton générer */}
+      <button
+        onClick={!isLocked ? onGenerate : undefined}
+        disabled={!canGenerate || isGenerating}
+        className={`w-full flex items-center justify-center gap-2 font-semibold text-sm py-3 rounded-xl transition-all ${
+          canGenerate && !isGenerating
+            ? 'bg-purple-600 hover:bg-purple-700 text-white active:scale-[0.98]'
+            : 'bg-purple-100 text-purple-400 cursor-not-allowed'
+        }`}
+      >
+        {isGenerating ? (
+          <>
+            <div className="w-4 h-4 border-2 border-purple-400 border-t-transparent rounded-full animate-spin" />
+            {planI18n.mannequinGenerating}
+          </>
+        ) : (
+          <>
+            <Sparkles className="w-4 h-4" />
+            {planI18n.mannequinGenerate}
+          </>
+        )}
+      </button>
+
+      {isLocked ? (
+        <p className="text-xs text-purple-500 flex items-center justify-center gap-1.5">
+          <Lock className="w-3 h-3 shrink-0" />
+          {planI18n.mannequinLockedMsg}
+        </p>
+      ) : (
+        <>
+          {!hasSlot0Photo && (
+            <p className="text-xs text-purple-400 text-center">{planI18n.noSlot0Msg}</p>
+          )}
+          {hasSlot0Photo && !selectedMannequin && (
+            <p className="text-xs text-purple-400 text-center">{planI18n.noMannequinMsg}</p>
+          )}
+        </>
+      )}
+    </div>
+  )
+}
+
+/* ─── MannequinTeaser (kept for reference) ─────────────────────────────────── */
+
+function MannequinTeaser({ planI18n }: { planI18n: typeof PLAN_I18N.fr }) {
+  return (
+    <div className="mt-3 flex items-center gap-3 bg-gray-50 border border-dashed border-gray-200 rounded-2xl p-4">
+      <div className="w-9 h-9 rounded-xl bg-gray-100 flex items-center justify-center shrink-0">
+        <Lock className="w-4 h-4 text-gray-400" />
+      </div>
+      <div className="flex-1 min-w-0">
+        <div className="flex items-center gap-2 mb-0.5">
+          <span className="font-display font-extrabold text-sm text-gray-500">{planI18n.teaserTitle}</span>
+          <span className="text-[9px] font-bold bg-indigo-100 text-indigo-600 px-1.5 py-0.5 rounded-full uppercase tracking-wide">Pro</span>
+        </div>
+        <p className="text-xs text-gray-400 leading-tight">{planI18n.teaserDesc}</p>
+      </div>
     </div>
   )
 }
@@ -894,10 +1607,15 @@ interface SlotCardProps {
   locked?: boolean
   displayLabel: string
   badgeLabels: { required: string; recommended: string; optional: string }
-  loadingLabels: { removingBg: string; applyingBg: string; loading: string }
+  loadingLabels: { removingBg: string; applyingBg: string; loading: string; bgRemoved: string; bgFailed: string; bgPro: string }
   overrideDisplayUrl?: string
   isCompositedDisplay?: boolean
   isCompositing?: boolean
+  showCheckbox?: boolean
+  isChecked?: boolean
+  onCheckToggle?: () => void
+  isAiGenerated?: boolean
+  aiBadgeLabel?: string
   onFileSelected: (file: File) => void
   onSwap: (sourceId: number, targetId: number) => void
   onClear: () => void
@@ -907,24 +1625,17 @@ interface SlotCardProps {
 function SlotCard({
   def, slot, isDragOver, dragSourceId, locked = false, displayLabel, badgeLabels, loadingLabels,
   overrideDisplayUrl, isCompositedDisplay = false, isCompositing = false,
+  showCheckbox = false, isChecked = false, onCheckToggle,
+  isAiGenerated = false, aiBadgeLabel = 'IA',
   onFileSelected, onSwap, onClear, onDragOverChange,
 }: SlotCardProps) {
-  const inputRef   = useRef<HTMLInputElement>(null)
-  const isEmpty    = slot.status === 'empty'
-  const isLoading  = slot.status === 'uploading' || slot.status === 'processing-bg'
-  const hasBg      = slot.processedUrl !== null
+  const inputRef  = useRef<HTMLInputElement>(null)
+  const isLoading = slot.status === 'uploading' || slot.status === 'processing-bg'
+  const hasBg     = slot.processedUrl !== null
 
-  /* URL effective à afficher */
-  const displayUrl = overrideDisplayUrl ?? (slot.processedUrl ?? slot.preview)
-
-  /* Fond du container : damier pour PNG transparent */
-  const containerStyle: React.CSSProperties =
-    isCompositedDisplay || !hasBg
-      ? {}
-      : { background: 'repeating-conic-gradient(#e5e7eb 0% 25%, #f9fafb 0% 50%) 0 0 / 14px 14px' }
-
-  /* Toujours object-cover avec hauteur fixe */
-  const imgClass = 'object-cover'
+  /* Les slots IA sans override s'affichent vides en sections 1/2 (photo réelle → RENDU) */
+  const displayUrl = overrideDisplayUrl ?? (isAiGenerated ? null : slot.preview)
+  const isEmpty    = slot.status === 'empty' || (isAiGenerated && !overrideDisplayUrl)
 
   const handleDragOver = (e: React.DragEvent) => {
     e.preventDefault()
@@ -941,7 +1652,7 @@ function SlotCard({
       if (!locked) onSwap(parseInt(sourceId), def.id)
       return
     }
-    const files = Array.from(e.dataTransfer.files).filter((f) => f.type.startsWith('image/'))
+    const files = Array.from(e.dataTransfer.files).filter(f => f.type.startsWith('image/'))
     if (files[0]) onFileSelected(files[0])
   }
 
@@ -950,7 +1661,10 @@ function SlotCard({
       onDragOver={handleDragOver}
       onDragLeave={() => onDragOverChange(false)}
       onDrop={handleDrop}
-      onClick={() => isEmpty && inputRef.current?.click()}
+      onClick={() => {
+        if (!isEmpty && showCheckbox) { onCheckToggle?.(); return }
+        if (isEmpty) inputRef.current?.click()
+      }}
       className={`relative w-full aspect-square rounded-xl overflow-hidden transition-all duration-150 group ${
         isDragOver && !locked
           ? 'ring-2 ring-indigo-500 ring-offset-2 scale-[1.04]'
@@ -999,10 +1713,9 @@ function SlotCard({
             dragSourceId.current = def.id
           }}
           onDragEnd={locked ? undefined : () => { dragSourceId.current = null }}
-          className={`absolute inset-0 ${locked ? 'cursor-default' : 'cursor-grab active:cursor-grabbing'}`}
-          style={!isCompositedDisplay && displayUrl === slot.processedUrl ? containerStyle : undefined}
+          className={`absolute inset-0 bg-gray-50 ${locked ? 'cursor-default' : 'cursor-grab active:cursor-grabbing'}`}
         >
-          <img src={displayUrl} alt={displayLabel} className={`w-full h-full ${imgClass}`} draggable={false} />
+          <img src={displayUrl} alt={displayLabel} className="w-full h-full object-contain" draggable={false} />
 
           {/* Overlay survol */}
           <div className="absolute inset-0 bg-black/0 group-hover:bg-black/20 transition-colors" />
@@ -1022,15 +1735,15 @@ function SlotCard({
           <div className="absolute bottom-1.5 inset-x-1.5 flex justify-center opacity-0 group-hover:opacity-100 transition-opacity">
             {hasBg ? (
               <span className="bg-green-500 text-white text-[9px] font-bold px-2 py-0.5 rounded-full flex items-center gap-0.5 shadow">
-                ✓ Fond supprimé
+                ✓ {loadingLabels.bgRemoved}
               </span>
             ) : slot.error === 'bg_failed' ? (
               <span className="bg-orange-500 text-white text-[9px] font-bold px-2 py-0.5 rounded-full flex items-center gap-1 shadow">
-                <AlertTriangle className="w-2 h-2" /> Fond indisponible
+                <AlertTriangle className="w-2 h-2" /> {loadingLabels.bgFailed}
               </span>
             ) : (def as { bgRemoval: string }).bgRemoval === 'pro' ? (
               <span className="bg-indigo-600/90 text-white text-[9px] font-bold px-2 py-0.5 rounded-full flex items-center gap-1 backdrop-blur-sm shadow">
-                <Lock className="w-2 h-2" /> Fond Pro
+                <Lock className="w-2 h-2" /> {loadingLabels.bgPro}
               </span>
             ) : null}
           </div>
@@ -1044,13 +1757,36 @@ function SlotCard({
         </div>
       )}
 
-      {/* Badge ✦ slot 0 vide */}
+      {/* ── Badge ✦ slot 0 vide ── */}
       {def.id === 0 && isEmpty && (
         <div className="absolute top-1.5 left-1.5">
           <div className="w-4 h-4 rounded-full bg-indigo-600 flex items-center justify-center">
             <span className="text-white text-[8px] font-extrabold leading-none">✦</span>
           </div>
         </div>
+      )}
+
+      {/* ── Badge IA (slots générés par FASHN) ── */}
+      {isAiGenerated && !isEmpty && (
+        <div className="absolute top-1 left-1 z-10 pointer-events-none">
+          <span className="bg-purple-600 text-white text-[8px] font-bold px-1.5 py-0.5 rounded shadow">
+            {aiBadgeLabel}
+          </span>
+        </div>
+      )}
+
+      {/* ── Checkbox suppression fond (Premium / Pro) ── */}
+      {showCheckbox && !isLoading && (
+        <button
+          onClick={(e) => { e.stopPropagation(); onCheckToggle?.() }}
+          className={`absolute top-1 left-1 z-20 w-5 h-5 rounded-md border-2 flex items-center justify-center transition-all shadow-sm ${
+            isChecked
+              ? 'bg-indigo-600 border-indigo-600'
+              : 'bg-white/90 border-gray-300 hover:border-indigo-400'
+          }`}
+        >
+          {isChecked && <Check className="w-2.5 h-2.5 text-white" />}
+        </button>
       )}
     </div>
   )

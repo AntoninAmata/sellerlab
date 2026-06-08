@@ -5,8 +5,10 @@ export interface PhotoSlot {
   file: File | null
   preview: string | null
   processedUrl: string | null
+  compositedUrl?: string   // processedUrl composited with selected background (for export)
   status: SlotStatus
   error?: string
+  isAiGenerated?: boolean
 }
 
 /* ─── Étape 2 — Reconnaissance automatique ─────────────────────────────── */
