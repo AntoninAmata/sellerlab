@@ -7,11 +7,12 @@ import {
 } from 'lucide-react'
 import type { PhotoSlot, RecognitionResult, RecognitionField, Confidence, ExtraInfo } from '../types'
 import {
-  CATEGORIES, SIZES, COLORS, MATERIALS, CONDITIONS, STYLES, PATTERNS,
+  SIZES, COLORS, MATERIALS, CONDITIONS, STYLES, PATTERNS,
   tx, GENRE_LABELS, CONDITION_LABELS, COLOR_LABELS, MATERIAL_LABELS,
-  CATEGORY_LABELS, SUBCATEGORY_LABELS, STYLE_LABELS, PATTERN_LABELS,
+  STYLE_LABELS, PATTERN_LABELS,
 } from '@/lib/vinted-taxonomy'
-import type { Genre, SizeSystem } from '@/lib/vinted-taxonomy'
+import type { SizeSystem } from '@/lib/vinted-taxonomy'
+import { getN1List, getN2List, getN3List, getN4List, getN5List, parseVintedPath } from '@/lib/vinted-navigation-taxonomy'
 import { useLang } from '@/app/providers'
 import type { Lang } from '@/lib/i18n'
 
@@ -42,6 +43,8 @@ const UI_I18N: Record<Lang, {
   summary: string
   /* Choose option */
   choose: string
+  /* Subcategory hint (bookmarklet auto-select warning) */
+  subcategoryHint: string
   /* Add to desc */
   addToDesc: string; addMeasure: string; other: string
   /* Placeholder */
@@ -66,6 +69,7 @@ const UI_I18N: Record<Lang, {
     generalInfo: 'Infos générales', dimensions: 'Dimensions (optionnel)',
     summary: 'Récapitulatif',
     choose: '— Choisir —',
+    subcategoryHint: 'Vérifiez la sous-catégorie précise sur Vinted après le remplissage automatique',
     addToDesc: 'Ajouter à la description', addMeasure: 'Ajouter une mesure personnalisée', other: 'Autre',
     infoValue: 'Valeur…', measureName: 'Nom de la mesure…', measureValue: 'cm',
   },
@@ -88,6 +92,7 @@ const UI_I18N: Record<Lang, {
     generalInfo: 'General info', dimensions: 'Dimensions (optional)',
     summary: 'Summary',
     choose: '— Choose —',
+    subcategoryHint: 'Check the exact subcategory on Vinted after auto-fill',
     addToDesc: 'Add to description', addMeasure: 'Add custom measurement', other: 'Other',
     infoValue: 'Value…', measureName: 'Measurement name…', measureValue: 'cm',
   },
@@ -110,6 +115,7 @@ const UI_I18N: Record<Lang, {
     generalInfo: 'Información general', dimensions: 'Dimensiones (opcional)',
     summary: 'Resumen',
     choose: '— Elegir —',
+    subcategoryHint: 'Verifica la subcategoría exacta en Vinted tras el relleno automático',
     addToDesc: 'Añadir a la descripción', addMeasure: 'Añadir medida personalizada', other: 'Otro',
     infoValue: 'Valor…', measureName: 'Nombre de la medida…', measureValue: 'cm',
   },
@@ -132,6 +138,7 @@ const UI_I18N: Record<Lang, {
     generalInfo: 'Allgemeine Infos', dimensions: 'Maße (optional)',
     summary: 'Zusammenfassung',
     choose: '— Wählen —',
+    subcategoryHint: 'Überprüfe die genaue Unterkategorie auf Vinted nach dem automatischen Ausfüllen',
     addToDesc: 'Zur Beschreibung hinzufügen', addMeasure: 'Benutzerdefiniertes Maß hinzufügen', other: 'Sonstiges',
     infoValue: 'Wert…', measureName: 'Maßbezeichnung…', measureValue: 'cm',
   },
@@ -154,6 +161,7 @@ const UI_I18N: Record<Lang, {
     generalInfo: 'Info generali', dimensions: 'Dimensioni (opzionale)',
     summary: 'Riepilogo',
     choose: '— Scegli —',
+    subcategoryHint: 'Verifica la sottocategoria esatta su Vinted dopo il riempimento automatico',
     addToDesc: 'Aggiungi alla descrizione', addMeasure: 'Aggiungi misura personalizzata', other: 'Altro',
     infoValue: 'Valore…', measureName: 'Nome della misura…', measureValue: 'cm',
   },
@@ -176,6 +184,7 @@ const UI_I18N: Record<Lang, {
     generalInfo: 'Algemene info', dimensions: 'Afmetingen (optioneel)',
     summary: 'Samenvatting',
     choose: '— Kies —',
+    subcategoryHint: 'Controleer de exacte subcategorie op Vinted na het automatisch invullen',
     addToDesc: 'Toevoegen aan beschrijving', addMeasure: 'Aangepaste meting toevoegen', other: 'Overig',
     infoValue: 'Waarde…', measureName: 'Naam meting…', measureValue: 'cm',
   },
@@ -198,6 +207,7 @@ const UI_I18N: Record<Lang, {
     generalInfo: 'Informacje ogólne', dimensions: 'Wymiary (opcjonalnie)',
     summary: 'Podsumowanie',
     choose: '— Wybierz —',
+    subcategoryHint: 'Sprawdź dokładną podkategorię na Vinted po automatycznym wypełnieniu',
     addToDesc: 'Dodaj do opisu', addMeasure: 'Dodaj niestandardowy pomiar', other: 'Inne',
     infoValue: 'Wartość…', measureName: 'Nazwa pomiaru…', measureValue: 'cm',
   },
@@ -419,8 +429,7 @@ function normalizeConfidence(result: RecognitionResult): RecognitionResult {
   return {
     marque:        fix(result.marque),
     genre:         fix(result.genre),
-    categorie:     fix(result.categorie),
-    sousCategorie: fix(result.sousCategorie),
+    vintedPath:    fix(result.vintedPath),
     taille:        fix(result.taille),
     tailleSysteme: fix(result.tailleSysteme),
     etat:          fix(result.etat),
@@ -632,24 +641,6 @@ export default function RecognitionStep({ slots, result, setResult }: Props) {
     })
   }
 
-  /* ── Liste sous-catégories selon genre + catégorie ── */
-  function getSubCats(genre: string, categorieName: string): string[] {
-    const genreKey = genre as Genre
-    const cats = CATEGORIES[genreKey] ?? []
-    const cat = cats.find(c => c.name === categorieName)
-    return cat?.subCategories.map(s => s.name) ?? []
-  }
-
-  /* ── Tailles selon sous-catégorie ── */
-  function getSizes(genre: string, catName: string, subCatName: string): string[] {
-    const genreKey = genre as Genre
-    const cats = CATEGORIES[genreKey] ?? []
-    const cat = cats.find(c => c.name === catName)
-    const sub = cat?.subCategories.find(s => s.name === subCatName)
-    const sys = sub?.sizeSystem ?? 'letters'
-    return SIZES[sys]
-  }
-
   /* ─────────────────────────────────────────────────────────────────────── */
   /* ── État chargement ── */
   if (loading) {
@@ -701,7 +692,12 @@ export default function RecognitionStep({ slots, result, setResult }: Props) {
 
   if (!result) return null
 
-  const subCats = getSubCats(result.genre.value, result.categorie.value)
+  /* ── Parsing du chemin Vinted en niveaux N1-N5 ── */
+  const { n1, n2, n3, n4, n5 } = parseVintedPath(result.vintedPath.value)
+  const n2Options = n1 ? getN2List(n1) : []
+  const n3Options = n1 && n2 ? getN3List(n1, n2) : []
+  const n4Options = n1 && n2 && n3 ? getN4List(n1, n2, n3) : []
+  const n5Options = n1 && n2 && n3 && n4 ? getN5List(n1, n2, n3, n4) : []
 
   /* Sizes for the dropdown: prefer the system that contains the recognized value
      so it is pre-selected; fall back to the first available system. */
@@ -777,8 +773,7 @@ export default function RecognitionStep({ slots, result, setResult }: Props) {
                   setResult({
                     ...result,
                     genre: { value: e.target.value, confidence: 'manual' },
-                    categorie: { value: '', confidence: 'manual' },
-                    sousCategorie: { value: '', confidence: 'manual' },
+                    vintedPath: { value: '', confidence: 'manual' },
                     taille: { value: '', confidence: 'manual' },
                   })
                 }}
@@ -792,51 +787,94 @@ export default function RecognitionStep({ slots, result, setResult }: Props) {
             </Field>
           </div>
 
+          {/* Catégorie — sélecteur en cascade N1 > N2 > N3 > N4 */}
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-5">
-            {/* Catégorie */}
-            <Field label={ui.category} confidence={result.categorie.confidence} required>
+            {/* N1 */}
+            <Field label={ui.category} confidence={result.vintedPath.confidence} required>
               <select
-                value={result.categorie.value}
+                value={n1}
                 onChange={e => {
-                  if (!result) return
-                  setResult({
-                    ...result,
-                    categorie: { value: e.target.value, confidence: 'manual' },
-                    sousCategorie: { value: '', confidence: 'manual' },
-                    taille: { value: '', confidence: 'manual' },
-                  })
+                  setResult({ ...result, vintedPath: { value: e.target.value, confidence: 'manual' }, taille: { value: '', confidence: 'manual' } })
                 }}
-                className={inputCls(result.categorie.confidence)}
+                className={inputCls(result.vintedPath.confidence)}
               >
                 <option value="">{ui.choose}</option>
-                {(CATEGORIES[result.genre.value as Genre] ?? []).map(cat => (
-                  <option key={cat.name} value={cat.name}>{tx(CATEGORY_LABELS, lang, cat.name)}</option>
-                ))}
+                {getN1List().map(v => <option key={v} value={v}>{v}</option>)}
               </select>
             </Field>
 
-            {/* Sous-catégorie */}
-            <Field label={ui.subCategory} confidence={result.sousCategorie.confidence}>
+            {/* N2 */}
+            <Field label={ui.subCategory} confidence={result.vintedPath.confidence}>
               <select
-                value={result.sousCategorie.value}
+                value={n2}
+                disabled={n2Options.length === 0}
                 onChange={e => {
-                  if (!result) return
-                  setResult({
-                    ...result,
-                    sousCategorie: { value: e.target.value, confidence: 'manual' },
-                    taille: { value: '', confidence: 'manual' },
-                  })
+                  setResult({ ...result, vintedPath: { value: n1 + ' > ' + e.target.value, confidence: 'manual' }, taille: { value: '', confidence: 'manual' } })
                 }}
-                disabled={subCats.length === 0}
-                className={inputCls(result.sousCategorie.confidence)}
+                className={inputCls(result.vintedPath.confidence)}
               >
                 <option value="">{ui.choose}</option>
-                {subCats.map(sc => (
-                  <option key={sc} value={sc}>{tx(SUBCATEGORY_LABELS, lang, sc)}</option>
-                ))}
+                {n2Options.map(v => <option key={v} value={v}>{v}</option>)}
               </select>
             </Field>
           </div>
+
+          {/* N3 + N4 */}
+          {n2 && (
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-5">
+              <Field label={ui.subCategory} confidence={result.vintedPath.confidence}>
+                <select
+                  value={n3}
+                  disabled={n3Options.length === 0}
+                  onChange={e => {
+                    setResult({ ...result, vintedPath: { value: n1 + ' > ' + n2 + ' > ' + e.target.value, confidence: 'manual' }, taille: { value: '', confidence: 'manual' } })
+                  }}
+                  className={inputCls(result.vintedPath.confidence)}
+                >
+                  <option value="">{ui.choose}</option>
+                  {n3Options.map(v => <option key={v} value={v}>{v}</option>)}
+                </select>
+              </Field>
+
+              {n3 && n4Options.length > 0 && (
+                <Field label={ui.subCategory} confidence={result.vintedPath.confidence}>
+                  <select
+                    value={n4}
+                    onChange={e => {
+                      setResult({ ...result, vintedPath: { value: n1 + ' > ' + n2 + ' > ' + n3 + ' > ' + e.target.value, confidence: 'manual' }, taille: { value: '', confidence: 'manual' } })
+                    }}
+                    className={inputCls(result.vintedPath.confidence)}
+                  >
+                    <option value="">{ui.choose}</option>
+                    {n4Options.map(v => <option key={v} value={v}>{v}</option>)}
+                  </select>
+                </Field>
+              )}
+
+              {n4 && n5Options.length > 0 && (
+                <Field label={ui.subCategory} confidence={result.vintedPath.confidence}>
+                  <select
+                    value={n5}
+                    onChange={e => {
+                      setResult({ ...result, vintedPath: { value: n1 + ' > ' + n2 + ' > ' + n3 + ' > ' + n4 + ' > ' + e.target.value, confidence: 'manual' }, taille: { value: '', confidence: 'manual' } })
+                    }}
+                    className={inputCls(result.vintedPath.confidence)}
+                  >
+                    <option value="">{ui.choose}</option>
+                    {n5Options.map(v => <option key={v} value={v}>{v}</option>)}
+                  </select>
+                </Field>
+              )}
+            </div>
+          )}
+
+          {/* Avertissement : N3 terminal dans la taxonomie — le bookmarklet auto-sélectionnera le N4 si Vinted en affiche un */}
+          {n3 && !n4 && n4Options.length === 0 && n5Options.length === 0 && (
+            <div className="flex items-start gap-2 p-3 bg-amber-50 border border-amber-200 rounded-xl">
+              <AlertTriangle className="w-3.5 h-3.5 text-amber-500 shrink-0 mt-0.5" />
+              <p className="text-xs text-amber-700">{ui.subcategoryHint}</p>
+            </div>
+          )}
         </section>
 
         {/* ── Section Caractéristiques ── */}
@@ -1273,8 +1311,7 @@ export default function RecognitionStep({ slots, result, setResult }: Props) {
           <div className="flex flex-wrap gap-2">
             {[
               result.genre.value ? tx(GENRE_LABELS, lang, result.genre.value) : '',
-              result.categorie.value ? tx(CATEGORY_LABELS, lang, result.categorie.value) : '',
-              result.sousCategorie.value ? tx(SUBCATEGORY_LABELS, lang, result.sousCategorie.value) : '',
+              result.vintedPath.value ? result.vintedPath.value.split(' > ').pop() : '',
               result.marque.value,
               result.taille.value,
               result.etat.value ? tx(CONDITION_LABELS, lang, result.etat.value) : '',

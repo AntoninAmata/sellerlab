@@ -7,8 +7,7 @@ const client = new Anthropic()
 export interface GenerateRequest {
   marque: string
   genre: string
-  categorie: string
-  sousCategorie: string
+  vintedPath: string
   taille: string
   tailleSysteme?: string
   etat: string
@@ -118,7 +117,7 @@ export async function POST(req: NextRequest) {
     const body: GenerateRequest = await req.json()
 
     const {
-      marque, genre, categorie, sousCategorie, taille, tailleSysteme, etat,
+      marque, genre, vintedPath, taille, tailleSysteme, etat,
       couleurs, matieres, style, motif, defauts, extraInfo, lang,
     } = body
 
@@ -157,7 +156,7 @@ export async function POST(req: NextRequest) {
 Contexte article (NE PAS copier ces champs en brut dans la description — les intégrer naturellement dans les bullets emoji) :
 - Marque : ${marque || 'Inconnue'}
 - Genre : ${genre}
-- Catégorie : ${categorie} > ${sousCategorie}
+- Catégorie : ${vintedPath}
 - Taille : ${tailleInfo}
 - État : ${etat}
 - Couleurs : ${couleurs.join(', ') || 'Non précisées'}

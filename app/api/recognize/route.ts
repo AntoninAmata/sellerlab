@@ -1,6 +1,7 @@
 import Anthropic from '@anthropic-ai/sdk'
 import { NextRequest, NextResponse } from 'next/server'
-import { CATEGORIES, COLORS, MATERIALS, CONDITIONS, STYLES, PATTERNS } from '@/lib/vinted-taxonomy'
+import { COLORS, MATERIALS, CONDITIONS, STYLES, PATTERNS } from '@/lib/vinted-taxonomy'
+import { getNavRef } from '@/lib/vinted-navigation-taxonomy'
 import type { RecognitionResult } from '@/app/app/types'
 
 const client = new Anthropic()
@@ -10,13 +11,8 @@ const LANG_NAMES: Record<string, string> = {
   de: 'allemand', it: 'italien', nl: 'néerlandais', pl: 'polonais',
 }
 
-/* ─── Taxonomie compacte pour le prompt (calculée une fois) ─────────────── */
-const TAXONOMY_REF = Object.entries(CATEGORIES)
-  .map(([genre, cats]) =>
-    cats.map(cat =>
-      `${genre} > ${cat.name} : ${cat.subCategories.map(s => `${s.name} [${s.sizeSystem}]`).join(' | ')}`
-    ).join('\n')
-  ).join('\n')
+/* ─── Taxonomie de navigation Vinted (calculée une fois) ────────────────── */
+const TAXONOMY_REF = getNavRef()
 
 /* ─── POST /api/recognize ────────────────────────────────────────────────── */
 /* Reçoit un tableau de photos (base64) et retourne un RecognitionResult      */
@@ -78,16 +74,14 @@ NIVEAUX DE CONFIANCE :
 - "low" : tu es sûr à moins de 60% ou l'info n'est pas visible
 - IMPORTANT : si la valeur est vide ou non détectée, la confiance DOIT être "low"
 
-TAXONOMIE VINTED EXACTE — utilise ces noms précis pour "categorie" et "sousCategorie" :
+CHEMINS DE NAVIGATION VINTED EXACTS — liste complète des chemins valides :
 ${TAXONOMY_REF}
 
-RÈGLES CATÉGORIE/SOUS-CATÉGORIE :
-- Utilise EXACTEMENT les noms ci-dessus (copier/coller le nom exact, pas de paraphrase)
-- "categorie" = la colonne avant ">" (ex: "Vestes & Manteaux")
-- "sousCategorie" = le nom entre ":" et "[" (ex: "Vestes en cuir", "Bombers", "Vestes en cuir & Bombers")
-- Un perfecto/veste en cuir → genre Femme : "Vestes & Manteaux" > "Vestes en cuir" / genre Homme : "Vestes & Manteaux" > "Vestes en cuir & Bombers"
-- Un blazer → "Vestes & Manteaux" > "Blazers & Vestes"
-- Un manteau laine → "Vestes & Manteaux" > "Manteaux"
+RÈGLES CATÉGORIE :
+- "vintedPath" = chemin de navigation EXACT copié depuis la liste ci-dessus, sans modification
+- Format : "N1 > N2 > N3" ou "N1 > N2 > N3 > N4" selon la profondeur du chemin dans la liste
+- Choisis le chemin le plus précis (préfère N4 si disponible, sinon N3)
+- Exemples : "Femmes > Vêtements > Manteaux et vestes > Manteaux", "Hommes > Vêtements > Jeans > Jeans slim", "Électronique > Ordinateurs et accessoires > Claviers et accessoires"
 
 SYSTÈMES DE TAILLE :
 1. Repère la sous-catégorie dans la taxonomie et note son [sizeSystem] (valeur entre crochets)
@@ -105,8 +99,7 @@ Réponds UNIQUEMENT avec ce JSON (sans markdown, sans texte avant ou après) :
 {
   "marque": { "value": "string — marque lisible sur étiquette ou logo visible, sinon vide", "confidence": "high|medium|low" },
   "genre": { "value": "Femme|Homme|Enfant|Mixte|Maison|Électronique|Beauté|Sport", "confidence": "high|medium|low" },
-  "categorie": { "value": "string — nom exact de la catégorie dans la taxonomie ci-dessus", "confidence": "high|medium|low" },
-  "sousCategorie": { "value": "string — nom exact de la sous-catégorie dans la taxonomie ci-dessus", "confidence": "high|medium|low" },
+  "vintedPath": { "value": "string — chemin exact depuis la liste ci-dessus (ex: \"Femmes > Vêtements > Jeans > Jeans skinny\")", "confidence": "high|medium|low" },
   "taille": { "value": "string — taille lue sur étiquette ou déduite, sinon vide", "confidence": "high|medium|low" },
   "tailleSysteme": { "value": ["système_taxonomie"] ou ["système_taxonomie", "système_étiquette"] — tableau de systèmes applicables parmi : eu_femme|eu_homme|letters|jeans|pointures|enfant_age|enfant_cm|one_size|none, "confidence": "high|medium|low" },
   "etat": { "value": "string — parmi les 5 états Vinted exacts", "confidence": "high|medium|low" },
@@ -117,7 +110,7 @@ Réponds UNIQUEMENT avec ce JSON (sans markdown, sans texte avant ou après) :
   "defauts": { "value": "string — défauts visibles décrits précisément, sinon vide", "confidence": "high|medium|low" }
 }
 
-LANGUE POUR LES DÉFAUTS : La valeur du champ "defauts" doit être rédigée en ${LANG_NAMES[locale ?? 'fr'] ?? 'français'}. Tous les autres champs taxonomie (genre, categorie, sousCategorie, etat, couleurs, matieres, style, motif) doivent IMPÉRATIVEMENT utiliser les valeurs françaises exactes de la liste ci-dessus, sans traduction.`
+LANGUE POUR LES DÉFAUTS : La valeur du champ "defauts" doit être rédigée en ${LANG_NAMES[locale ?? 'fr'] ?? 'français'}. Les champs etat, couleurs, matieres, style, motif doivent utiliser les valeurs françaises exactes de la liste ci-dessus. Le champ "vintedPath" doit utiliser un chemin français exact de la liste de chemins de navigation fournie.`
 
     const response = await client.messages.create({
       model: 'claude-sonnet-4-6',
@@ -142,6 +135,17 @@ LANGUE POUR LES DÉFAUTS : La valeur du champ "defauts" doit être rédigée en 
     }
 
     const result: RecognitionResult = JSON.parse(jsonMatch[0])
+
+    /* ── Normalise vintedPath : renomme categorie → vintedPath si l'IA renvoie l'ancien nom ── */
+    if (!result.vintedPath && (result as unknown as Record<string, unknown>).categorie) {
+      const old = result as unknown as Record<string, unknown>
+      result.vintedPath = old.categorie as RecognitionResult['vintedPath']
+      delete old.categorie
+      delete old.sousCategorie
+    }
+    if (!result.vintedPath) {
+      result.vintedPath = { value: '', confidence: 'low' }
+    }
 
     /* ── Normalise tailleSysteme : toujours un tableau ── */
     if (!result.tailleSysteme) {

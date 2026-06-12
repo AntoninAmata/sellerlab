@@ -304,8 +304,7 @@ function useGenerate(
         body: JSON.stringify({
           marque:        recognition.marque.value,
           genre:         recognition.genre.value,
-          categorie:     recognition.categorie.value,
-          sousCategorie: recognition.sousCategorie.value,
+          vintedPath:    recognition.vintedPath.value,
           taille:        recognition.taille.value,
           tailleSysteme: recognition.tailleSysteme.value[0] ?? '',
           etat:          recognition.etat.value,

@@ -27,7 +27,7 @@ SaaS pour vendeurs Vinted (et autres plateformes à terme).
 - i18n complet sur tout le flux /app ✅
 - Mannequin IA FASHN intégré (plan Pro) ✅
 - Import URL Vinted ✅ (plan Pro)
-- Bookmarklet Vinted 🔄 (à faire)
+- Bookmarklet Vinted ✅ (fonctionnel)
 
 ---
 
@@ -297,7 +297,25 @@ PAS de bouton "Tout copier"
 - Le bookmarklet récupère les données via `GET /api/bookmarklet-data?token=abc123`
 - Remplit automatiquement : titre, description, prix + dropdowns catégorie/marque/taille/état/couleur/matière
 - Page d'installation : `/bookmarklet`
-- Fichiers : `app/api/bookmarklet-data/route.ts`, `app/bookmarklet/page.tsx`
+- Fichiers : `app/api/bookmarklet-data/route.ts`, `app/bookmarklet/page.tsx`, `app/public/bookmarklet.js`
+
+#### Architecture bookmarklet — fonctions JS dans `app/public/bookmarklet.js`
+- `sv(el, v)` — setValue React-safe (contourne React #418 via Object.getOwnPropertyDescriptor)
+- `sc(path, cb)` — navigue le dropdown Catégorie jusqu'à 4 niveaux via `input[name="category"]`
+  - Reçoit le chemin de navigation FR exact (ex: `"Femmes > Vêtements > Jeans > Jeans skinny"`)
+  - DOIT s'exécuter EN PREMIER : Vinted n'affiche Marque/Taille/État/Couleur/Matériau qu'après sélection catégorie
+- `fb(brand, cb)` — dropdown Marque via `input[name="brand"]` + `input[name="brand-search-input"]`
+  - Null-check obligatoire : `input[name="brand"]` absent pour catégories non-vêtements (Électronique, Maison)
+- `fs(v, cb)` — dropdown Taille via `[role="checkbox"][aria-label="VALEUR"]`
+- `fd(name, v, cb)` — dropdown générique via `input[name]` + `[class*="Cell__clickable"]`
+- Ordre de remplissage : titre → description → prix → catégorie (sc) → marque (fb) → taille (fs) → état → couleur 1 → couleur 2 → matériau
+
+#### Chemins de catégorie et langue
+- Le champ `categorie` dans `RecognitionResult` contient le chemin de navigation FR exact depuis `lib/vinted-navigation-taxonomy.ts`
+- Format : `"N1 > N2 > N3"` ou `"N1 > N2 > N3 > N4"` selon profondeur
+- Le prompt de reconnaissance (`app/api/recognize/route.ts`) reçoit `locale` et génère le chemin dans la langue de l'interface
+- Le bookmarklet s'exécute sur la version Vinted de la langue choisie par l'utilisateur (vinted.fr, vinted.es, etc.)
+- La correspondance langue ↔ chemin UI Vinted est assurée par le fait que le prompt génère des chemins dans la bonne langue
 
 ---
 
@@ -343,8 +361,20 @@ Tableau complet de EU 35 à EU 46 avec correspondances UK/US Homme/US Femme.
 
 ## Taxonomie Vinted — 7 langues ✅
 
-Fichier : `lib/vinted-taxonomy.ts` — traduit dans FR, EN, ES, DE, IT, NL, PL.
-Couleurs (29), États (5), Matériaux (55), Catégories, Sous-catégories — tous traduits.
+### `lib/vinted-taxonomy.ts` — valeurs de dropdowns traduits FR/EN/ES/DE/IT/NL/PL
+Couleurs (29), États (5), Matériaux (55), Catégories, Sous-catégories — tous traduits dans les 7 langues.
+Utilisé pour : contraintes du prompt de reconnaissance + dropdowns de l'interface /app.
+
+### `lib/vinted-navigation-taxonomy.ts` — chemins de navigation FR uniquement
+Chemins exacts de l'interface Vinted FR, format `"N1 > N2 > N3 [> N4 [> N5]]"`.
+**Taxonomie Femmes/Hommes complète aux niveaux 4 et 5 connus** (Vêtements, Chaussures, Accessoires).
+- N4 ajouté : Maternité, Vêtements de sport, Bottes, Chaussures de sport, Chapeaux, Bijoux, Sous-vêtements, Pyjamas, Sacs (Hommes), Vêtements de sport et accessoires (Hommes)
+- N5 ajouté : Manteaux/Vestes (Femmes+Hommes), Sweats (Femmes), Accessoires de sports (Femmes+Hommes), Sous-vêtements maternité (Femmes)
+- `getNavRef()` → chaîne newline-séparée pour injection dans le prompt de reconnaissance
+- `getNavRefFiltered(prefix)` → filtre par préfixe (usage futur)
+- **Pas de traductions** : le prompt de reconnaissance reçoit `locale` et génère directement le chemin dans la langue Vinted correspondante
+- Le champ `categorie` de `RecognitionResult` = chemin exact copié depuis cette liste (en FR pour vinted.fr, traduit pour les autres versions)
+- Le champ `sousCategorie` = dernier segment du chemin (rétrocompatibilité avec les dropdowns de l'étape 2)
 
 ---
 
@@ -413,3 +443,69 @@ Couleurs (29), États (5), Matériaux (55), Catégories, Sous-catégories — to
 - RÈGLE ABSOLUE : tous les appels API incluent la locale
 - Pour chaque nouvelle page : meta title + description SEO obligatoires
 - Photos redimensionnées à 1024px avant envoi API
+
+---
+
+## Résumé session 2026-06-12 — Bookmarklet & taxonomie
+
+### Bookmarklet Vinted ✅ (fonctionnel, plan Pro)
+Fichiers : `app/public/bookmarklet.js` (source lisible), `app/bookmarklet/page.tsx` (version minifiée servie).
+
+**Champs remplis automatiquement (dans l'ordre) :**
+titre → description → prix → catégorie (sc) → marque (fb) → taille (fs) → état → couleur 1 → couleur 2 → matériau
+
+**Fonctions JS :**
+- `sv(el, v)` — setValue React-safe (contourne React #418)
+- `sc(path, cb)` — navigue le dropdown Catégorie jusqu'à **5 niveaux** via `input[name="category"]`
+  - `af(cb)` (autoFirst) — si Vinted affiche encore des options après le dernier niveau du path, sélectionne automatiquement la 1re option visible (ferme le dropdown, débloque les champs suivants)
+  - Délai 1200ms entre chaque niveau ET avant `af` (uniformisé depuis 800ms pour fiabilité)
+- `fb(brand, cb)` — dropdown Marque via `input[name="brand"]` + champ de recherche `brand-search-input`
+- `fs(v, cb)` — taille via `[role="checkbox"][aria-label]` + fallback "Taille unique" dans les 7 langues Vinted + null-check si champ absent
+- `fd(name, v, cb)` — dropdown générique (état, couleur, matériau) via `input[name]`
+
+**Architecture :** token UUID stocké en Map mémoire serveur (15 min), API `GET /api/bookmarklet-data?token=`, bookmarklet injecté via `javascript:` URL avec `encodeURIComponent`.
+
+### Taxonomie de navigation Vinted — `lib/vinted-navigation-taxonomy.ts`
+Format flat `NAV_PATHS`: `"N1 > N2 > N3 [> N4 [> N5]]"` — source unique pour dropdowns cascades ET prompt de reconnaissance.
+
+**Couverture complète Femmes/Hommes (N4 et N5 ajoutés cette session) :**
+- N4 ajouté : Maternité (13 entrées dont 3 N5), Vêtements de sport F+H, Bottes F+H, Chaussures de sport F+H, Chapeaux F+H, Bijoux F+H, Sous-vêtements et chaussettes H, Pyjamas H, Sacs et sacoches H
+- N5 ajouté : Manteaux (7F/6H), Vestes (11F/12H), Sweats (6F), Accessoires de sports (5F/5H), Sous-vêtements maternité (3F)
+- Total : ~256 chemins N3, ~72 chemins N4, ~48 chemins N5
+
+**Exports :**
+- `NAV_PATHS` — liste complète (pour `getNavRef()` injecté dans le prompt)
+- `VINTED_TAXONOMY_LEVEL5_FR` — constante Record des N5 connus (pour référence rapide)
+- `parseVintedPath(path)` → `{ n1, n2, n3, n4, n5 }`
+- `getN1List()`, `getN2List(n1)`, `getN3List(n1,n2)`, `getN4List(n1,n2,n3)`, `getN5List(n1,n2,n3,n4)`
+
+### Nettoyage `lib/vinted-taxonomy.ts`
+Supprimé : interfaces `SubCategory`/`Category`, const `CATEGORIES` (~500 lignes), `CATEGORY_LABELS`, `SUBCATEGORY_LABELS`.
+Conservé : `SIZES`, `COLORS`, `MATERIALS`, `CONDITIONS`, `STYLES`, `PATTERNS`, `tx()`, tous les `*_LABELS`.
+
+### Étape 2 — Reconnaissance (RecognitionStep.tsx)
+- Champ `vintedPath` remplace `categorie` + `sousCategorie`
+- Dropdowns en cascade N1→N2→N3→N4→N5 (N5 affiché si `n5Options.length > 0`)
+- Badge de confiance correctement transmis (plus de faux "Modifié")
+- Avertissement ambre si N3 terminal sans N4/N5 dans la taxonomie ("Vérifiez la sous-catégorie sur Vinted après remplissage"), traduit dans les 7 langues
+
+---
+
+## Prochaine session — Priorités
+
+### P1 — Qualité produit (impact direct sur conversion)
+1. **Amélioration traitement photos** — suppression de fond plus propre (rembg ?), meilleure gestion des transparences, option "recadrage automatique"
+2. **Amélioration annonces/descriptions** — ton plus vendeur, SEO mots-clés mieux intégrés, option longueur courte/longue, meilleure utilisation des infos complémentaires (dimensions, défauts)
+3. **Stabilisation calcul de prix** — tester sur des vrais articles, affiner les pondérations marché/décote, fiabiliser l'API de recherche de prix marché
+
+### P2 — Bookmarklet (polish)
+4. **Réduction délais bookmarklet** — tester avec des délais adaptatifs (poll toutes les 200ms jusqu'à apparition des options) plutôt que timeouts fixes, pour réduire le temps total de remplissage
+5. **Support autres langues Vinted** — les paths de catégories sont en FR, vérifier la correspondance sur vinted.es, vinted.de, etc.
+
+### P3 — Infrastructure & monétisation
+6. **Supabase Auth** — inscription/connexion, gestion des quotas freemium
+7. **Stripe paiements** — checkout Premium + Pro
+8. **Déploiement Vercel** — mise en ligne Phase 1
+
+### P4 — Vision agentic (Phase 2+)
+9. **Version agentic AI** — au lieu du bookmarklet, un agent IA qui remplit Vinted de façon autonome (extension Chrome ou Playwright côté serveur), avec supervision humaine pour validation finale

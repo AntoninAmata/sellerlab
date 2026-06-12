@@ -3,14 +3,16 @@
 import { useState } from 'react'
 import {
   Copy, Check, Send, Tag, FileText, Image,
-  Package, ChevronRight, ExternalLink, Download, FolderOpen,
+  Package, ChevronRight, ExternalLink, Download, FolderOpen, Wand2, Lock,
 } from 'lucide-react'
 import type { PhotoSlot, RecognitionResult, PriceResult, GenerateResult } from '../types'
 import { useLang } from '@/app/providers'
 import type { Lang } from '@/lib/i18n'
 import {
-  tx, CATEGORY_LABELS, SUBCATEGORY_LABELS, CONDITION_LABELS, COLOR_LABELS, MATERIAL_LABELS,
+  tx, GENRE_LABELS, CONDITION_LABELS, COLOR_LABELS, MATERIAL_LABELS,
 } from '@/lib/vinted-taxonomy'
+
+type Plan = 'freemium' | 'premium' | 'pro'
 
 /* ─── Traductions UI — 7 langues ─────────────────────────────────────────── */
 
@@ -24,6 +26,7 @@ const UI: Record<Lang, {
   pkgLarge: string; pkgLargeDesc: string
   pkgMedium: string; pkgMediumDesc: string
   pkgSmall: string; pkgSmallDesc: string; pkgSmallDescAcc: string
+  autoFillBtn: string; autoFillLoading: string; autoFillLocked: string; autoFillHint: string
 }> = {
   fr: {
     header: 'Prêt à publier', headerSub: 'Copiez chaque champ et collez-le sur Vinted.',
@@ -36,6 +39,8 @@ const UI: Record<Lang, {
     pkgLarge: 'Grand colis', pkgLargeDesc: 'Pour les chaussures et accessoires volumineux',
     pkgMedium: 'Moyen colis', pkgMediumDesc: 'Pour les pièces épaisses ou volumineuses',
     pkgSmall: 'Petit colis', pkgSmallDesc: 'Pour les pièces légères', pkgSmallDescAcc: 'Pour les accessoires et petites pièces',
+    autoFillBtn: 'Remplir Vinted automatiquement', autoFillLoading: 'Ouverture…',
+    autoFillLocked: 'Disponible avec le plan Pro', autoFillHint: 'Ouvre Vinted et pré-remplit le formulaire en un clic',
   },
   en: {
     header: 'Ready to publish', headerSub: 'Copy each field and paste it on Vinted.',
@@ -48,6 +53,8 @@ const UI: Record<Lang, {
     pkgLarge: 'Large parcel', pkgLargeDesc: 'For shoes and bulky accessories',
     pkgMedium: 'Medium parcel', pkgMediumDesc: 'For thick or bulky items',
     pkgSmall: 'Small parcel', pkgSmallDesc: 'For lightweight items', pkgSmallDescAcc: 'For accessories and small items',
+    autoFillBtn: 'Auto-fill Vinted', autoFillLoading: 'Opening…',
+    autoFillLocked: 'Available with Pro plan', autoFillHint: 'Opens Vinted and pre-fills the form in one click',
   },
   es: {
     header: 'Listo para publicar', headerSub: 'Copia cada campo y pégalo en Vinted.',
@@ -60,6 +67,8 @@ const UI: Record<Lang, {
     pkgLarge: 'Paquete grande', pkgLargeDesc: 'Para zapatos y accesorios voluminosos',
     pkgMedium: 'Paquete mediano', pkgMediumDesc: 'Para prendas gruesas o voluminosas',
     pkgSmall: 'Paquete pequeño', pkgSmallDesc: 'Para prendas ligeras', pkgSmallDescAcc: 'Para accesorios y artículos pequeños',
+    autoFillBtn: 'Rellenar Vinted automáticamente', autoFillLoading: 'Abriendo…',
+    autoFillLocked: 'Disponible con el plan Pro', autoFillHint: 'Abre Vinted y rellena el formulario en un clic',
   },
   de: {
     header: 'Bereit zur Veröffentlichung', headerSub: 'Kopiere jedes Feld und füge es auf Vinted ein.',
@@ -72,6 +81,8 @@ const UI: Record<Lang, {
     pkgLarge: 'Großes Paket', pkgLargeDesc: 'Für Schuhe und sperrige Accessoires',
     pkgMedium: 'Mittleres Paket', pkgMediumDesc: 'Für dicke oder sperrige Teile',
     pkgSmall: 'Kleines Paket', pkgSmallDesc: 'Für leichte Teile', pkgSmallDescAcc: 'Für Accessoires und kleine Teile',
+    autoFillBtn: 'Vinted automatisch ausfüllen', autoFillLoading: 'Wird geöffnet…',
+    autoFillLocked: 'Verfügbar mit dem Pro-Plan', autoFillHint: 'Öffnet Vinted und füllt das Formular mit einem Klick aus',
   },
   it: {
     header: 'Pronto per pubblicare', headerSub: 'Copia ogni campo e incollalo su Vinted.',
@@ -84,6 +95,8 @@ const UI: Record<Lang, {
     pkgLarge: 'Pacco grande', pkgLargeDesc: 'Per scarpe e accessori voluminosi',
     pkgMedium: 'Pacco medio', pkgMediumDesc: 'Per capi spessi o voluminosi',
     pkgSmall: 'Pacco piccolo', pkgSmallDesc: 'Per capi leggeri', pkgSmallDescAcc: 'Per accessori e articoli piccoli',
+    autoFillBtn: 'Compila Vinted automaticamente', autoFillLoading: 'Apertura…',
+    autoFillLocked: 'Disponibile con il piano Pro', autoFillHint: 'Apre Vinted e compila il modulo in un clic',
   },
   nl: {
     header: 'Klaar om te publiceren', headerSub: 'Kopieer elk veld en plak het op Vinted.',
@@ -96,6 +109,8 @@ const UI: Record<Lang, {
     pkgLarge: 'Groot pakket', pkgLargeDesc: 'Voor schoenen en omvangrijke accessoires',
     pkgMedium: 'Middelgroot pakket', pkgMediumDesc: 'Voor dikke of omvangrijke stukken',
     pkgSmall: 'Klein pakket', pkgSmallDesc: 'Voor lichte stukken', pkgSmallDescAcc: 'Voor accessoires en kleine stukken',
+    autoFillBtn: 'Vinted automatisch invullen', autoFillLoading: 'Openen…',
+    autoFillLocked: 'Beschikbaar met het Pro-plan', autoFillHint: 'Opent Vinted en vult het formulier in één klik in',
   },
   pl: {
     header: 'Gotowe do publikacji', headerSub: 'Skopiuj każde pole i wklej je na Vinted.',
@@ -108,6 +123,8 @@ const UI: Record<Lang, {
     pkgLarge: 'Duża paczka', pkgLargeDesc: 'Do butów i objętościowych akcesoriów',
     pkgMedium: 'Średnia paczka', pkgMediumDesc: 'Do grubych lub objętościowych elementów',
     pkgSmall: 'Mała paczka', pkgSmallDesc: 'Do lekkich elementów', pkgSmallDescAcc: 'Do akcesoriów i małych przedmiotów',
+    autoFillBtn: 'Automatycznie wypełnij Vinted', autoFillLoading: 'Otwieranie…',
+    autoFillLocked: 'Dostępne w planie Pro', autoFillHint: 'Otwiera Vinted i wypełnia formularz jednym kliknięciem',
   },
 }
 
@@ -186,10 +203,42 @@ function CopyBtn({ text, label, copiedLabel }: { text: string; label: string; co
 export default function ExportStep({ slots, aiPhotos, recognition, pricing, annonce }: Props) {
   const { lang } = useLang()
   const t = UI[lang] ?? UI.fr
+  const [plan, setPlan]               = useState<Plan>('freemium')
   const [downloading, setDownloading] = useState(false)
+  const [autoFilling, setAutoFilling] = useState(false)
   const filledSlots = slots.filter(s => s.file !== null)
   const totalPhotos = filledSlots.length + aiPhotos.length
-  const pkg = suggestPackage(recognition?.categorie.value ?? '', t)
+  const pkg = suggestPackage(recognition?.vintedPath.value ?? '', t)
+
+  /* ── Bookmarklet auto-fill (Pro) ── */
+  async function handleAutoFill() {
+    if (!annonce || !pricing || !recognition) return
+    setAutoFilling(true)
+    try {
+      const res = await fetch('/api/bookmarklet-data', {
+        method:  'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          titre:       annonce.titre,
+          description: annonce.descriptionExport ?? annonce.descriptionFR,
+          prix:        pricing.prixSuggere,
+          categorie: recognition.vintedPath.value,
+          marque:      recognition.marque.value,
+          taille:      recognition.taille.value,
+          etat:        tx(CONDITION_LABELS, lang, recognition.etat.value ?? ''),
+          couleurs:    recognition.couleurs.value.map(c => tx(COLOR_LABELS,    lang, c)),
+          matieres:    recognition.matieres.value.map(m => tx(MATERIAL_LABELS, lang, m)),
+          materiau:    recognition.matieres.value[0] ? tx(MATERIAL_LABELS, lang, recognition.matieres.value[0]) : null,
+        }),
+      })
+      const { token } = await res.json() as { token: string }
+      window.open(`${getVintedUrl()}?sltoken=${token}`, '_blank')
+    } catch (err) {
+      console.error('[bookmarklet] error:', err)
+    } finally {
+      setAutoFilling(false)
+    }
+  }
 
   /* ── Téléchargement ZIP des photos ── */
   async function downloadZip() {
@@ -234,6 +283,20 @@ export default function ExportStep({ slots, aiPhotos, recognition, pricing, anno
 
   return (
     <div className="max-w-2xl mx-auto">
+
+      {/* ── Switcher plan (DEV uniquement) ── */}
+      <div className="flex items-center gap-2 bg-amber-50 border border-amber-200 rounded-xl px-3 py-2 mb-4">
+        <span className="text-[10px] font-bold text-amber-500 uppercase tracking-wider shrink-0">DEV</span>
+        <div className="flex gap-1">
+          {(['freemium', 'premium', 'pro'] as Plan[]).map(p => (
+            <button key={p} onClick={() => setPlan(p)}
+              className={`text-xs font-semibold px-3 py-1 rounded-lg transition-all ${plan === p ? 'bg-amber-400 text-white shadow-sm' : 'text-amber-600 hover:bg-amber-100'}`}
+            >
+              {p.charAt(0).toUpperCase() + p.slice(1)}
+            </button>
+          ))}
+        </div>
+      </div>
 
       {/* ── En-tête ── */}
       <div className="flex items-center gap-2 mb-7">
@@ -342,14 +405,8 @@ export default function ExportStep({ slots, aiPhotos, recognition, pricing, anno
               {/* Catégorie — pleine largeur car peut être long */}
               <div className="mb-3">
                 <p className="text-[10px] font-bold text-gray-400 uppercase tracking-wider mb-0.5">{t.categoryLabel}</p>
-                <p className="text-sm font-medium text-gray-800 flex items-center gap-1 flex-wrap">
-                  {tx(CATEGORY_LABELS, lang, recognition!.categorie.value)}
-                  {recognition!.sousCategorie.value && (
-                    <>
-                      <ChevronRight className="w-3 h-3 text-gray-400 shrink-0" />
-                      {tx(SUBCATEGORY_LABELS, lang, recognition!.sousCategorie.value)}
-                    </>
-                  )}
+                <p className="text-sm font-medium text-gray-800">
+                  {recognition!.vintedPath.value || '—'}
                 </p>
               </div>
 
@@ -413,7 +470,7 @@ export default function ExportStep({ slots, aiPhotos, recognition, pricing, anno
             </div>
           </div>
 
-          {/* ── CTA Vinted ── */}
+          {/* ── CTA Vinted — Option A (tous plans) ── */}
           <a
             href={getVintedUrl()}
             target="_blank"
@@ -424,6 +481,44 @@ export default function ExportStep({ slots, aiPhotos, recognition, pricing, anno
             {t.openVinted}
             <ChevronRight className="w-3.5 h-3.5" />
           </a>
+
+          {/* ── Bookmarklet auto-fill — Option B (Pro) ── */}
+          <div className={`rounded-2xl border p-4 space-y-3 ${plan === 'pro' ? 'bg-violet-50 border-violet-100' : 'bg-gray-50 border-gray-100 opacity-70'}`}>
+            <div className="flex items-center gap-2">
+              <div className="w-7 h-7 rounded-lg bg-violet-100 flex items-center justify-center shrink-0">
+                <Wand2 className="w-3.5 h-3.5 text-violet-600" />
+              </div>
+              <div className="flex-1 min-w-0">
+                <div className="flex items-center gap-1.5">
+                  <p className="font-display font-extrabold text-sm text-violet-900">{t.autoFillBtn}</p>
+                  <span className="text-[9px] font-bold bg-violet-100 text-violet-600 px-1.5 py-0.5 rounded-full uppercase tracking-wide">Pro</span>
+                </div>
+                <p className="text-xs text-gray-400 mt-0.5">{t.autoFillHint}</p>
+              </div>
+            </div>
+
+            {plan !== 'pro' ? (
+              <p className="text-xs text-gray-400 flex items-center gap-1.5">
+                <Lock className="w-3 h-3 shrink-0" />
+                {t.autoFillLocked}
+              </p>
+            ) : (
+              <button
+                onClick={handleAutoFill}
+                disabled={autoFilling}
+                className={`w-full flex items-center justify-center gap-2 py-3 rounded-xl font-semibold text-sm transition-all ${
+                  autoFilling
+                    ? 'bg-violet-100 text-violet-400 cursor-wait'
+                    : 'bg-violet-600 hover:bg-violet-700 text-white active:scale-[0.98]'
+                }`}
+              >
+                {autoFilling
+                  ? <><div className="w-4 h-4 border-2 border-violet-400 border-t-transparent rounded-full animate-spin" />{t.autoFillLoading}</>
+                  : <><Wand2 className="w-4 h-4" />{t.autoFillBtn}</>
+                }
+              </button>
+            )}
+          </div>
 
         </div>
       )}

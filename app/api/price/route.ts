@@ -12,8 +12,7 @@ const LANG_NAMES: Record<string, string> = {
 export interface PriceRequest {
   marque: string
   genre: string
-  categorie: string
-  sousCategorie: string
+  vintedPath: string
   taille: string
   etat: string
   couleurs: string[]
@@ -121,7 +120,7 @@ export async function POST(req: NextRequest) {
     const body: PriceRequest = await req.json()
 
     const {
-      marque, genre, categorie, sousCategorie, taille, etat,
+      marque, genre, vintedPath, taille, etat,
       couleurs, matieres, style,
       prixAchatNeuf, plateforme, rarete,
       brand_segment: inputBrandSegment,
@@ -145,7 +144,7 @@ export async function POST(req: NextRequest) {
 
 Article :
 - Marque : ${marque || 'Non précisée'}
-- Catégorie : ${categorie} > ${sousCategorie}
+- Catégorie : ${vintedPath}
 - État : ${etat}
 - Segment marque : ${seg}
 ${prixAchatNeuf ? `- Prix d'achat neuf déclaré : ${prixAchatNeuf}€` : ''}
@@ -267,7 +266,7 @@ Réponds UNIQUEMENT avec ce JSON (sans markdown) :
 Article :
 - Marque : ${marque || 'Non précisée'}
 - Genre : ${genre}
-- Catégorie : ${categorie} > ${sousCategorie}
+- Catégorie : ${vintedPath}
 - Taille : ${taille || 'Non précisée'}
 - État : ${etat}
 - Couleurs : ${couleurs.join(', ') || 'Non précisées'}

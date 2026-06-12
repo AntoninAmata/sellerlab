@@ -197,8 +197,7 @@ function usePricing(
         body: JSON.stringify({
           marque:        recognition.marque.value,
           genre:         recognition.genre.value,
-          categorie:     recognition.categorie.value,
-          sousCategorie: recognition.sousCategorie.value,
+          vintedPath:    recognition.vintedPath.value,
           taille:        recognition.taille.value,
           etat:          recognition.etat.value,
           couleurs:      recognition.couleurs.value,

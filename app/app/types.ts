@@ -29,8 +29,8 @@ export interface RecognitionField<T> {
 export interface RecognitionResult {
   marque:        RecognitionField<string>
   genre:         RecognitionField<string>
-  categorie:     RecognitionField<string>
-  sousCategorie: RecognitionField<string>
+  /* Chemin de navigation Vinted complet, ex: "Femmes > Vêtements > Jeans > Jeans skinny" */
+  vintedPath:    RecognitionField<string>
   taille:        RecognitionField<string>
   etat:          RecognitionField<string>
   couleurs:      RecognitionField<string[]>
