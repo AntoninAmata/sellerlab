@@ -21,11 +21,14 @@ SaaS pour vendeurs Vinted (et autres plateformes à terme).
 - Sitemap XML + navigation complète
 - Header scroll-aware + hamburger mobile
 - Footer multi-colonnes avec badge "Phase bêta"
-- Flux /app — 5 étapes complètes ✅
+- Flux /app — 5 étapes complètes ✅ (Article → Visuels → Annonce → Prix → Publication)
 - Build propre — 0 erreur TypeScript ✅
 - Taxonomie Vinted traduite dans les 7 langues ✅
 - i18n complet sur tout le flux /app ✅
-- Mannequin IA FASHN intégré (plan Pro) ✅
+- Mannequin IA FASHN tryon-max intégré (plan Pro) — 15H + 15F, 3 poses ✅
+- Photos produit non portées FASHN product-to-model (Pro) ✅
+- Style auto-adapté : prompt de tenue généré selon article + traduit en anglais ✅
+- Rendu 3:4 (1080×1440) toutes photos traitées, 31 fonds ✅
 - Import URL Vinted ✅ (plan Pro)
 - Bookmarklet Vinted ✅ (fonctionnel)
 
@@ -68,9 +71,9 @@ SaaS pour vendeurs Vinted (et autres plateformes à terme).
 - Backend : Supabase (DB + Auth + Storage pour photos utilisateurs)
 - Paiements : Stripe
 - Emails : Resend + react-email
-- IA : Claude API — claude-sonnet-4-6 pour vision et génération, claude-haiku-4-5 pour classification photos
+- IA : Claude API — claude-sonnet-4-6 pour vision et génération, claude-haiku-4-5 pour classification photos et traduction de prompts
 - Suppression fond : @imgly/background-removal (WebAssembly côté client, gratuit, privé)
-- Mannequin IA : FASHN.ai (Product to Model endpoint)
+- Mannequin IA : FASHN.ai — tryon-max pour photos portées, product-to-model pour photos produit
 - Analytics : Umami (RGPD, gratuit)
 - Hébergement : Vercel
 
@@ -98,24 +101,28 @@ SaaS pour vendeurs Vinted (et autres plateformes à terme).
 
 ## 3 Formules tarifaires
 - Freemium 0€ : 1 annonce/mois, background removal blanc uniquement sur slot 0, pas de mannequin IA, pas d'import URL
-- Premium X€ : annonces limitées/mois, background removal 22 fonds sur photos choisies, pas de mannequin IA, pas d'import URL
-- Pro XX€ : annonces limitées/mois, background removal complet, mannequin IA (2 photos), import URL Vinted, bookmarklet Vinted
+- Premium X€ : annonces limitées/mois, background removal 31 fonds sur photos choisies, pas de mannequin IA, pas d'import URL
+- Pro XX€ : annonces limitées/mois, background removal complet, mannequin IA (photos portées + produit), import URL Vinted, bookmarklet Vinted
 
 ---
 
 ## Page /app — Flux en 5 étapes
 
-### Étape 1 — Photos ✅ Construite
+**Frise :** Article → Visuels → Annonce → Prix → Publication
+
+---
+
+### Étape 1 — Article ✅ Construite
+Upload photos + classification IA + reconnaissance automatique
 
 #### Import URL Vinted ✅ (plan Pro uniquement)
-- Zone "Importer depuis Vinted" en haut de l'étape 1, alternative à l'upload manuel
+- Zone "Importer depuis Vinted" en haut, alternative à l'upload manuel
 - Freemium/Premium : zone visible mais verrouillée (cadenas)
 - Pro : input URL + bouton "Importer"
 - Supporte tous les domaines Vinted : .fr, .es, .de, .it, .nl, .pl, .co.uk
 - API : `app/api/import-vinted/route.ts`
-- Technique : fetch côté serveur avec headers navigateur → regex sur HTML pour extraire URLs images (format images1.vinted.net) → filtre par timestamp dominant pour éliminer la photo de profil du vendeur → téléchargement en base64 côté serveur → injection dans slots
-- IMPORTANT : Vinted n'utilise PAS __NEXT_DATA__ — on parse le HTML directement avec une regex
-- Les photos importées passent par la classification IA normale (même process qu'un upload manuel)
+- Technique : fetch côté serveur → regex sur HTML pour extraire URLs images1.vinted.net → filtre par timestamp dominant → téléchargement en base64 → injection dans slots
+- IMPORTANT : Vinted n'utilise PAS __NEXT_DATA__ — on parse le HTML directement
 - NE récupère PAS titre/description/prix/catégorie — uniquement les photos
 
 #### Slots (15 au total) — Structure définitive
@@ -131,90 +138,102 @@ SaaS pour vendeurs Vinted (et autres plateformes à terme).
 - Slot 7 : Défaut — Optionnel
 - Slot 8 : Emballage — Optionnel
 
-**Section 2 — PHOTOS PORTÉES (FACE, PROFIL, DOS)** — 6 slots
+**Section 2 — PHOTOS PORTÉES** — 6 slots
 - Slots 9-14 : Vue portée 1 à 6 — Recommandé (1-4) / Optionnel (5-6)
-
-**Section 3 — 📸 RENDU — PHOTOS TRAITÉES** (en dessous des photos portées)
-- Affiche les photos traitées (background removal + mannequin IA)
-- Les photos traitées ne vont JAMAIS dans les slots originaux
-- State séparé `aiPhotos` pour les photos IA
-
-#### 3 plans tarifaires — comportement photos
-
-**Freemium (0€) :**
-- Panneau fond : fond blanc uniquement, autres fonds verrouillés avec cadenas
-- Message : "Passez au Premium pour tous les fonds"
-- Background removal : slot 0 uniquement, fond blanc
-- Panneau mannequin IA : visible mais entièrement verrouillé, scrollable pour teaser
-
-**Premium :**
-- Panneau fond : 22 fonds disponibles
-- Message : "Cochez les photos dont vous souhaitez supprimer le fond"
-- Checkbox sur chaque slot pour choisir quelles photos traiter
-- Panneau mannequin IA : visible, scrollable (Homme/Femme), mais génération verrouillée — badge "Pro"
-
-**Pro :**
-- Panneau fond : 22 fonds disponibles + checkboxes
-- Panneau mannequin IA : entièrement fonctionnel
-- Bouton : "Générer 2 photos portées"
-- 2 appels FASHN séparés en parallèle avec seeds différents
-
-#### Fonds disponibles — 23 au total
-1. Blanc pur — `/public/backgrounds/bg-white.jpg`
-2-23. bg-01.jpg à bg-22.jpg dans `/public/backgrounds/`
-
-#### Mannequin IA — FASHN.ai Product to Model
-- API : `app/api/generate-mannequin/route.ts`
-- Clé : `FASHN_API_KEY` dans `.env.local`
-- 10 hommes + 10 femmes dans `/public/mannequins/`
-- Retenus : man-01, 02, 05, 06, 07, 09, 13, 16, 18, 20 / woman-01, 02, 04, 06, 07, 10, 13, 16, 18, 20
-- Descriptions détaillées : `lib/mannequin-descriptions.ts`
-- Bouton sélection : "Choisir ce style" (pas "Utiliser ce mannequin")
-- 2 appels séparés avec seeds différents pour des poses différentes
-- Paramètres : `image_prompt` (mannequin base64), `background_reference` (fond choisi), `num_images: 1`, `resolution: "1k"`, NO face_reference
-- Prompt : "Full body, [DESCRIPTION MANNEQUIN], [PARTIE TENUE], natural Vinted selling photo"
-- Tenue par défaut (modifiable par le user) : "outfit adapted to the garment, contemporary 2026 casual style"
-- Champ "Personnaliser la tenue" replié par défaut
-
-#### Disposition visuelle
-- Slots 0-2 : grille `grid-cols-3`, grandes cases, `object-contain`
-- Slots 3-8 : grille `grid-cols-6`, petites cases
-- Slots 9-14 : grille `grid-cols-6`, petites cases
-- Toutes les photos en `object-contain` sur fond gris clair
 
 #### Classification IA
 - UN SEUL appel Claude Haiku pour toutes les photos simultanément
 - Redimensionnement automatique à 1024px avant envoi
 - Ordre priorité : worn → flat → detail → autre
 
-#### Suppression de fond
-- @imgly/background-removal (WebAssembly côté client) — GRATUIT
-- Safari : message orange d'avertissement — NE PAS bloquer le flux
-
----
-
-### Étape 2 — Reconnaissance automatique ✅ Construite
-
+#### Reconnaissance automatique (dans la même étape)
 Claude Vision (claude-sonnet-4-6) analyse les photos et pré-remplit le formulaire.
 Le prompt reçoit `locale` pour répondre dans la langue de l'interface.
 
-Champs détectés automatiquement :
-- Marque, Segment de marque (interne), Genre, Catégorie + sous-catégorie, Taille, État, Couleur (max 2), Matière, Style, Motif, Défauts visibles
+Champs détectés : Marque, Segment de marque (interne), Genre, Catégorie + sous-catégorie (vintedPath), Taille, État, Couleur (max 2), Matière, Style, Motif, Défauts visibles
 
-#### Informations complémentaires
-
-**Bloc 1 — Informations générales** (PAS de dimensions ici)
-- Tags : pays de fabrication, doublure, numéro de référence, type de cuir, instructions d'entretien, Autre
-- Prix neuf (optionnel)
-- Tag passe vert après validation uniquement
-
-**Bloc 2 — Dimensions**
-- Tags : tour de poitrine, longueur, épaules, tour de taille, tour de hanches, entrejambe, pointure, largeur, hauteur, profondeur
-- Mesure personnalisée possible
+**Informations complémentaires :**
+- Bloc 1 — Infos générales : pays de fabrication, doublure, numéro référence, type cuir, entretien, Autre + Prix neuf
+- Bloc 2 — Dimensions : poitrine, longueur, épaules, taille, hanches, entrejambe, pointure, largeur, hauteur, profondeur + mesure personnalisée
 
 ---
 
-### Étape 3 — Génération de l'annonce ✅ Construite
+### Étape 2 — Visuels ✅ Construite
+Traitement photos : détourage fond + fonds + mannequin IA + photos produit
+
+#### Suppression de fond
+- @imgly/background-removal (WebAssembly côté client) — GRATUIT, privé
+- Safari : message orange d'avertissement — NE PAS bloquer le flux
+- Résultat : détourage PNG → composition sur fond choisi → JPEG 3:4 1080×1440
+
+#### Fonds disponibles — 31 au total
+- Blanc pur : `/public/backgrounds/bg-white.jpg`
+- Extérieurs/studios : `bg-01.jpg` à `bg-22.jpg`
+- Intérieurs scandinaves : `bg-23.jpg` à `bg-30.jpg`
+- Changement de fond = recomposition côté client (pas de re-détourage, pas d'appel FASHN)
+
+#### 3 plans tarifaires — comportement photos
+
+**Freemium (0€) :**
+- Fond blanc uniquement (autres verrouillés avec cadenas)
+- Background removal : slot 0 uniquement
+- Mannequin IA : visible mais verrouillé (teaser scrollable)
+
+**Premium :**
+- 31 fonds disponibles avec checkboxes par slot
+- Mannequin IA : visible mais génération verrouillée (badge "Pro")
+
+**Pro :**
+- 31 fonds + checkboxes
+- Mannequin IA et photos produit entièrement fonctionnels
+
+#### Rendu final — format universel
+- Toutes les photos traitées : JPEG 3:4 portrait, 1080×1440 px
+- Fond : cover (Math.max) pour remplir le cadre
+- Cutout : contain 85% (Math.min) centré sur le fond
+- Les photos traitées ne vont JAMAIS dans les slots originaux
+- State séparé : `aiCutoutEntries`, `productCutoutEntries`, `aiPhotos`
+
+#### Mannequin IA — FASHN.ai tryon-max (plan Pro)
+- API : `app/api/generate-mannequin/route.ts`
+- Endpoint FASHN : **tryon-max** (2 crédits/photo, qualité maximale)
+- Mannequins : **15 hommes + 15 femmes** — man-01 à man-15 / woman-01 à woman-15
+- Fichiers : `/public/mannequins/final/{id}.png` — 3 poses disponibles : face, side, back
+- Descriptions : `lib/mannequin-descriptions.ts`
+- Bouton sélection : "Choisir ce mannequin" (confirmation avant génération)
+- Paramètres FASHN : `model_image` (base64 PNG pose choisie), `garment_image` (slot 0 base64), `outfit_prompt` (tenue traduite EN), `resolution: "1k"`, NO background_reference
+- Résultat : URL FASHN → removeBackground (@imgly) → composition sur fond choisi
+
+#### Style auto-adapté — generateOutfitPrompt
+- Fichier : `RecognitionStep.tsx` (fonction pure avant le composant)
+- Extraction type depuis `vintedPath` (N2/N3 regex) : HAUT / BAS / PIECE_ENTIERE / VESTE / CHAUSSURE / ACCESSOIRE
+- Normalisation style depuis `result.style.value` : casual / chic / sportif / vintage / streetwear / rock / business / boheme / minimaliste / default
+- Table `OUTFIT_PROMPTS` : 7 langues × 6 types × 10 styles (coupes 2026 — straight-leg, wide-leg, NO slim/skinny)
+- `promptIsAutoRef` : flag pour ne pas écraser une édition manuelle de l'utilisateur
+- `handleCustomPromptChange` : passe le flag à false, empêche la régénération auto
+- Avant chaque appel FASHN : traduction du prompt via `/api/translate-prompt`
+
+#### Traduction du prompt — /api/translate-prompt
+- Modèle : claude-haiku-4-5 (rapide, économique)
+- Si `source_lang === 'en'` : renvoie le texte sans appel API
+- Sinon : traduction en anglais avec vocabulaire mode précis
+- Fallback : si échec, envoie le prompt original (ne bloque pas la génération)
+
+#### Photos produit non portées — FASHN.ai product-to-model (plan Pro)
+- API : `app/api/generate-product-photo/route.ts`
+- Endpoint FASHN : **product-to-model** (mode fast, 1 crédit/photo)
+- 3 modes : buste / cintre / plat
+- Même pipeline de composition : removeBackground → compositeWithBackground → JPEG 3:4
+- `productCutoutEntries` recomposités sur le fond choisi sans re-appel FASHN
+
+#### Coût FASHN par annonce (plan Pro)
+- 2 photos mannequin (tryon-max) : 4 crédits
+- 2 photos produit (product-to-model fast) : 2 crédits
+- Total estimé : ~6-8 crédits/annonce
+
+---
+
+### Étape 3 — Annonce ✅ Construite
 
 RÈGLE ABSOLUE : jamais d'information inventée. NE JAMAIS mentionner "Vinted Pro".
 
@@ -229,7 +248,7 @@ Structure (ordre exact) :
 
 ---
 
-### Étape 4 — Calcul du prix ✅ Construite
+### Étape 4 — Prix ✅ Construite
 
 #### Segment de marque (déterminé par l'IA, exemples non exhaustifs)
 - `standard` : Zara, H&M, Mango...
@@ -267,7 +286,7 @@ Structure (ordre exact) :
 
 ---
 
-### Étape 5 — Export vers Vinted ✅ Construite
+### Étape 5 — Publication ✅ Construite
 
 Structure suivant l'ordre EXACT du formulaire Vinted :
 1. PHOTOS — miniatures + bouton "Télécharger toutes les photos (ZIP)"
@@ -319,15 +338,17 @@ PAS de bouton "Tout copier"
 
 ---
 
-## Mannequin IA — Descriptions complètes
+## Mannequin IA — Référence complète
 
-Fichier : `lib/mannequin-descriptions.ts`
+Fichier descriptions : `lib/mannequin-descriptions.ts`
+Fichiers images : `/public/mannequins/final/{id}.png` — 3 poses par mannequin (face, side, back)
 
-Mannequins retenus (10H + 10F) :
-- Hommes : man-01, man-02, man-05, man-06, man-07, man-09, man-13, man-16, man-18, man-20
-- Femmes : woman-01, woman-02, woman-04, woman-06, woman-07, woman-10, woman-13, woman-16, woman-18, woman-20
+**15 hommes + 15 femmes :**
+- Hommes : man-01 à man-15
+- Femmes : woman-01 à woman-15
 
-Note : 40 nouvelles photos à régénérer (face + 3/4) avec pantalon ample + imperfections. En attente.
+Endpoint FASHN : **tryon-max** (qualité maximale, 2 crédits/photo)
+Paramètres : `model_image` (base64 PNG pose), `garment_image` (slot 0 base64), `outfit_prompt` (EN), `resolution: "1k"`
 
 ---
 
@@ -491,21 +512,84 @@ Conservé : `SIZES`, `COLORS`, `MATERIALS`, `CONDITIONS`, `STYLES`, `PATTERNS`, 
 
 ---
 
+## Résumé session 2026-06-17 — Visuels, mannequin IA & style auto-adapté
+
+### Réorganisation du flux /app
+- Étape 1 : **Article** = upload + classification IA + reconnaissance (anciens étapes 1+2 fusionnés)
+- Étape 2 : **Visuels** = tout le traitement photo (détourage + fonds + mannequin IA + photos produit)
+- Frise finale : Article → Visuels → Annonce → Prix → Publication (dans les 7 langues)
+
+### FASHN — passage à tryon-max
+- Photos portées : **tryon-max** (2 crédits/photo, qualité maximale)
+- Photos produit non portées : **product-to-model fast** (1 crédit/photo)
+- 3 modes produit : buste / cintre / plat
+- Résolution : `1k` partout
+- `background_reference` retiré — composition côté client uniquement
+
+### Mannequins IA
+- **15 hommes + 15 femmes** : man-01 à man-15 / woman-01 à woman-15
+- **3 poses** par mannequin : face, side, back — fichiers `/public/mannequins/final/{id}.png`
+- Bouton de confirmation "Choisir ce mannequin" avant génération
+
+### Rendu 3:4 universel (compositeWithBackground)
+- Format fixe : JPEG portrait 1080×1440 px
+- Fond : cover (Math.max), cutout : contain 85% centré (Math.min)
+- Changement de fond = recomposition locale gratuite (aucun appel FASHN)
+- Même pipeline pour : slots réels, photos mannequin, photos produit
+
+### 31 fonds
+- `bg-white.jpg` + `bg-01.jpg` à `bg-22.jpg` + **`bg-23.jpg` à `bg-30.jpg`** (8 intérieurs scandinaves)
+
+### Style auto-adapté (generateOutfitPrompt)
+- `classifyGarment(vintedPath)` → type (HAUT/BAS/PIECE_ENTIERE/VESTE/CHAUSSURE/ACCESSOIRE) via regex N2/N3
+- `normalizeStyle(style.value)` → clé style (casual/chic/sportif/vintage/streetwear/rock/business/boheme/minimaliste/default)
+- `OUTFIT_PROMPTS` : 7 langues × 6 types × 10 styles — coupes 2026 (straight-leg/wide-leg, zéro slim/skinny)
+- `promptIsAutoRef` + `handleCustomPromptChange` : la génération auto s'arrête dès que l'utilisateur modifie le champ
+- Traduction via `/api/translate-prompt` (claude-haiku-4-5) avant envoi FASHN — fallback = texte original
+
+### Routes API ajoutées
+- `/api/translate-prompt` — claude-haiku-4-5, texte → anglais, court-circuit si source_lang='en'
+
+---
+
 ## Prochaine session — Priorités
 
-### P1 — Qualité produit (impact direct sur conversion)
-1. **Amélioration traitement photos** — suppression de fond plus propre (rembg ?), meilleure gestion des transparences, option "recadrage automatique"
-2. **Amélioration annonces/descriptions** — ton plus vendeur, SEO mots-clés mieux intégrés, option longueur courte/longue, meilleure utilisation des infos complémentaires (dimensions, défauts)
-3. **Stabilisation calcul de prix** — tester sur des vrais articles, affiner les pondérations marché/décote, fiabiliser l'API de recherche de prix marché
+### P1 — Tests terrain & stabilisation
+1. **Tester la génération mannequin tryon-max** — vérifier la qualité des poses face/side/back sur plusieurs articles
+2. **Tester le style auto-adapté** — vérifier que les prompts générés produisent des tenues cohérentes
+3. **Stabilisation calcul de prix** — tester sur des vrais articles, affiner pondérations, fiabiliser l'API marché
 
-### P2 — Bookmarklet (polish)
-4. **Réduction délais bookmarklet** — tester avec des délais adaptatifs (poll toutes les 200ms jusqu'à apparition des options) plutôt que timeouts fixes, pour réduire le temps total de remplissage
-5. **Support autres langues Vinted** — les paths de catégories sont en FR, vérifier la correspondance sur vinted.es, vinted.de, etc.
+### P2 — Qualité produit
+4. **Amélioration annonces/descriptions** — ton plus vendeur, SEO mots-clés mieux intégrés, option longueur courte/longue
+5. **Amélioration suppression de fond** — meilleure gestion des transparences, cas difficiles (cheveux, dentelle)
 
-### P3 — Infrastructure & monétisation
-6. **Supabase Auth** — inscription/connexion, gestion des quotas freemium
-7. **Stripe paiements** — checkout Premium + Pro
-8. **Déploiement Vercel** — mise en ligne Phase 1
+### P3 — Bookmarklet (polish)
+6. **Réduction délais bookmarklet** — délais adaptatifs (poll 200ms) plutôt que timeouts fixes
+7. **Support autres langues Vinted** — vérifier correspondance chemins de catégories sur vinted.es, vinted.de, etc.
 
-### P4 — Vision agentic (Phase 2+)
-9. **Version agentic AI** — au lieu du bookmarklet, un agent IA qui remplit Vinted de façon autonome (extension Chrome ou Playwright côté serveur), avec supervision humaine pour validation finale
+### P4 — Infrastructure & monétisation
+8. **Supabase Auth** — inscription/connexion, gestion des quotas freemium
+9. **Stripe paiements** — checkout Premium + Pro
+10. **Déploiement Vercel** — mise en ligne Phase 1
+
+---
+
+## ⚠️ À faire avant déploiement Vercel — Mannequins IA
+
+`public/mannequins/` est dans le `.gitignore` (494 Mo de PNG impossibles à pousser sur GitHub tel quel).
+Les fichiers existent en local et tout fonctionne, mais ils **ne seront pas sur Vercel automatiquement**.
+
+**Deux options au moment du déploiement :**
+
+**Option A — Supabase Storage (recommandée)**
+- Uploader les 45 PNG (× 3 poses) sur un bucket Supabase Storage public
+- Modifier `app/api/generate-mannequin/route.ts` : remplacer `readFileSync` par un `fetch` vers l'URL Supabase
+- Avantage : pas de limite de taille, images CDN-servis
+
+**Option B — Git LFS**
+- `git lfs install` + `git lfs track "app/public/mannequins/**/*.png"`
+- Commit + push avec LFS activé
+- Avantage : transparent dans le code, pas de changement de routes
+- Inconvénient : coût GitHub LFS Storage au-delà de 1 Go gratuit
+
+**Status actuel :** en local ✅ / GitHub ❌ (gitignoré) / Vercel ❌ (absent du repo)

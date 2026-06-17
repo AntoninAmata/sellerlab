@@ -1,3 +1,5 @@
+export type Plan = 'freemium' | 'premium' | 'pro'
+
 export type SlotStatus = 'empty' | 'uploading' | 'processing-bg' | 'done' | 'error'
 
 export interface PhotoSlot {

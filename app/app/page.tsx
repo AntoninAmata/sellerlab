@@ -8,7 +8,7 @@ import RecognitionStep from './components/RecognitionStep'
 import PricingStep from './components/PricingStep'
 import AnnonceStep from './components/AnnonceStep'
 import ExportStep from './components/ExportStep'
-import type { PhotoSlot, RecognitionResult, PriceResult, GenerateResult } from './types'
+import type { PhotoSlot, RecognitionResult, PriceResult, GenerateResult, Plan } from './types'
 import { useLang } from '@/app/providers'
 import type { Lang } from '@/lib/i18n'
 
@@ -35,11 +35,11 @@ const PAGE_I18N: Record<Lang, {
 }> = {
   fr: {
     steps: [
-      { label: 'Photos',          shortLabel: 'Photos'  },
-      { label: 'Reconnaissance',  shortLabel: 'Reconn.' },
+      { label: 'Article',          shortLabel: 'Article' },
+      { label: 'Visuels',         shortLabel: 'Visuels' },
       { label: 'Annonce',         shortLabel: 'Annonce' },
       { label: 'Prix',            shortLabel: 'Prix'    },
-      { label: 'Export',          shortLabel: 'Export'  },
+      { label: 'Publication',      shortLabel: 'Publi.'  },
     ],
     newListing:   'Nouvelle annonce',
     stepOf:       (s, t) => `Étape ${s} / ${t}`,
@@ -50,11 +50,11 @@ const PAGE_I18N: Record<Lang, {
   },
   en: {
     steps: [
-      { label: 'Photos',      shortLabel: 'Photos'  },
-      { label: 'Recognition', shortLabel: 'Recogn.' },
+      { label: 'Article',     shortLabel: 'Article' },
+      { label: 'Visuals',     shortLabel: 'Visuals' },
       { label: 'Listing',     shortLabel: 'Listing' },
       { label: 'Price',       shortLabel: 'Price'   },
-      { label: 'Export',      shortLabel: 'Export'  },
+      { label: 'Publishing',  shortLabel: 'Publish.'},
     ],
     newListing:   'New listing',
     stepOf:       (s, t) => `Step ${s} / ${t}`,
@@ -65,11 +65,11 @@ const PAGE_I18N: Record<Lang, {
   },
   es: {
     steps: [
-      { label: 'Fotos',         shortLabel: 'Fotos'   },
-      { label: 'Identificación',shortLabel: 'Ident.'  },
+      { label: 'Artículo',       shortLabel: 'Artíc.'  },
+      { label: 'Visuales',       shortLabel: 'Visual.' },
       { label: 'Anuncio',       shortLabel: 'Anuncio' },
       { label: 'Precio',        shortLabel: 'Precio'  },
-      { label: 'Exportar',      shortLabel: 'Export'  },
+      { label: 'Publicación',    shortLabel: 'Public.' },
     ],
     newListing:   'Nuevo anuncio',
     stepOf:       (s, t) => `Paso ${s} / ${t}`,
@@ -80,11 +80,11 @@ const PAGE_I18N: Record<Lang, {
   },
   de: {
     steps: [
-      { label: 'Fotos',       shortLabel: 'Fotos'   },
-      { label: 'Erkennung',   shortLabel: 'Erkenn.' },
+      { label: 'Artikel',      shortLabel: 'Artikel' },
+      { label: 'Visuals',      shortLabel: 'Visuals' },
       { label: 'Anzeige',     shortLabel: 'Anzeige' },
       { label: 'Preis',       shortLabel: 'Preis'   },
-      { label: 'Export',      shortLabel: 'Export'  },
+      { label: 'Veröffentlichen', shortLabel: 'Veröff.' },
     ],
     newListing:   'Neue Anzeige',
     stepOf:       (s, t) => `Schritt ${s} / ${t}`,
@@ -95,11 +95,11 @@ const PAGE_I18N: Record<Lang, {
   },
   it: {
     steps: [
-      { label: 'Foto',          shortLabel: 'Foto'    },
-      { label: 'Riconoscimento',shortLabel: 'Riconosc.'},
+      { label: 'Articolo',       shortLabel: 'Artic.'  },
+      { label: 'Immagini',        shortLabel: 'Immagin.'},
       { label: 'Annuncio',      shortLabel: 'Annuncio'},
       { label: 'Prezzo',        shortLabel: 'Prezzo'  },
-      { label: 'Esporta',       shortLabel: 'Esporta' },
+      { label: 'Pubblicazione',  shortLabel: 'Pubbl.'  },
     ],
     newListing:   'Nuovo annuncio',
     stepOf:       (s, t) => `Passo ${s} / ${t}`,
@@ -110,11 +110,11 @@ const PAGE_I18N: Record<Lang, {
   },
   nl: {
     steps: [
-      { label: "Foto's",    shortLabel: "Foto's"  },
-      { label: 'Herkenning',shortLabel: 'Herkenn.'},
+      { label: 'Artikel',    shortLabel: 'Artikel' },
+      { label: 'Visuals',    shortLabel: 'Visuals' },
       { label: 'Advertentie',shortLabel: 'Advert.' },
       { label: 'Prijs',     shortLabel: 'Prijs'   },
-      { label: 'Export',    shortLabel: 'Export'  },
+      { label: 'Publiceren', shortLabel: 'Public.' },
     ],
     newListing:   'Nieuwe advertentie',
     stepOf:       (s, t) => `Stap ${s} / ${t}`,
@@ -125,11 +125,11 @@ const PAGE_I18N: Record<Lang, {
   },
   pl: {
     steps: [
-      { label: 'Zdjęcia',    shortLabel: 'Zdjęcia' },
-      { label: 'Rozpoznanie',shortLabel: 'Rozp.'   },
+      { label: 'Artykuł',     shortLabel: 'Artykuł' },
+      { label: 'Zdjęcia',     shortLabel: 'Zdjęcia' },
       { label: 'Ogłoszenie', shortLabel: 'Ogłosz.' },
       { label: 'Cena',       shortLabel: 'Cena'    },
-      { label: 'Eksport',    shortLabel: 'Eksport' },
+      { label: 'Publikacja',  shortLabel: 'Publik.' },
     ],
     newListing:   'Nowe ogłoszenie',
     stepOf:       (s, t) => `Krok ${s} / ${t}`,
@@ -138,6 +138,29 @@ const PAGE_I18N: Record<Lang, {
     finish:       'Zakończ',
     addMainPhoto: 'Dodaj co najmniej główne zdjęcie, aby kontynuować',
   },
+}
+
+/* ─── Switcher plan DEV ───────────────────────────────────────────────────── */
+
+function PlanSwitcher({ plan, onChange }: { plan: Plan; onChange: (p: Plan) => void }) {
+  return (
+    <div className="flex items-center gap-2 bg-amber-50 border border-amber-200 rounded-xl px-3 py-2 mb-6">
+      <span className="text-[10px] font-bold text-amber-500 uppercase tracking-wider shrink-0">DEV</span>
+      <div className="flex gap-1">
+        {(['freemium', 'premium', 'pro'] as Plan[]).map(p => (
+          <button
+            key={p}
+            onClick={() => onChange(p)}
+            className={`text-xs font-semibold px-3 py-1 rounded-lg transition-all ${
+              plan === p ? 'bg-amber-400 text-white shadow-sm' : 'text-amber-600 hover:bg-amber-100'
+            }`}
+          >
+            {p.charAt(0).toUpperCase() + p.slice(1)}
+          </button>
+        ))}
+      </div>
+    </div>
+  )
 }
 
 /* ─── État initial des 15 slots ───────────────────────────────────────────── */
@@ -159,6 +182,7 @@ export default function AppPage() {
   const t = PAGE_I18N[lang] ?? PAGE_I18N.fr
   const STEPS = STEP_ICONS.map((s, i) => ({ ...s, ...t.steps[i] }))
 
+  const [plan, setPlan] = useState<Plan>('freemium')
   const [step, setStep] = useState(1)
   const [slots, setSlots] = useState<PhotoSlot[]>(makeSlots)
   const [aiPhotos, setAiPhotos] = useState<string[]>([])
@@ -183,8 +207,8 @@ export default function AppPage() {
 
   /* ── Condition pour avancer selon l'étape active ── */
   function canContinue(): boolean {
-    if (step === 1) return mainPhotoReady
-    if (step === 2) return recognitionResult !== null
+    if (step === 1) return mainPhotoReady && recognitionResult !== null
+    if (step === 2) return true
     if (step === 3) return annonceResult !== null
     if (step === 4) return pricingResult !== null
     return true
@@ -264,15 +288,25 @@ export default function AppPage() {
 
       {/* ── Contenu de l'étape ── */}
       <main className="flex-1 max-w-5xl w-full mx-auto px-4 sm:px-6 py-8">
+        <PlanSwitcher plan={plan} onChange={setPlan} />
         {step === 1 && (
-          <PhotoUploadStep slots={slots} setSlots={setSlots} aiPhotos={aiPhotos} setAiPhotos={setAiPhotos} />
+          <PhotoUploadStep
+            slots={slots}
+            setSlots={setSlots}
+            result={recognitionResult}
+            setResult={setRecognitionResult}
+            plan={plan}
+          />
         )}
 
         {step === 2 && (
           <RecognitionStep
             slots={slots}
+            setSlots={setSlots}
             result={recognitionResult}
-            setResult={setRecognitionResult}
+            aiPhotos={aiPhotos}
+            setAiPhotos={setAiPhotos}
+            plan={plan}
           />
         )}
 

@@ -39,3 +39,13 @@ yarn-error.log*
 # typescript
 *.tsbuildinfo
 next-env.d.ts
+
+# Mannequins IA — 494 Mo de PNG, non versionnable sur GitHub
+# À héberger sur Supabase Storage ou Git LFS avant déploiement Vercel
+app/public/mannequins/
+public/mannequins/
+
+# Fichiers de test locaux
+public/test-output/
+public/test-veste.jpg
+scripts/

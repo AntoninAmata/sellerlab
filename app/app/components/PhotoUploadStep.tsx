@@ -1,17 +1,22 @@
 'use client'
 
-import { useState, useRef, useCallback, useEffect } from 'react'
+import { useState, useRef, useCallback, useEffect, useMemo } from 'react'
 import {
   Camera, Tag, X, Lock, Upload, Sparkles,
-  GripVertical, AlertTriangle, Check, Wand2, User, Link,
+  GripVertical, AlertTriangle, Check, Link,
+  Loader2, RefreshCw, CheckCircle2, XCircle, Pencil,
+  AlertCircle, ScanLine, Plus,
 } from 'lucide-react'
-import type { PhotoSlot } from '../types'
+import type { PhotoSlot, RecognitionResult, RecognitionField, Confidence, ExtraInfo, Plan } from '../types'
+import {
+  SIZES, COLORS, MATERIALS, CONDITIONS, STYLES, PATTERNS,
+  tx, GENRE_LABELS, CONDITION_LABELS, COLOR_LABELS, MATERIAL_LABELS,
+  STYLE_LABELS, PATTERN_LABELS,
+} from '@/lib/vinted-taxonomy'
+import type { SizeSystem } from '@/lib/vinted-taxonomy'
+import { getN1List, getN2List, getN3List, getN4List, getN5List, parseVintedPath } from '@/lib/vinted-navigation-taxonomy'
 import type { Lang } from '@/lib/i18n'
 import { useLang } from '@/app/providers'
-
-/* ─── Plan tarifaire ─────────────────────────────────────────────────────── */
-
-type Plan = 'freemium' | 'premium' | 'pro'
 
 /* ─── Titres des 2 sections — 7 langues ──────────────────────────────────── */
 
@@ -91,46 +96,6 @@ const SLOT_LABELS: Record<Lang, string[]> = {
     'Inne zdjęcie (detal, wada, opakowanie...)', 'Inne zdjęcie (detal, wada, opakowanie...)', 'Inne zdjęcie (detal, wada, opakowanie...)',
     'Noszone 1', 'Noszone 2', 'Noszone 3', 'Noszone 4', 'Noszone 5', 'Noszone 6',
   ],
-}
-
-/* ─── Traductions bannière validation (freemium) — 7 langues ─────────────── */
-
-const BANNER_I18N: Record<Lang, { title: string; desc: string; btn: string }> = {
-  fr: {
-    title: "Vérifiez l'ordre de vos photos",
-    desc:  'Réorganisez par glisser-déposer si besoin, puis lancez le traitement.',
-    btn:   'Traiter les photos — Supprimer le fond',
-  },
-  en: {
-    title: 'Check your photo order',
-    desc:  'Drag and drop to reorder if needed, then start processing.',
-    btn:   'Process photos — Remove background',
-  },
-  es: {
-    title: 'Verifica el orden de tus fotos',
-    desc:  'Reorganiza arrastrando si es necesario, luego lanza el procesamiento.',
-    btn:   'Procesar fotos — Eliminar fondo',
-  },
-  de: {
-    title: 'Überprüfe deine Fotoreihenfolge',
-    desc:  'Bei Bedarf per Drag & Drop neu anordnen, dann Verarbeitung starten.',
-    btn:   'Fotos verarbeiten — Hintergrund entfernen',
-  },
-  it: {
-    title: "Verifica l'ordine delle foto",
-    desc:  "Riorganizza con drag & drop se necessario, poi avvia l'elaborazione.",
-    btn:   'Elabora foto — Rimuovi sfondo',
-  },
-  nl: {
-    title: "Controleer de volgorde van je foto's",
-    desc:  'Herorden indien nodig via slepen, start dan de verwerking.',
-    btn:   "Foto's verwerken — Achtergrond verwijderen",
-  },
-  pl: {
-    title: 'Sprawdź kolejność zdjęć',
-    desc:  'Przeciągnij, aby zmienić kolejność, następnie uruchom przetwarzanie.',
-    btn:   'Przetwórz zdjęcia — Usuń tło',
-  },
 }
 
 /* ─── Traductions zone d'import — 7 langues ─────────────────────────────── */
@@ -269,39 +234,6 @@ const LOADING_I18N: Record<Lang, {
   pl: { removingBg: 'Usuwanie tła…', applyingBg: 'Stosowanie tła…', loading: 'Ładowanie…', bgRemoved: 'Tło usunięte', bgFailed: 'Tło niedostępne', bgPro: 'Tło Pro' },
 }
 
-/* ─── Traductions astuce ──────────────────────────────────────────────────── */
-
-const TIP_I18N: Record<Lang, { unlock: string; lock: string }> = {
-  fr: {
-    unlock: 'Glissez-déposez entre les slots pour réorganiser · Cliquez pour uploader',
-    lock:   'Photos figées (fond supprimé) · Cliquez sur un slot pour remplacer',
-  },
-  en: {
-    unlock: 'Drag and drop between slots to reorder · Click to upload',
-    lock:   'Photos locked (background removed) · Click a slot to replace',
-  },
-  es: {
-    unlock: 'Arrastra entre slots para reorganizar · Haz clic para subir',
-    lock:   'Fotos bloqueadas (fondo eliminado) · Haz clic para reemplazar',
-  },
-  de: {
-    unlock: 'Zwischen Slots ziehen zum Umordnen · Klicken zum Hochladen',
-    lock:   'Fotos gesperrt (Hintergrund entfernt) · Klicken zum Ersetzen',
-  },
-  it: {
-    unlock: 'Trascina tra i slot per riordinare · Clicca per caricare',
-    lock:   'Foto bloccate (sfondo rimosso) · Clicca per sostituire',
-  },
-  nl: {
-    unlock: 'Sleep tussen slots om te herordenen · Klik om te uploaden',
-    lock:   "Foto's vergrendeld (achtergrond verwijderd) · Klik om te vervangen",
-  },
-  pl: {
-    unlock: 'Przeciągnij między slotami · Kliknij slot aby przesłać',
-    lock:   'Zdjęcia zablokowane (tło usunięte) · Kliknij aby zastąpić',
-  },
-}
-
 /* ─── Traductions interface plans — 7 langues ────────────────────────────── */
 
 const PLAN_I18N: Record<Lang, {
@@ -317,6 +249,12 @@ const PLAN_I18N: Record<Lang, {
   mannequinGenerating: string
   mannequinLockedMsg: string
   mannequinCustomPromptLabel: string
+  wearingPromptLabel: string
+  displayModeTitle: string
+  displayModeBust: string
+  displayModeHanger: string
+  displayModeFlat: string
+  generateProductPhotos: string
   teaserTitle: string
   teaserDesc: string
   badgeAI: string
@@ -349,6 +287,12 @@ const PLAN_I18N: Record<Lang, {
     mannequinGenerating:   'Génération en cours…',
     mannequinLockedMsg:    'Disponible avec le plan Pro',
     mannequinCustomPromptLabel: 'Personnaliser la tenue',
+    wearingPromptLabel:         'Comment porter le vêtement',
+    displayModeTitle:           'Type de photo produit',
+    displayModeBust:            'Buste',
+    displayModeHanger:          'Cintre',
+    displayModeFlat:            'À plat',
+    generateProductPhotos:      'Générer les photos produit',
     teaserTitle:           'Mannequin IA',
     teaserDesc:            "Générez automatiquement des photos portées avec l'IA",
     badgeAI:               'IA',
@@ -381,6 +325,12 @@ const PLAN_I18N: Record<Lang, {
     mannequinGenerating:   'Generating…',
     mannequinLockedMsg:    'Available with Pro plan',
     mannequinCustomPromptLabel: 'Customize the outfit',
+    wearingPromptLabel:         'How to wear the garment',
+    displayModeTitle:           'Product photo type',
+    displayModeBust:            'Bust',
+    displayModeHanger:          'Hanger',
+    displayModeFlat:            'Flat lay',
+    generateProductPhotos:      'Generate product photos',
     teaserTitle:           'AI Model',
     teaserDesc:            'Automatically generate worn photos with AI',
     badgeAI:               'AI',
@@ -413,6 +363,12 @@ const PLAN_I18N: Record<Lang, {
     mannequinGenerating:   'Generando…',
     mannequinLockedMsg:    'Disponible con el plan Pro',
     mannequinCustomPromptLabel: 'Personalizar el atuendo',
+    wearingPromptLabel:         'Cómo llevar la prenda',
+    displayModeTitle:           'Tipo de foto de producto',
+    displayModeBust:            'Busto',
+    displayModeHanger:          'Percha',
+    displayModeFlat:            'Plano',
+    generateProductPhotos:      'Generar fotos de producto',
     teaserTitle:           'Maniquí IA',
     teaserDesc:            'Genera automáticamente fotos vestidas con IA',
     badgeAI:               'IA',
@@ -445,6 +401,12 @@ const PLAN_I18N: Record<Lang, {
     mannequinGenerating:   'Wird generiert…',
     mannequinLockedMsg:    'Verfügbar mit dem Pro-Plan',
     mannequinCustomPromptLabel: 'Outfit anpassen',
+    wearingPromptLabel:         'Wie das Kleidungsstück getragen wird',
+    displayModeTitle:           'Produktfoto-Typ',
+    displayModeBust:            'Büste',
+    displayModeHanger:          'Bügel',
+    displayModeFlat:            'Flach',
+    generateProductPhotos:      'Produktfotos generieren',
     teaserTitle:           'KI-Modell',
     teaserDesc:            'Erstelle automatisch Anzieh-Fotos mit KI',
     badgeAI:               'KI',
@@ -477,6 +439,12 @@ const PLAN_I18N: Record<Lang, {
     mannequinGenerating:   'Generazione in corso…',
     mannequinLockedMsg:    'Disponibile con il piano Pro',
     mannequinCustomPromptLabel: "Personalizza l'outfit",
+    wearingPromptLabel:         'Come indossare il capo',
+    displayModeTitle:           'Tipo di foto prodotto',
+    displayModeBust:            'Busto',
+    displayModeHanger:          'Gruccia',
+    displayModeFlat:            'Piano',
+    generateProductPhotos:      'Genera foto prodotto',
     teaserTitle:           'Manichino IA',
     teaserDesc:            "Genera automaticamente foto indossate con l'IA",
     badgeAI:               'IA',
@@ -509,6 +477,12 @@ const PLAN_I18N: Record<Lang, {
     mannequinGenerating:   'Bezig met genereren…',
     mannequinLockedMsg:    'Beschikbaar met het Pro-plan',
     mannequinCustomPromptLabel: 'Outfit aanpassen',
+    wearingPromptLabel:         'Hoe het kledingstuk te dragen',
+    displayModeTitle:           'Type productfoto',
+    displayModeBust:            'Buste',
+    displayModeHanger:          'Hanger',
+    displayModeFlat:            'Plat',
+    generateProductPhotos:      "Productfoto's genereren",
     teaserTitle:           'AI-model',
     teaserDesc:            "Genereer automatisch gedragen foto's met AI",
     badgeAI:               'AI',
@@ -541,6 +515,12 @@ const PLAN_I18N: Record<Lang, {
     mannequinGenerating:   'Generowanie…',
     mannequinLockedMsg:    'Dostępne w planie Pro',
     mannequinCustomPromptLabel: 'Dostosuj strój',
+    wearingPromptLabel:         'Jak nosić ubranie',
+    displayModeTitle:           'Typ zdjęcia produktu',
+    displayModeBust:            'Biust',
+    displayModeHanger:          'Wieszak',
+    displayModeFlat:            'Na płasko',
+    generateProductPhotos:      'Generuj zdjęcia produktu',
     teaserTitle:           'Manekin IA',
     teaserDesc:            'Automatycznie generuj zdjęcia noszone z AI',
     badgeAI:               'AI',
@@ -562,34 +542,17 @@ const PLAN_I18N: Record<Lang, {
   },
 }
 
-/* ─── Backgrounds — 23 choix (blanc CSS + 22 images IA bg-01…bg-22) ─────── */
-
-type BgDef =
-  | { id: number; label: string; type: 'color'; color: string; preview: string }
-  | { id: number; label: string; type: 'image'; src: string; preview: string }
-
-const _IMAGE_BACKGROUNDS: BgDef[] = Array.from({ length: 22 }, (_, i) => ({
-  id: i + 1,
-  label: `Fond ${String(i + 1).padStart(2, '0')}`,
-  type: 'image' as const,
-  src: `/backgrounds/bg-${String(i + 1).padStart(2, '0')}.jpg`,
-  preview: `/backgrounds/bg-${String(i + 1).padStart(2, '0')}.jpg`,
-}))
-
-const BACKGROUNDS: BgDef[] = [
-  { id: 0, label: 'Blanc pur', type: 'image', src: '/backgrounds/bg-white.jpg', preview: '/backgrounds/bg-white.jpg' },
-  ..._IMAGE_BACKGROUNDS,
-]
-
 /* ─── Mannequins — 20 hommes + 20 femmes ─────────────────────────────────── */
 
 const MEN_MANNEQUINS: string[] = [
-  'man-01', 'man-02', 'man-05', 'man-06', 'man-07',
-  'man-09', 'man-13', 'man-16', 'man-18', 'man-20',
+  'man-01', 'man-02', 'man-03', 'man-04', 'man-05',
+  'man-06', 'man-07', 'man-08', 'man-09', 'man-10',
+  'man-11', 'man-12', 'man-13', 'man-14', 'man-15',
 ]
 const WOMEN_MANNEQUINS: string[] = [
-  'woman-01', 'woman-02', 'woman-04', 'woman-06', 'woman-07',
-  'woman-10', 'woman-13', 'woman-16', 'woman-18', 'woman-20',
+  'woman-01', 'woman-02', 'woman-03', 'woman-04', 'woman-05',
+  'woman-06', 'woman-07', 'woman-08', 'woman-09', 'woman-10',
+  'woman-11', 'woman-12', 'woman-13', 'woman-14', 'woman-15',
 ]
 
 /* ─── Resize image to max dimension (storage + classification) ───────────── */
@@ -614,51 +577,6 @@ async function resizeImage(file: File | Blob, maxPx = 1024): Promise<Blob> {
     }
     img.onerror = () => { URL.revokeObjectURL(url); reject(new Error('img load failed')) }
     img.src = url
-  })
-}
-
-/* ─── Compositing canvas : cutout PNG + fond ──────────────────────────────── */
-
-async function compositeWithBackground(cutoutUrl: string, bg: BgDef): Promise<string> {
-  return new Promise((resolve, reject) => {
-    const cutout = new Image()
-    cutout.onload = () => {
-      const canvas  = document.createElement('canvas')
-      canvas.width  = cutout.naturalWidth
-      canvas.height = cutout.naturalHeight
-      const ctx     = canvas.getContext('2d')!
-
-      const draw = () => {
-        ctx.drawImage(cutout, 0, 0)
-        canvas.toBlob(
-          (blob) => blob ? resolve(URL.createObjectURL(blob)) : reject(new Error('toBlob failed')),
-          'image/jpeg', 0.92,
-        )
-      }
-
-      if (bg.type === 'color') {
-        ctx.fillStyle = bg.color
-        ctx.fillRect(0, 0, canvas.width, canvas.height)
-        draw()
-      } else {
-        const bgImg = new Image()
-        bgImg.onload = () => {
-          const s  = Math.max(canvas.width / bgImg.naturalWidth, canvas.height / bgImg.naturalHeight)
-          const bw = bgImg.naturalWidth  * s
-          const bh = bgImg.naturalHeight * s
-          ctx.drawImage(bgImg, (canvas.width - bw) / 2, (canvas.height - bh) / 2, bw, bh)
-          draw()
-        }
-        bgImg.onerror = () => {
-          ctx.fillStyle = '#FFFFFF'
-          ctx.fillRect(0, 0, canvas.width, canvas.height)
-          draw()
-        }
-        bgImg.src = bg.src
-      }
-    }
-    cutout.onerror = reject
-    cutout.src = cutoutUrl
   })
 }
 
@@ -724,127 +642,653 @@ function assignSlots(
   })
 }
 
+/* ─── Traductions UI reconnaissance — 7 langues ──────────────────────────── */
+
+const UI_I18N: Record<Lang, {
+  high: string; medium: string; low: string; manual: string
+  analyzing: string; analyzingSub: string
+  analysisFailed: string; retry: string; analysisError: string
+  autoRecognition: string; autoRecognitionSub: string; rerun: string
+  confidence: string; confidenceLegend: string
+  sectionArticle: string; sectionChars: string; sectionFlaws: string; sectionExtra: string
+  brand: string; gender: string; category: string; subCategory: string
+  size: string; condition: string; colors: string; materials: string
+  style: string; pattern: string; flaws: string; retailPrice: string
+  defectDetected: string
+  generalInfo: string; dimensions: string
+  summary: string
+  choose: string
+  subcategoryHint: string
+  addToDesc: string; addMeasure: string; other: string
+  infoValue: string; measureName: string; measureValue: string
+}> = {
+  fr: {
+    high: 'Élevée', medium: 'Moyenne', low: 'Incertaine', manual: 'Modifié',
+    analyzing: 'Analyse en cours…',
+    analyzingSub: "L'IA examine vos photos pour identifier la marque, la taille, les couleurs et plus encore.",
+    analysisFailed: 'Analyse impossible', retry: 'Réessayer',
+    analysisError: "L'analyse a échoué. Vérifiez votre connexion et réessayez.",
+    autoRecognition: 'Reconnaissance automatique',
+    autoRecognitionSub: "L'IA a pré-rempli les champs ci-dessous. Corrigez si nécessaire.",
+    rerun: 'Relancer',
+    confidence: 'Confiance :', confidenceLegend: 'Élevée = reconnu avec certitude · Moyenne = à vérifier · Incertaine = à corriger manuellement',
+    sectionArticle: 'Article', sectionChars: 'Caractéristiques',
+    sectionFlaws: 'Défauts visibles', sectionExtra: 'Informations complémentaires',
+    brand: 'Marque', gender: 'Genre', category: 'Catégorie', subCategory: 'Sous-catégorie',
+    size: 'Taille', condition: 'État', colors: 'Couleurs (max 2)', materials: 'Matières (max 3)',
+    style: 'Style', pattern: 'Motif', flaws: 'Description des défauts', retailPrice: 'Prix neuf',
+    defectDetected: 'Défaut détecté — confirmez',
+    generalInfo: 'Infos générales', dimensions: 'Dimensions (optionnel)',
+    summary: 'Récapitulatif',
+    choose: '— Choisir —',
+    subcategoryHint: 'Vérifiez la sous-catégorie précise sur Vinted après le remplissage automatique',
+    addToDesc: 'Ajouter à la description', addMeasure: 'Ajouter une mesure personnalisée', other: 'Autre',
+    infoValue: 'Valeur…', measureName: 'Nom de la mesure…', measureValue: 'cm',
+  },
+  en: {
+    high: 'High', medium: 'Medium', low: 'Uncertain', manual: 'Edited',
+    analyzing: 'Analyzing…',
+    analyzingSub: 'AI is examining your photos to identify the brand, size, colors and more.',
+    analysisFailed: 'Analysis failed', retry: 'Retry',
+    analysisError: 'Analysis failed. Check your connection and try again.',
+    autoRecognition: 'Automatic recognition',
+    autoRecognitionSub: 'AI has pre-filled the fields below. Correct if needed.',
+    rerun: 'Re-run',
+    confidence: 'Confidence:', confidenceLegend: 'High = detected with certainty · Medium = check it · Uncertain = correct manually',
+    sectionArticle: 'Item', sectionChars: 'Characteristics',
+    sectionFlaws: 'Visible flaws', sectionExtra: 'Additional information',
+    brand: 'Brand', gender: 'Gender', category: 'Category', subCategory: 'Sub-category',
+    size: 'Size', condition: 'Condition', colors: 'Colors (max 2)', materials: 'Materials (max 3)',
+    style: 'Style', pattern: 'Pattern', flaws: 'Flaw description', retailPrice: 'Retail price',
+    defectDetected: 'Flaw detected — please confirm',
+    generalInfo: 'General info', dimensions: 'Dimensions (optional)',
+    summary: 'Summary',
+    choose: '— Choose —',
+    subcategoryHint: 'Check the exact subcategory on Vinted after auto-fill',
+    addToDesc: 'Add to description', addMeasure: 'Add custom measurement', other: 'Other',
+    infoValue: 'Value…', measureName: 'Measurement name…', measureValue: 'cm',
+  },
+  es: {
+    high: 'Alta', medium: 'Media', low: 'Incierta', manual: 'Editado',
+    analyzing: 'Analizando…',
+    analyzingSub: 'La IA examina tus fotos para identificar la marca, la talla, los colores y más.',
+    analysisFailed: 'Análisis imposible', retry: 'Reintentar',
+    analysisError: 'El análisis falló. Verifica tu conexión e inténtalo de nuevo.',
+    autoRecognition: 'Reconocimiento automático',
+    autoRecognitionSub: 'La IA ha rellenado los campos a continuación. Corrige si es necesario.',
+    rerun: 'Relanzar',
+    confidence: 'Confianza:', confidenceLegend: 'Alta = detectado con certeza · Media = verificar · Incierta = corregir manualmente',
+    sectionArticle: 'Artículo', sectionChars: 'Características',
+    sectionFlaws: 'Defectos visibles', sectionExtra: 'Información adicional',
+    brand: 'Marca', gender: 'Género', category: 'Categoría', subCategory: 'Subcategoría',
+    size: 'Talla', condition: 'Estado', colors: 'Colores (máx 2)', materials: 'Materiales (máx 3)',
+    style: 'Estilo', pattern: 'Motivo', flaws: 'Descripción de defectos', retailPrice: 'Precio nuevo',
+    defectDetected: 'Defecto detectado — confirma',
+    generalInfo: 'Información general', dimensions: 'Dimensiones (opcional)',
+    summary: 'Resumen',
+    choose: '— Elegir —',
+    subcategoryHint: 'Verifica la subcategoría exacta en Vinted tras el relleno automático',
+    addToDesc: 'Añadir a la descripción', addMeasure: 'Añadir medida personalizada', other: 'Otro',
+    infoValue: 'Valor…', measureName: 'Nombre de la medida…', measureValue: 'cm',
+  },
+  de: {
+    high: 'Hoch', medium: 'Mittel', low: 'Unsicher', manual: 'Bearbeitet',
+    analyzing: 'Analyse läuft…',
+    analyzingSub: 'Die KI untersucht deine Fotos, um Marke, Größe, Farben und mehr zu erkennen.',
+    analysisFailed: 'Analyse fehlgeschlagen', retry: 'Erneut versuchen',
+    analysisError: 'Die Analyse ist fehlgeschlagen. Überprüfe deine Verbindung und versuche es erneut.',
+    autoRecognition: 'Automatische Erkennung',
+    autoRecognitionSub: 'Die KI hat die Felder unten vorausgefüllt. Korrigiere bei Bedarf.',
+    rerun: 'Erneut starten',
+    confidence: 'Konfidenz:', confidenceLegend: 'Hoch = sicher erkannt · Mittel = prüfen · Unsicher = manuell korrigieren',
+    sectionArticle: 'Artikel', sectionChars: 'Eigenschaften',
+    sectionFlaws: 'Sichtbare Mängel', sectionExtra: 'Zusätzliche Informationen',
+    brand: 'Marke', gender: 'Geschlecht', category: 'Kategorie', subCategory: 'Unterkategorie',
+    size: 'Größe', condition: 'Zustand', colors: 'Farben (max 2)', materials: 'Materialien (max 3)',
+    style: 'Stil', pattern: 'Muster', flaws: 'Mängelbeschreibung', retailPrice: 'Neupreis',
+    defectDetected: 'Mangel erkannt — bitte bestätigen',
+    generalInfo: 'Allgemeine Infos', dimensions: 'Maße (optional)',
+    summary: 'Zusammenfassung',
+    choose: '— Wählen —',
+    subcategoryHint: 'Überprüfe die genaue Unterkategorie auf Vinted nach dem automatischen Ausfüllen',
+    addToDesc: 'Zur Beschreibung hinzufügen', addMeasure: 'Benutzerdefiniertes Maß hinzufügen', other: 'Sonstiges',
+    infoValue: 'Wert…', measureName: 'Maßbezeichnung…', measureValue: 'cm',
+  },
+  it: {
+    high: 'Alta', medium: 'Media', low: 'Incerta', manual: 'Modificato',
+    analyzing: 'Analisi in corso…',
+    analyzingSub: "L'IA esamina le tue foto per identificare marca, taglia, colori e altro.",
+    analysisFailed: 'Analisi impossibile', retry: 'Riprova',
+    analysisError: "L'analisi è fallita. Controlla la connessione e riprova.",
+    autoRecognition: 'Riconoscimento automatico',
+    autoRecognitionSub: "L'IA ha precompilato i campi qui sotto. Correggi se necessario.",
+    rerun: 'Riavvia',
+    confidence: 'Affidabilità:', confidenceLegend: 'Alta = rilevato con certezza · Media = da verificare · Incerta = correggere manualmente',
+    sectionArticle: 'Articolo', sectionChars: 'Caratteristiche',
+    sectionFlaws: 'Difetti visibili', sectionExtra: 'Informazioni aggiuntive',
+    brand: 'Marca', gender: 'Genere', category: 'Categoria', subCategory: 'Sottocategoria',
+    size: 'Taglia', condition: 'Stato', colors: 'Colori (max 2)', materials: 'Materiali (max 3)',
+    style: 'Stile', pattern: 'Motivo', flaws: 'Descrizione difetti', retailPrice: 'Prezzo nuovo',
+    defectDetected: 'Difetto rilevato — conferma',
+    generalInfo: 'Info generali', dimensions: 'Dimensioni (opzionale)',
+    summary: 'Riepilogo',
+    choose: '— Scegli —',
+    subcategoryHint: 'Verifica la sottocategoria esatta su Vinted dopo il riempimento automatico',
+    addToDesc: 'Aggiungi alla descrizione', addMeasure: 'Aggiungi misura personalizzata', other: 'Altro',
+    infoValue: 'Valore…', measureName: 'Nome della misura…', measureValue: 'cm',
+  },
+  nl: {
+    high: 'Hoog', medium: 'Gemiddeld', low: 'Onzeker', manual: 'Bewerkt',
+    analyzing: 'Analyse bezig…',
+    analyzingSub: "AI onderzoekt je foto's om merk, maat, kleuren en meer te identificeren.",
+    analysisFailed: 'Analyse mislukt', retry: 'Opnieuw proberen',
+    analysisError: 'De analyse is mislukt. Controleer je verbinding en probeer opnieuw.',
+    autoRecognition: 'Automatische herkenning',
+    autoRecognitionSub: 'AI heeft de onderstaande velden ingevuld. Corrigeer indien nodig.',
+    rerun: 'Opnieuw starten',
+    confidence: 'Betrouwbaarheid:', confidenceLegend: 'Hoog = zeker herkend · Gemiddeld = controleren · Onzeker = handmatig corrigeren',
+    sectionArticle: 'Artikel', sectionChars: 'Kenmerken',
+    sectionFlaws: 'Zichtbare gebreken', sectionExtra: 'Aanvullende informatie',
+    brand: 'Merk', gender: 'Geslacht', category: 'Categorie', subCategory: 'Subcategorie',
+    size: 'Maat', condition: 'Staat', colors: "Kleuren (max 2)", materials: 'Materialen (max 3)',
+    style: 'Stijl', pattern: 'Motief', flaws: 'Beschrijving gebreken', retailPrice: 'Nieuwprijs',
+    defectDetected: 'Gebrek gedetecteerd — bevestig',
+    generalInfo: 'Algemene info', dimensions: 'Afmetingen (optioneel)',
+    summary: 'Samenvatting',
+    choose: '— Kies —',
+    subcategoryHint: 'Controleer de exacte subcategorie op Vinted na het automatisch invullen',
+    addToDesc: 'Toevoegen aan beschrijving', addMeasure: 'Aangepaste meting toevoegen', other: 'Overig',
+    infoValue: 'Waarde…', measureName: 'Naam meting…', measureValue: 'cm',
+  },
+  pl: {
+    high: 'Wysoka', medium: 'Średnia', low: 'Niepewna', manual: 'Edytowano',
+    analyzing: 'Analiza w toku…',
+    analyzingSub: 'AI analizuje Twoje zdjęcia, aby zidentyfikować markę, rozmiar, kolory i więcej.',
+    analysisFailed: 'Analiza niemożliwa', retry: 'Spróbuj ponownie',
+    analysisError: 'Analiza nie powiodła się. Sprawdź połączenie i spróbuj ponownie.',
+    autoRecognition: 'Automatyczne rozpoznawanie',
+    autoRecognitionSub: 'AI wstępnie wypełniło pola poniżej. Popraw, jeśli to konieczne.',
+    rerun: 'Uruchom ponownie',
+    confidence: 'Pewność:', confidenceLegend: 'Wysoka = wykryte z pewnością · Średnia = sprawdź · Niepewna = popraw ręcznie',
+    sectionArticle: 'Artykuł', sectionChars: 'Cechy',
+    sectionFlaws: 'Widoczne wady', sectionExtra: 'Dodatkowe informacje',
+    brand: 'Marka', gender: 'Płeć', category: 'Kategoria', subCategory: 'Podkategoria',
+    size: 'Rozmiar', condition: 'Stan', colors: 'Kolory (maks 2)', materials: 'Materiały (maks 3)',
+    style: 'Styl', pattern: 'Wzór', flaws: 'Opis wad', retailPrice: 'Cena nowa',
+    defectDetected: 'Wykryto wadę — potwierdź',
+    generalInfo: 'Informacje ogólne', dimensions: 'Wymiary (opcjonalnie)',
+    summary: 'Podsumowanie',
+    choose: '— Wybierz —',
+    subcategoryHint: 'Sprawdź dokładną podkategorię na Vinted po automatycznym wypełnieniu',
+    addToDesc: 'Dodaj do opisu', addMeasure: 'Dodaj niestandardowy pomiar', other: 'Inne',
+    infoValue: 'Wartość…', measureName: 'Nazwa pomiaru…', measureValue: 'cm',
+  },
+}
+
+/* ─── Presets infos complémentaires + dimensions — 7 langues ─────────────── */
+
+const EXTRA_INFO_PRESETS_I18N: Record<Lang, string[]> = {
+  fr: ['Pays de fabrication', 'Doublure', 'Référence produit', 'Type de fermeture', 'Saison', 'Remarques'],
+  en: ['Country of origin', 'Lining', 'Product reference', 'Closure type', 'Season', 'Notes'],
+  es: ['País de fabricación', 'Forro', 'Referencia del producto', 'Tipo de cierre', 'Temporada', 'Observaciones'],
+  de: ['Herstellungsland', 'Futter', 'Produktreferenz', 'Verschlusstyp', 'Saison', 'Bemerkungen'],
+  it: ['Paese di fabbricazione', 'Fodera', 'Riferimento prodotto', 'Tipo di chiusura', 'Stagione', 'Note'],
+  nl: ['Land van herkomst', 'Voering', 'Productreferentie', 'Type sluiting', 'Seizoen', 'Opmerkingen'],
+  pl: ['Kraj produkcji', 'Podszewka', 'Numer referencyjny', 'Typ zamknięcia', 'Sezon', 'Uwagi'],
+}
+
+const DIM_PRESETS_I18N: Record<Lang, { fr: string; en: string }[]> = {
+  fr: [
+    { fr: 'Tour de poitrine', en: 'Chest' }, { fr: 'Longueur', en: 'Length' },
+    { fr: 'Épaules', en: 'Shoulders' }, { fr: 'Tour de taille', en: 'Waist' },
+    { fr: 'Tour de hanches', en: 'Hips' }, { fr: 'Entrejambe', en: 'Inseam' },
+    { fr: 'Pointure', en: 'Shoe size' }, { fr: 'Largeur', en: 'Width' },
+    { fr: 'Hauteur', en: 'Height' }, { fr: 'Profondeur', en: 'Depth' },
+  ],
+  en: [
+    { fr: 'Chest', en: 'Chest' }, { fr: 'Length', en: 'Length' },
+    { fr: 'Shoulders', en: 'Shoulders' }, { fr: 'Waist', en: 'Waist' },
+    { fr: 'Hips', en: 'Hips' }, { fr: 'Inseam', en: 'Inseam' },
+    { fr: 'Shoe size', en: 'Shoe size' }, { fr: 'Width', en: 'Width' },
+    { fr: 'Height', en: 'Height' }, { fr: 'Depth', en: 'Depth' },
+  ],
+  es: [
+    { fr: 'Pecho', en: 'Chest' }, { fr: 'Longitud', en: 'Length' },
+    { fr: 'Hombros', en: 'Shoulders' }, { fr: 'Cintura', en: 'Waist' },
+    { fr: 'Caderas', en: 'Hips' }, { fr: 'Entrepierna', en: 'Inseam' },
+    { fr: 'Número', en: 'Shoe size' }, { fr: 'Anchura', en: 'Width' },
+    { fr: 'Altura', en: 'Height' }, { fr: 'Profundidad', en: 'Depth' },
+  ],
+  de: [
+    { fr: 'Brustumfang', en: 'Chest' }, { fr: 'Länge', en: 'Length' },
+    { fr: 'Schultern', en: 'Shoulders' }, { fr: 'Taillenumfang', en: 'Waist' },
+    { fr: 'Hüftumfang', en: 'Hips' }, { fr: 'Schrittlänge', en: 'Inseam' },
+    { fr: 'Schuhgröße', en: 'Shoe size' }, { fr: 'Breite', en: 'Width' },
+    { fr: 'Höhe', en: 'Height' }, { fr: 'Tiefe', en: 'Depth' },
+  ],
+  it: [
+    { fr: 'Petto', en: 'Chest' }, { fr: 'Lunghezza', en: 'Length' },
+    { fr: 'Spalle', en: 'Shoulders' }, { fr: 'Vita', en: 'Waist' },
+    { fr: 'Fianchi', en: 'Hips' }, { fr: 'Cavallo', en: 'Inseam' },
+    { fr: 'Numero scarpa', en: 'Shoe size' }, { fr: 'Larghezza', en: 'Width' },
+    { fr: 'Altezza', en: 'Height' }, { fr: 'Profondità', en: 'Depth' },
+  ],
+  nl: [
+    { fr: 'Borstomtrek', en: 'Chest' }, { fr: 'Lengte', en: 'Length' },
+    { fr: 'Schouders', en: 'Shoulders' }, { fr: 'Tailleomtrek', en: 'Waist' },
+    { fr: 'Heupomtrek', en: 'Hips' }, { fr: 'Beenlengte', en: 'Inseam' },
+    { fr: 'Schoenmaat', en: 'Shoe size' }, { fr: 'Breedte', en: 'Width' },
+    { fr: 'Hoogte', en: 'Height' }, { fr: 'Diepte', en: 'Depth' },
+  ],
+  pl: [
+    { fr: 'Obwód klatki piersiowej', en: 'Chest' }, { fr: 'Długość', en: 'Length' },
+    { fr: 'Ramiona', en: 'Shoulders' }, { fr: 'Obwód talii', en: 'Waist' },
+    { fr: 'Obwód bioder', en: 'Hips' }, { fr: 'Długość kroku', en: 'Inseam' },
+    { fr: 'Rozmiar buta', en: 'Shoe size' }, { fr: 'Szerokość', en: 'Width' },
+    { fr: 'Wysokość', en: 'Height' }, { fr: 'Głębokość', en: 'Depth' },
+  ],
+}
+
+const SYSTEM_LABELS_I18N: Record<Lang, Record<string, string>> = {
+  fr: { letters: 'Lettres', eu_femme: 'EU femme', eu_homme: 'EU homme', jeans: 'Jeans', pointures: 'Pointures', enfant_age: 'Âge', enfant_cm: 'cm', one_size: 'Taille unique', none: 'Sans taille' },
+  en: { letters: 'Letters', eu_femme: 'EU women', eu_homme: 'EU men',   jeans: 'Jeans', pointures: 'Shoe sizes', enfant_age: 'Age', enfant_cm: 'cm', one_size: 'One size',     none: 'No size'    },
+  es: { letters: 'Letras',  eu_femme: 'EU mujer', eu_homme: 'EU hombre',jeans: 'Jeans', pointures: 'Tallas zapato', enfant_age: 'Edad', enfant_cm: 'cm', one_size: 'Talla única', none: 'Sin talla' },
+  de: { letters: 'Buchstaben', eu_femme: 'EU Damen', eu_homme: 'EU Herren', jeans: 'Jeans', pointures: 'Schuhgrößen', enfant_age: 'Alter', enfant_cm: 'cm', one_size: 'Einheitsgröße', none: 'Ohne Größe' },
+  it: { letters: 'Lettere', eu_femme: 'EU donna', eu_homme: 'EU uomo',  jeans: 'Jeans', pointures: 'Taglie scarpe', enfant_age: 'Età', enfant_cm: 'cm', one_size: 'Taglia unica', none: 'Senza taglia' },
+  nl: { letters: 'Letters', eu_femme: 'EU dames',  eu_homme: 'EU heren', jeans: 'Jeans', pointures: 'Schoenmaten', enfant_age: 'Leeftijd', enfant_cm: 'cm', one_size: 'One size', none: 'Geen maat' },
+  pl: { letters: 'Litery',  eu_femme: 'EU damskie',eu_homme: 'EU męskie',jeans: 'Jeans', pointures: 'Rozmiary butów', enfant_age: 'Wiek', enfant_cm: 'cm', one_size: 'Jeden rozmiar', none: 'Bez rozmiaru' },
+}
+
+const DIM_PRESETS_FR = [
+  'Tour de poitrine', 'Longueur', 'Épaules', 'Tour de taille',
+  'Tour de hanches', 'Entrejambe', 'Pointure', 'Largeur', 'Hauteur', 'Profondeur',
+]
+
+const DIM_PRESETS_EN = [
+  'Chest', 'Length', 'Shoulders', 'Waist',
+  'Hips', 'Inseam', 'Shoe size', 'Width', 'Height', 'Depth',
+]
+
+const EXTRA_INFO_PRESETS = EXTRA_INFO_PRESETS_I18N.fr
+
+const SYSTEM_LABELS: Record<string, string> = {
+  letters: 'Lettres', eu_femme: 'EU femme', eu_homme: 'EU homme', jeans: 'Jeans',
+  pointures: 'Pointures', enfant_age: 'Âge', enfant_cm: 'cm', one_size: 'Taille unique', none: 'Sans taille',
+}
+
+/* ─── Redimensionnement + conversion base64 (max 1024px, <3 Mo) ─────────── */
+
+async function resizeAndEncode(file: File, maxPx = 1024): Promise<{ base64: string; mediaType: string }> {
+  return new Promise((resolve, reject) => {
+    const img = new Image()
+    const objectUrl = URL.createObjectURL(file)
+
+    img.onload = () => {
+      URL.revokeObjectURL(objectUrl)
+      const scale = Math.min(1, maxPx / Math.max(img.width, img.height))
+      const w = Math.round(img.width * scale)
+      const h = Math.round(img.height * scale)
+
+      const canvas = document.createElement('canvas')
+      canvas.width  = w
+      canvas.height = h
+      canvas.getContext('2d')!.drawImage(img, 0, 0, w, h)
+
+      canvas.toBlob(blob => {
+        if (!blob) { reject(new Error('canvas toBlob failed')); return }
+        const reader = new FileReader()
+        reader.onload = () => {
+          const dataUrl = reader.result as string
+          const [header, b64] = dataUrl.split(',')
+          const mediaType = header.match(/:(.*?);/)?.[1] ?? 'image/jpeg'
+          resolve({ base64: b64, mediaType })
+        }
+        reader.onerror = reject
+        reader.readAsDataURL(blob)
+      }, 'image/jpeg', 0.85)
+    }
+
+    img.onerror = reject
+    img.src = objectUrl
+  })
+}
+
+/* ─── Normalisation des niveaux de confiance ─────────────────────────────── */
+
+function normalizeConfidence(result: RecognitionResult): RecognitionResult {
+  function fix<T>(field: RecognitionField<T>): RecognitionField<T> {
+    const empty = Array.isArray(field.value)
+      ? (field.value as unknown[]).length === 0
+      : !field.value
+    if (empty && field.confidence !== 'manual') return { value: field.value, confidence: 'low' }
+    return field
+  }
+  return {
+    marque:        fix(result.marque),
+    genre:         fix(result.genre),
+    vintedPath:    fix(result.vintedPath),
+    taille:        fix(result.taille),
+    tailleSysteme: fix(result.tailleSysteme),
+    etat:          fix(result.etat),
+    couleurs:      fix(result.couleurs),
+    matieres:      fix(result.matieres),
+    style:         fix(result.style),
+    motif:         fix(result.motif),
+    defauts:       fix(result.defauts),
+    ...(result.brand_segment ? { brand_segment: result.brand_segment } : {}),
+  }
+}
+
+/* ─── Hook appel API reconnaissance ─────────────────────────────────────── */
+
+function useRecognition(
+  slots: PhotoSlot[],
+  result: RecognitionResult | null,
+  setResult: (r: RecognitionResult) => void,
+  canAutoRun: boolean,
+) {
+  const [loading, setLoading] = useState(false)
+  const [error, setError] = useState<string | null>(null)
+  const ranRef = useRef(false)
+  const { lang } = useLang()
+
+  const run = useCallback(async () => {
+    const targets = [0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10]
+    const filled = targets.map(i => slots[i]).filter(s => s.file !== null)
+
+    if (filled.length === 0) {
+      setError("Aucune photo disponible pour l'analyse.")
+      return
+    }
+
+    setLoading(true)
+    setError(null)
+
+    try {
+      const images = await Promise.all(
+        filled.map(async (slot) => {
+          const encoded = await resizeAndEncode(slot.file!)
+          return { ...encoded, slotId: slot.id }
+        })
+      )
+
+      const res = await fetch('/api/recognize', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ images, locale: lang }),
+      })
+
+      if (!res.ok) throw new Error('Erreur serveur')
+      const data: RecognitionResult = await res.json()
+      setResult(normalizeConfidence(data))
+    } catch {
+      setError("L'analyse a échoué. Vérifiez votre connexion et réessayez.")
+    } finally {
+      setLoading(false)
+    }
+  }, [slots, setResult, lang])
+
+  useEffect(() => {
+    if (canAutoRun && !ranRef.current && !result) {
+      ranRef.current = true
+      run()
+    }
+  }, [canAutoRun, run, result])
+
+  return { loading, error, retry: run }
+}
+
+/* ─── Badge confiance ────────────────────────────────────────────────────── */
+
+interface ConfidenceBadgeProps {
+  confidence: Confidence
+  labels?: { high: string; medium: string; low: string; manual: string }
+}
+
+function ConfidenceBadge({ confidence, labels }: ConfidenceBadgeProps) {
+  const { lang } = useLang()
+  const l = labels ?? (UI_I18N[lang] ?? UI_I18N.fr)
+  const map: Record<Confidence, { label: string; className: string; Icon: React.ElementType }> = {
+    high:   { label: l.high,   className: 'bg-green-50 text-green-700 border-green-200',    Icon: CheckCircle2  },
+    medium: { label: l.medium, className: 'bg-orange-50 text-orange-700 border-orange-200', Icon: AlertCircle   },
+    low:    { label: l.low,    className: 'bg-red-50 text-red-700 border-red-200',           Icon: XCircle       },
+    manual: { label: l.manual, className: 'bg-gray-50 text-gray-500 border-gray-200',        Icon: Pencil        },
+  }
+  const { label, className, Icon } = map[confidence]
+  return (
+    <span className={`inline-flex items-center gap-1 text-[10px] font-semibold px-1.5 py-0.5 rounded-md border ${className}`}>
+      <Icon className="w-2.5 h-2.5" />
+      {label}
+    </span>
+  )
+}
+
+/* ─── Composant champ éditable ───────────────────────────────────────────── */
+
+interface FieldProps {
+  label: string
+  confidence: Confidence
+  children: React.ReactNode
+  required?: boolean
+}
+
+function Field({ label, confidence, children, required }: FieldProps) {
+  return (
+    <div className="flex flex-col gap-1.5">
+      <div className="flex items-center gap-2">
+        <label className="text-xs font-semibold text-gray-600 uppercase tracking-wide">
+          {label}
+          {required && <span className="text-red-400 ml-0.5">*</span>}
+        </label>
+        <ConfidenceBadge confidence={confidence} />
+      </div>
+      {children}
+    </div>
+  )
+}
+
+/* ─── Classes input partagées ────────────────────────────────────────────── */
+
+const inputCls = (conf: Confidence) => {
+  const border = conf === 'low' ? 'border-red-200 focus:border-red-400 focus:ring-red-100'
+    : conf === 'medium' ? 'border-orange-200 focus:border-orange-400 focus:ring-orange-100'
+    : conf === 'manual' ? 'border-gray-200 focus:border-gray-400 focus:ring-gray-100'
+    : 'border-green-200 focus:border-green-400 focus:ring-green-100'
+  return `w-full rounded-xl border px-3 py-2.5 text-sm text-gray-900 bg-white focus:outline-none focus:ring-2 transition-colors ${border}`
+}
+
 /* ─── Props ───────────────────────────────────────────────────────────────── */
 
 interface Props {
   slots: PhotoSlot[]
   setSlots: React.Dispatch<React.SetStateAction<PhotoSlot[]>>
-  aiPhotos: string[]
-  setAiPhotos: (urls: string[]) => void
+  result: RecognitionResult | null
+  setResult: (r: RecognitionResult | null) => void
+  plan: Plan
 }
 
 /* ─── Composant principal ─────────────────────────────────────────────────── */
 
-export default function PhotoUploadStep({ slots, setSlots, aiPhotos, setAiPhotos }: Props) {
+export default function PhotoUploadStep({ slots, setSlots, result, setResult, plan }: Props) {
   const { lang } = useLang()
-
-  /* Plan tarifaire (simulé — sera branché Stripe plus tard) */
-  const [plan, setPlan]                           = useState<Plan>('freemium')
 
   const [dragOverId, setDragOverId]               = useState<number | null>(null)
   const [isClassifying, setIsClassifying]         = useState(false)
   const [classifiedCount, setClassifiedCount]     = useState<number | null>(null)
   const [overflowCount, setOverflowCount]         = useState(0)
   const [globalDragOver, setGlobalDragOver]       = useState(false)
-  const [selectedBg, setSelectedBg]               = useState(0)
-  const [showValidationBanner, setShowValidationBanner] = useState(false)
-
-  /* Premium / Pro — checkboxes suppression fond */
-  const [bgCheckedSlots, setBgCheckedSlots]       = useState<Set<number>>(new Set())
-  const [isProcessingBg, setIsProcessingBg]       = useState(false)
-
-  /* Pro — mannequin IA */
-  const [selectedMannequin, setSelectedMannequin] = useState<string | null>(null)
-  const [isGeneratingMannequin, setIsGeneratingMannequin] = useState(false)
-  const [mannequinCustomPrompt, setMannequinCustomPrompt] = useState('outfit adapted to the garment, contemporary 2026 casual style')
-
   /* Pro — import URL Vinted */
   const [vintedUrl, setVintedUrl]         = useState('')
   const [isImporting, setIsImporting]     = useState(false)
   const [importError, setImportError]     = useState<string | null>(null)
   const [importSuccess, setImportSuccess] = useState<string | null>(null)
 
-  /* Compositing fond sur tous les slots traités */
-  const [compositedUrls, setCompositedUrls]       = useState<Record<number, string>>({})
-  const [isCompositing, setIsCompositing]         = useState(false)
-
   const dragSourceId = useRef<number | null>(null)
   const slotsRef     = useRef<PhotoSlot[]>(slots)
   useEffect(() => { slotsRef.current = slots }, [slots])
 
-  /* Charge la préférence fond */
-  useEffect(() => {
-    const saved = localStorage.getItem('sellerlab_bg_choice')
-    if (saved !== null) setSelectedBg(parseInt(saved) || 0)
-  }, [])
-
-  const handleBgSelect = (id: number) => {
-    setSelectedBg(id)
-    localStorage.setItem('sellerlab_bg_choice', String(id))
-  }
-
-  /* ── Compositing : recomposite tous les slots avec processedUrl ── */
-  const processedSlotKey = slots
-    .filter(s => s.processedUrl)
-    .map(s => `${s.id}:${s.processedUrl}`)
-    .join('|')
-
-  useEffect(() => {
-    const processedSlots = slots.filter(s => s.processedUrl !== null)
-    if (processedSlots.length === 0) {
-      setCompositedUrls(prev => {
-        Object.values(prev).forEach(u => u && URL.revokeObjectURL(u))
-        return {}
-      })
-      setIsCompositing(false)
-      return
-    }
-
-    let cancelled = false
-    setIsCompositing(true)
-
-    Promise.all(
-      processedSlots.map(slot =>
-        compositeWithBackground(slot.processedUrl!, BACKGROUNDS[selectedBg])
-          .then(url => ({ id: slot.id, url }))
-          .catch(() => ({ id: slot.id, url: '' }))
-      )
-    ).then(results => {
-      if (cancelled) return
-      const next: Record<number, string> = {}
-      results.forEach(({ id, url }) => { if (url) next[id] = url })
-
-      setCompositedUrls(prev => {
-        Object.values(prev).forEach(u => u && URL.revokeObjectURL(u))
-        return next
-      })
-      /* Sync compositedUrl into slot state so ExportStep can use it */
-      setSlots(prev => prev.map(s => ({ ...s, compositedUrl: next[s.id] ?? undefined })))
-      setIsCompositing(false)
-    }).catch(() => {
-      if (!cancelled) setIsCompositing(false)
-    })
-
-    return () => { cancelled = true }
-  // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [processedSlotKey, selectedBg])
-
   /* ── Helpers i18n ── */
   const planI18n      = PLAN_I18N[lang]      ?? PLAN_I18N.fr
-  const bannerI18n    = BANNER_I18N[lang]    ?? BANNER_I18N.fr
-  const tipI18n       = TIP_I18N[lang]       ?? TIP_I18N.fr
   const sectionTitles = SECTION_TITLES[lang] ?? SECTION_TITLES.fr
   const dropI18n      = DROP_I18N[lang]      ?? DROP_I18N.fr
   const badgeI18n     = BADGE_I18N[lang]     ?? BADGE_I18N.fr
   const loadingI18n   = LOADING_I18N[lang]   ?? LOADING_I18N.fr
+  const ui            = UI_I18N[lang]        ?? UI_I18N.fr
+  const dimPresets    = DIM_PRESETS_I18N[lang] ?? DIM_PRESETS_I18N.fr
+  const extraPresets  = EXTRA_INFO_PRESETS_I18N[lang] ?? EXTRA_INFO_PRESETS_I18N.fr
 
-  const anySlotHasBg  = slots.some(s => s.processedUrl !== null)
+  /* ── Reconnaissance automatique ── */
+  const mainPhotoReady = (slots[0]?.file !== null)
+    && slots[0]?.status !== 'uploading'
+    && slots[0]?.status !== 'processing-bg'
+  const { loading: recogLoading, error: recogError, retry: recogRetry } = useRecognition(
+    slots, result, r => setResult(r), mainPhotoReady,
+  )
+
+  /* ── Taxonomy: parse du chemin Vinted ── */
+  const parsed    = result ? parseVintedPath(result.vintedPath.value) : null
+  const n1        = parsed?.n1 ?? ''
+  const n2        = parsed?.n2 ?? ''
+  const n3        = parsed?.n3 ?? ''
+  const n4        = parsed?.n4 ?? ''
+  const n5        = parsed?.n5 ?? ''
+  const n2Options = n1 ? getN2List(n1) : []
+  const n3Options = n2 ? getN3List(n1, n2) : []
+  const n4Options = n3 ? getN4List(n1, n2, n3) : []
+  const n5Options = n4 ? getN5List(n1, n2, n3, n4) : []
+  const tailleSizes: string[] = useMemo(() => {
+    if (!result) return []
+    const sys = result.tailleSysteme.value[0] as SizeSystem | undefined
+    if (!sys) return []
+    return SIZES[sys] ?? []
+  }, [result])
+
+  /* ── États formulaire infos complémentaires + dimensions ── */
+  const [openExtraFields,  setOpenExtraFields]  = useState<string[]>([])
+  const [extraFieldInputs, setExtraFieldInputs] = useState<Record<string, string>>({})
+  const [customExtraRows,  setCustomExtraRows]  = useState<{ id: number; nom: string; value: string }[]>([])
+  const [prixNeuf,         setPrixNeuf]         = useState('')
+  const [openDimFields,    setOpenDimFields]    = useState<string[]>([])
+  const [dimInputs,        setDimInputs]        = useState<Record<string, string>>({})
+  const [customDimRows,    setCustomDimRows]    = useState<{ id: number; nom: string; valeur: string }[]>([])
+
+  /* ── update : modifie un champ RecognitionResult (confidence → 'manual') ── */
+  const update = useCallback((field: keyof RecognitionResult, value: string | string[]) => {
+    if (!result) return
+    setResult({ ...result, [field]: { value, confidence: 'manual' as const } })
+  }, [result, setResult])
+
+  /* ── Infos complémentaires — présets ── */
+  const validateMissingInfo = useCallback((label: string) => {
+    const value = (extraFieldInputs[label] ?? '').trim()
+    if (!value || !result) return
+    const existing = result.extraInfo?.missingInfos ?? []
+    setResult({
+      ...result,
+      extraInfo: {
+        ...(result.extraInfo ?? { missingInfos: [], dimensions: [] }),
+        missingInfos: [...existing.filter(i => i.label !== label), { label, value }],
+      },
+    })
+    setExtraFieldInputs(prev => { const n = { ...prev }; delete n[label]; return n })
+    setOpenExtraFields(prev => prev.filter(f => f !== label))
+  }, [extraFieldInputs, result, setResult])
+
+  const removeValidatedInfo = useCallback((label: string) => {
+    if (!result) return
+    setResult({
+      ...result,
+      extraInfo: {
+        ...(result.extraInfo ?? { missingInfos: [], dimensions: [] }),
+        missingInfos: (result.extraInfo?.missingInfos ?? []).filter(i => i.label !== label),
+      },
+    })
+  }, [result, setResult])
+
+  const addCustomExtraRow = useCallback(() => {
+    setCustomExtraRows(prev => [...prev, { id: Date.now(), nom: '', value: '' }])
+  }, [])
+
+  const validateCustomExtraRow = useCallback((id: number) => {
+    const row = customExtraRows.find(r => r.id === id)
+    if (!row || !row.nom.trim() || !row.value.trim() || !result) return
+    const existing = result.extraInfo?.missingInfos ?? []
+    setResult({
+      ...result,
+      extraInfo: {
+        ...(result.extraInfo ?? { missingInfos: [], dimensions: [] }),
+        missingInfos: [...existing.filter(i => i.label !== row.nom), { label: row.nom, value: row.value }],
+      },
+    })
+    setCustomExtraRows(prev => prev.filter(r => r.id !== id))
+  }, [customExtraRows, result, setResult])
+
+  const removeCustomExtraRow = useCallback((id: number) => {
+    setCustomExtraRows(prev => prev.filter(r => r.id !== id))
+  }, [])
+
+  /* ── Dimensions ── */
+  const validateDimension = useCallback((nom: string, nomEN: string) => {
+    const valeur = (dimInputs[nom] ?? '').trim()
+    if (!valeur || !result) return
+    const existing = result.extraInfo?.dimensions ?? []
+    setResult({
+      ...result,
+      extraInfo: {
+        ...(result.extraInfo ?? { missingInfos: [], dimensions: [] }),
+        dimensions: [...existing.filter(d => d.nom !== nom), { nom, nomEN, valeur }],
+      },
+    })
+    setDimInputs(prev => { const n = { ...prev }; delete n[nom]; return n })
+    setOpenDimFields(prev => prev.filter(f => f !== nom))
+  }, [dimInputs, result, setResult])
+
+  const removeValidatedDim = useCallback((nom: string) => {
+    if (!result) return
+    setResult({
+      ...result,
+      extraInfo: {
+        ...(result.extraInfo ?? { missingInfos: [], dimensions: [] }),
+        dimensions: (result.extraInfo?.dimensions ?? []).filter(d => d.nom !== nom),
+      },
+    })
+  }, [result, setResult])
+
+  const addCustomDimRow = useCallback(() => {
+    setCustomDimRows(prev => [...prev, { id: Date.now(), nom: '', valeur: '' }])
+  }, [])
+
+  const validateCustomDimRow = useCallback((id: number) => {
+    const row = customDimRows.find(r => r.id === id)
+    if (!row || !row.nom.trim() || !row.valeur.trim() || !result) return
+    const existing = result.extraInfo?.dimensions ?? []
+    setResult({
+      ...result,
+      extraInfo: {
+        ...(result.extraInfo ?? { missingInfos: [], dimensions: [] }),
+        dimensions: [...existing.filter(d => d.nom !== row.nom), { nom: row.nom, nomEN: row.nom, valeur: row.valeur }],
+      },
+    })
+    setCustomDimRows(prev => prev.filter(r => r.id !== id))
+  }, [customDimRows, result, setResult])
+
+  const removeCustomDimRow = useCallback((id: number) => {
+    setCustomDimRows(prev => prev.filter(r => r.id !== id))
+  }, [])
+
+  const validatePrixNeuf = useCallback(() => {
+    const v = parseFloat(prixNeuf)
+    if (!v || !result) return
+    setResult({
+      ...result,
+      extraInfo: {
+        ...(result.extraInfo ?? { missingInfos: [], dimensions: [] }),
+        prixAchatNeuf: v,
+      },
+    })
+  }, [prixNeuf, result, setResult])
+
   const filledCount   = slots.filter(s => s.file !== null || (s.preview !== null && s.status !== 'empty')).length
-
-  /* Slots pouvant être sélectionnés pour le changement de fond */
-  const checkableSlotIds: number[] = (plan === 'premium' || plan === 'pro')
-    ? SLOT_DEFS.filter(d => d.type === 'garment').map(d => d.id)
-    : []
 
   /* ── Met à jour un seul slot ── */
   const updateSlot = useCallback(
@@ -889,99 +1333,12 @@ export default function PhotoUploadStep({ slots, setSlots, aiPhotos, setAiPhotos
     [updateSlot, plan],
   )
 
-  /* ── Traiter les slots sélectionnés (premium / pro) ── */
-  const processCheckedSlots = useCallback(async () => {
-    if (isProcessingBg || bgCheckedSlots.size === 0) return
-    setIsProcessingBg(true)
-
-    const toProcess = Array.from(bgCheckedSlots)
-
-    /* Show loader on ALL selected photos at once */
-    setSlots(prev => prev.map(s =>
-      toProcess.includes(s.id) && s.file ? { ...s, status: 'processing-bg' as const } : s
-    ))
-
-    /* Process sequentially — WASM worker not designed for parallel calls */
-    for (const slotId of toProcess) {
-      const slot = slotsRef.current[slotId]
-      if (!slot?.file) continue
-      try {
-        const { removeBackground } = await import('@imgly/background-removal')
-        const blob = new Blob([await slot.file.arrayBuffer()], { type: slot.file.type || 'image/jpeg' })
-        const resultBlob = await removeBackground(blob)
-        updateSlot(slotId, { status: 'done', processedUrl: URL.createObjectURL(resultBlob) })
-      } catch (err) {
-        console.error(`Background removal failed (slot ${slotId}):`, err)
-        updateSlot(slotId, { status: 'done', processedUrl: null, error: 'bg_failed' })
-      }
-    }
-
-    setBgCheckedSlots(new Set())
-    setIsProcessingBg(false)
-  }, [isProcessingBg, bgCheckedSlots, updateSlot, setSlots])
-
-  /* ── Validation freemium : traite uniquement slot 0 ── */
-  const handleValidateAndProcess = useCallback(async () => {
-    const slot0 = slotsRef.current[0]
-    if (slot0.file) {
-      updateSlot(0, { status: 'processing-bg' })
-      try {
-        const { removeBackground } = await import('@imgly/background-removal')
-        const blob = new Blob([await slot0.file.arrayBuffer()], { type: slot0.file.type || 'image/jpeg' })
-        const resultBlob = await removeBackground(blob)
-        updateSlot(0, { status: 'done', processedUrl: URL.createObjectURL(resultBlob) })
-      } catch (err) {
-        console.error('Background removal failed (validate):', err)
-        updateSlot(0, { status: 'done', processedUrl: null, error: 'bg_failed' })
-      }
-    }
-    setShowValidationBanner(false)
-  }, [updateSlot])
-
-  /* ── Génération mannequin IA (Pro) ── */
-  const handleGenerateMannequin = useCallback(async () => {
-    if (!selectedMannequin || isGeneratingMannequin) return
-    const slot0 = slotsRef.current[0]
-    if (!slot0.file) return
-
-    setIsGeneratingMannequin(true)
-    try {
-      const reader = new FileReader()
-      const base64 = await new Promise<string>((resolve, reject) => {
-        reader.onload  = () => resolve(reader.result as string)
-        reader.onerror = reject
-        reader.readAsDataURL(slot0.file!)
-      })
-
-      const res = await fetch('/api/generate-mannequin', {
-        method:  'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body:    JSON.stringify({
-          product_image: base64,
-          mannequin_id: selectedMannequin,
-          background_id: selectedBg,
-          outfit_prompt: mannequinCustomPrompt.trim() || undefined,
-        }),
-      })
-
-      if (!res.ok) throw new Error('Generation failed')
-      const { urls } = await res.json() as { urls: string[] }
-
-      setAiPhotos(urls.slice(0, 2))
-    } catch (err) {
-      console.error('Mannequin generation failed:', err)
-    } finally {
-      setIsGeneratingMannequin(false)
-    }
-  }, [selectedMannequin, isGeneratingMannequin, updateSlot, selectedBg, mannequinCustomPrompt])
-
   /* ── Upload multiple → classify → slots ── */
   const handleMultipleFiles = useCallback(
     async (files: File[]) => {
       if (!files.length) return
       setClassifiedCount(null)
       setOverflowCount(0)
-      setShowValidationBanner(false)
 
       if (files.length === 1) {
         const firstEmpty = SLOT_DEFS.find(d => !slotsRef.current[d.id]?.file)
@@ -1032,8 +1389,6 @@ export default function PhotoUploadStep({ slots, setSlots, aiPhotos, setAiPhotos
         if (files.length > empty.length) setOverflowCount(files.length - empty.length)
       }
 
-      /* Bannière validation uniquement en freemium */
-      if (plan === 'freemium') setShowValidationBanner(true)
       setIsClassifying(false)
     },
     [loadFileInSlot, plan],
@@ -1092,10 +1447,10 @@ export default function PhotoUploadStep({ slots, setSlots, aiPhotos, setAiPhotos
     }
   }, [vintedUrl, isImporting, lang, handleMultipleFiles])
 
-  /* ── Swap — désactivé après remove-bg ── */
+  /* ── Swap ── */
   const swapSlots = useCallback(
     (sourceId: number, targetId: number) => {
-      if (anySlotHasBg || sourceId === targetId) return
+      if (sourceId === targetId) return
       setSlots(prev => {
         const next = [...prev]
         next[sourceId] = { ...prev[targetId], id: sourceId }
@@ -1103,7 +1458,7 @@ export default function PhotoUploadStep({ slots, setSlots, aiPhotos, setAiPhotos
         return next
       })
     },
-    [setSlots, anySlotHasBg],
+    [setSlots],
   )
 
   const clearSlot = useCallback(
@@ -1115,11 +1470,6 @@ export default function PhotoUploadStep({ slots, setSlots, aiPhotos, setAiPhotos
             : s,
         ),
       )
-      setBgCheckedSlots(prev => {
-        const next = new Set(prev)
-        next.delete(slotId)
-        return next
-      })
     },
     [setSlots],
   )
@@ -1135,20 +1485,8 @@ export default function PhotoUploadStep({ slots, setSlots, aiPhotos, setAiPhotos
     [handleMultipleFiles],
   )
 
-  const toggleBgCheck = (slotId: number) => {
-    setBgCheckedSlots(prev => {
-      const next = new Set(prev)
-      if (next.has(slotId)) next.delete(slotId)
-      else next.add(slotId)
-      return next
-    })
-  }
-
   return (
     <div className="space-y-3">
-
-      {/* ── Switcher plan (DEV uniquement — à retirer avant mise en prod) ── */}
-      <PlanSwitcher plan={plan} onChange={setPlan} />
 
       {/* ── En-tête ── */}
       <div>
@@ -1269,7 +1607,7 @@ export default function PhotoUploadStep({ slots, setSlots, aiPhotos, setAiPhotos
       </div>
 
       {/* Badge classification */}
-      {classifiedCount !== null && !isClassifying && !showValidationBanner && (
+      {classifiedCount !== null && !isClassifying && (
         <div className="flex items-center gap-2 text-xs text-green-700 bg-green-50 border border-green-200 rounded-xl px-4 py-2.5 w-fit">
           <Check className="w-3.5 h-3.5 shrink-0" />
           <span className="font-semibold">{dropI18n.classified(classifiedCount)}</span>
@@ -1292,58 +1630,6 @@ export default function PhotoUploadStep({ slots, setSlots, aiPhotos, setAiPhotos
         </div>
       )}
 
-      {/* ── Panneau fond — toujours visible ── */}
-      <BgPanel
-        plan={plan}
-        selectedBg={selectedBg}
-        onBgSelect={handleBgSelect}
-        checkedCount={bgCheckedSlots.size}
-        isProcessing={isProcessingBg}
-        onProcess={processCheckedSlots}
-        planI18n={planI18n}
-      />
-
-      {/* ── Panneau mannequin IA — actif en Pro, verrouillé en Freemium/Premium ── */}
-      <MannequinPanel
-        selectedMannequin={selectedMannequin}
-        onSelect={setSelectedMannequin}
-        onGenerate={handleGenerateMannequin}
-        isGenerating={isGeneratingMannequin}
-        hasSlot0Photo={!!slots[0]?.file}
-        isLocked={plan !== 'pro'}
-        planI18n={planI18n}
-        customPrompt={mannequinCustomPrompt}
-        onCustomPromptChange={setMannequinCustomPrompt}
-      />
-
-      {/* ── Bannière validation (freemium uniquement, après classification multiple) ── */}
-      {plan === 'freemium' && showValidationBanner && !isClassifying && (
-        <div className="rounded-2xl border-2 border-indigo-200 bg-indigo-50 p-5 space-y-4">
-          <div className="flex items-start gap-3">
-            <div className="w-8 h-8 rounded-xl bg-indigo-100 flex items-center justify-center shrink-0">
-              <Wand2 className="w-4 h-4 text-indigo-600" />
-            </div>
-            <div>
-              <h3 className="font-display font-extrabold text-base text-indigo-900 mb-0.5">{bannerI18n.title}</h3>
-              <p className="text-sm text-indigo-700">{bannerI18n.desc}</p>
-            </div>
-            <button
-              onClick={() => setShowValidationBanner(false)}
-              className="ml-auto text-indigo-400 hover:text-indigo-600 transition-colors shrink-0"
-            >
-              <X className="w-4 h-4" />
-            </button>
-          </div>
-          <button
-            onClick={handleValidateAndProcess}
-            className="w-full flex items-center justify-center gap-2 bg-indigo-600 hover:bg-indigo-700 text-white font-semibold text-sm py-3.5 rounded-xl transition-all active:scale-[0.98]"
-          >
-            <Wand2 className="w-4 h-4" />
-            {bannerI18n.btn}
-          </button>
-        </div>
-      )}
-
       {/* ══ Zones photos ════════════════════════════════════════════════════ */}
       <div className="space-y-3">
 
@@ -1361,13 +1647,9 @@ export default function PhotoUploadStep({ slots, setSlots, aiPhotos, setAiPhotos
                 slot={slots[def.id]}
                 isDragOver={dragOverId === def.id}
                 dragSourceId={dragSourceId}
-                locked={anySlotHasBg}
                 displayLabel={SLOT_LABELS[lang]?.[def.id] ?? def.label}
                 badgeLabels={badgeI18n}
                 loadingLabels={loadingI18n}
-                showCheckbox={checkableSlotIds.includes(def.id) && !!slots[def.id]?.file && slots[def.id]?.status !== 'processing-bg'}
-                isChecked={bgCheckedSlots.has(def.id)}
-                onCheckToggle={() => toggleBgCheck(def.id)}
                 onFileSelected={file => loadFileInSlot(file, def.id)}
                 onSwap={swapSlots}
                 onClear={() => clearSlot(def.id)}
@@ -1383,7 +1665,6 @@ export default function PhotoUploadStep({ slots, setSlots, aiPhotos, setAiPhotos
                 slot={slots[def.id]}
                 isDragOver={dragOverId === def.id}
                 dragSourceId={dragSourceId}
-                locked={anySlotHasBg}
                 displayLabel={SLOT_LABELS[lang]?.[def.id] ?? def.label}
                 badgeLabels={badgeI18n}
                 loadingLabels={loadingI18n}
@@ -1407,13 +1688,9 @@ export default function PhotoUploadStep({ slots, setSlots, aiPhotos, setAiPhotos
                 slot={slots[def.id]}
                 isDragOver={dragOverId === def.id}
                 dragSourceId={dragSourceId}
-                locked={anySlotHasBg}
                 displayLabel={SLOT_LABELS[lang]?.[def.id] ?? def.label}
                 badgeLabels={badgeI18n}
                 loadingLabels={loadingI18n}
-                showCheckbox={checkableSlotIds.includes(def.id) && !!slots[def.id]?.file && slots[def.id]?.status !== 'processing-bg'}
-                isChecked={bgCheckedSlots.has(def.id)}
-                onCheckToggle={() => toggleBgCheck(def.id)}
                 onFileSelected={file => loadFileInSlot(file, def.id)}
                 onSwap={swapSlots}
                 onClear={() => clearSlot(def.id)}
@@ -1424,375 +1701,628 @@ export default function PhotoUploadStep({ slots, setSlots, aiPhotos, setAiPhotos
 
         </div>
 
-        {/* ── SECTION 3 — RENDU (photos traitées + mannequin IA) ── */}
-        {(Object.keys(compositedUrls).length > 0 || aiPhotos.length > 0) && (
+      </div>
+
+      {/* ── Reconnaissance : chargement ── */}
+      {recogLoading && (
+        <div className="bg-white rounded-2xl border border-gray-100 shadow-sm p-8 flex flex-col items-center gap-4 text-center">
+          <div className="w-12 h-12 rounded-full bg-indigo-50 flex items-center justify-center">
+            <Loader2 className="w-6 h-6 text-indigo-500 animate-spin" />
+          </div>
           <div>
-            <p className="text-[10px] font-bold text-gray-400 tracking-widest mb-1.5">{planI18n.rendTitle}</p>
-            <div className="grid grid-cols-4 gap-2">
-              {Object.entries(compositedUrls).map(([id, url]) => (
-                <div key={id} className="relative aspect-square rounded-xl overflow-hidden border border-green-200 shadow-sm bg-gray-50">
-                  <img src={url} alt={`Rendu ${id}`} className="w-full h-full object-contain" draggable={false} />
-                  <div className="absolute top-1 left-1">
-                    <span className="bg-green-500 text-white text-[8px] font-bold px-1.5 py-0.5 rounded shadow">✓</span>
-                  </div>
-                </div>
-              ))}
-              {aiPhotos.map((url, i) => (
-                <div key={`ai-${i}`} className="relative aspect-square rounded-xl overflow-hidden border border-purple-200 shadow-sm bg-gray-50">
-                  <img src={url} alt={`IA ${i + 1}`} className="w-full h-full object-contain" draggable={false} />
-                  <div className="absolute top-1 left-1">
-                    <span className="bg-purple-600 text-white text-[8px] font-bold px-1.5 py-0.5 rounded shadow">{planI18n.badgeAI}</span>
-                  </div>
-                </div>
-              ))}
+            <p className="font-semibold text-gray-900">{ui.analyzing}</p>
+            <p className="text-sm text-gray-500 mt-1">{ui.analyzingSub}</p>
+          </div>
+        </div>
+      )}
+
+      {/* ── Reconnaissance : erreur ── */}
+      {recogError && !recogLoading && (
+        <div className="bg-white rounded-2xl border border-red-100 shadow-sm p-6 flex flex-col items-center gap-3 text-center">
+          <XCircle className="w-8 h-8 text-red-400" />
+          <div>
+            <p className="font-semibold text-gray-900">{ui.analysisFailed}</p>
+            <p className="text-sm text-gray-500 mt-1">{ui.analysisError}</p>
+          </div>
+          <button
+            onClick={recogRetry}
+            className="flex items-center gap-2 text-sm font-semibold text-indigo-600 hover:text-indigo-800 transition-colors"
+          >
+            <RefreshCw className="w-4 h-4" />
+            {ui.retry}
+          </button>
+        </div>
+      )}
+
+      {/* ── Reconnaissance : formulaire ── */}
+      {result && !recogLoading && (
+        <>
+          {/* En-tête résultat */}
+          <div className="flex items-center justify-between gap-3 px-1">
+            <div className="flex items-center gap-2">
+              <div className="w-7 h-7 rounded-full bg-green-100 flex items-center justify-center shrink-0">
+                <ScanLine className="w-3.5 h-3.5 text-green-600" />
+              </div>
+              <div>
+                <p className="text-sm font-bold text-gray-900">{ui.autoRecognition}</p>
+                <p className="text-xs text-gray-500">{ui.autoRecognitionSub}</p>
+                <p className="text-[10px] text-gray-400 mt-0.5">{ui.confidenceLegend}</p>
+              </div>
             </div>
-          </div>
-        )}
-
-        {/* ── Astuce ── */}
-        <p className="text-xs text-gray-400 text-center pb-2">
-          {anySlotHasBg ? tipI18n.lock : tipI18n.unlock}
-        </p>
-
-      </div>
-    </div>
-  )
-}
-
-/* ─── PlanSwitcher (dev uniquement) ──────────────────────────────────────── */
-
-function PlanSwitcher({ plan, onChange }: { plan: Plan; onChange: (p: Plan) => void }) {
-  return (
-    <div className="flex items-center gap-2 bg-amber-50 border border-amber-200 rounded-xl px-3 py-2">
-      <span className="text-[10px] font-bold text-amber-500 uppercase tracking-wider shrink-0">DEV</span>
-      <div className="flex gap-1">
-        {(['freemium', 'premium', 'pro'] as Plan[]).map(p => (
-          <button
-            key={p}
-            onClick={() => onChange(p)}
-            className={`text-xs font-semibold px-3 py-1 rounded-lg transition-all ${
-              plan === p
-                ? 'bg-amber-400 text-white shadow-sm'
-                : 'text-amber-600 hover:bg-amber-100'
-            }`}
-          >
-            {p.charAt(0).toUpperCase() + p.slice(1)}
-          </button>
-        ))}
-      </div>
-    </div>
-  )
-}
-
-/* ─── BgPanel ─────────────────────────────────────────────────────────────── */
-
-interface BgPanelProps {
-  plan: Plan
-  selectedBg: number
-  onBgSelect: (id: number) => void
-  checkedCount: number
-  isProcessing: boolean
-  onProcess: () => void
-  planI18n: typeof PLAN_I18N.fr
-}
-
-function BgPanel({ plan, selectedBg, onBgSelect, checkedCount, isProcessing, onProcess, planI18n }: BgPanelProps) {
-  const [showPreview, setShowPreview] = useState(false)
-  const currentBg = BACKGROUNDS[selectedBg] ?? BACKGROUNDS[0]
-
-  return (
-    <div className="bg-blue-50 border border-blue-100 rounded-2xl p-4 space-y-3">
-      <p className="text-[10px] font-bold text-blue-400 uppercase tracking-widest">{planI18n.bgPanelTitle}</p>
-
-      <div className="flex gap-2 overflow-x-auto pb-1 snap-x snap-mandatory">
-        {BACKGROUNDS.map(bg => {
-          const isLocked = plan === 'freemium' && bg.id !== 0
-          return (
             <button
-              key={bg.id}
-              onClick={() => { if (!isLocked) { onBgSelect(bg.id); setShowPreview(true) } }}
-              title={bg.label}
-              disabled={isLocked}
-              className={`relative snap-start shrink-0 w-16 h-16 rounded-xl overflow-hidden transition-all ${
-                isLocked ? 'cursor-not-allowed' : 'cursor-pointer'
-              } ${
-                selectedBg === bg.id && !isLocked
-                  ? 'ring-2 ring-indigo-500 ring-offset-2 scale-[1.06] shadow-md shadow-indigo-200'
-                  : isLocked
-                  ? 'ring-1 ring-gray-200 opacity-60'
-                  : 'ring-1 ring-gray-200 hover:ring-indigo-300'
-              }`}
+              onClick={recogRetry}
+              className="flex items-center gap-1.5 text-xs font-semibold text-gray-500 hover:text-indigo-600 transition-colors shrink-0"
             >
-              {bg.type === 'color' ? (
-                <div className="w-full h-full" style={{ backgroundColor: bg.color }} />
-              ) : (
-                <img src={bg.src} alt={bg.label} className="w-full h-full object-cover" draggable={false} />
-              )}
-              {selectedBg === bg.id && !isLocked && (
-                <div className="absolute inset-0 flex items-center justify-center bg-indigo-600/20">
-                  <Check className="w-4 h-4 text-white drop-shadow-md" />
-                </div>
-              )}
-              {isLocked && (
-                <div className="absolute inset-0 flex items-center justify-center bg-black/25">
-                  <Lock className="w-3 h-3 text-white/90" />
-                </div>
-              )}
-            </button>
-          )
-        })}
-      </div>
-
-      {/* Inline preview — s'affiche au clic sur une vignette, se ferme sur CTA */}
-      {showPreview && plan !== 'freemium' && (
-        <div className="rounded-xl overflow-hidden border border-blue-200 shadow-sm">
-          <div className="w-full h-28">
-            {currentBg.type === 'color' ? (
-              <div className="w-full h-full" style={{ backgroundColor: currentBg.color }} />
-            ) : (
-              <img src={currentBg.src} alt={currentBg.label} className="w-full h-full object-contain" draggable={false} />
-            )}
-          </div>
-          <div className="p-2 border-t border-blue-100">
-            <button
-              onClick={() => setShowPreview(false)}
-              className="w-full flex items-center justify-center gap-2 font-semibold text-sm py-2.5 rounded-xl bg-indigo-600 hover:bg-indigo-700 text-white active:scale-[0.98] transition-all"
-            >
-              <Check className="w-4 h-4" />
-              {planI18n.modalConfirmBg}
+              <RefreshCw className="w-3.5 h-3.5" />
+              {ui.rerun}
             </button>
           </div>
-        </div>
-      )}
 
-      {plan === 'freemium' ? (
-        <p className="text-xs text-blue-500 flex items-center gap-1.5">
-          <Lock className="w-3 h-3 shrink-0" />
-          {planI18n.freemiumLockMsg}
-        </p>
-      ) : (
-        <>
-          <p className="text-xs text-blue-600">{planI18n.checkboxHint}</p>
-          {checkedCount > 0 && (
-            <button
-              onClick={onProcess}
-              disabled={isProcessing}
-              className={`w-full flex items-center justify-center gap-2 font-semibold text-sm py-3 rounded-xl transition-all ${
-                !isProcessing
-                  ? 'bg-indigo-600 hover:bg-indigo-700 text-white active:scale-[0.98]'
-                  : 'bg-indigo-100 text-indigo-400 cursor-wait'
-              }`}
-            >
-              {isProcessing ? (
-                <>
-                  <div className="w-4 h-4 border-2 border-indigo-400 border-t-transparent rounded-full animate-spin" />
-                  {planI18n.processing}
-                </>
-              ) : (
-                <>
-                  <Wand2 className="w-4 h-4" />
-                  {planI18n.processBtn(checkedCount)}
-                </>
-              )}
-            </button>
-          )}
-        </>
-      )}
-    </div>
-  )
-}
+          {/* ── Section Article ── */}
+          <section className="bg-white rounded-2xl border border-gray-100 shadow-sm p-5 space-y-5">
+            <h3 className="text-xs font-bold text-gray-400 uppercase tracking-widest">{ui.sectionArticle}</h3>
 
-/* ─── MannequinPanel (Pro + teaser verrouillé Freemium/Premium) ────────────── */
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-5">
+              {/* Marque */}
+              <Field label={ui.brand} confidence={result.marque.confidence}>
+                <input
+                  type="text"
+                  value={result.marque.value}
+                  onChange={e => update('marque', e.target.value)}
+                  placeholder="Ex: Zara, H&M, Nike…"
+                  className={inputCls(result.marque.confidence)}
+                />
+              </Field>
 
-interface MannequinPanelProps {
-  selectedMannequin: string | null
-  onSelect: (id: string) => void
-  onGenerate: () => void
-  isGenerating: boolean
-  hasSlot0Photo: boolean
-  isLocked?: boolean
-  planI18n: typeof PLAN_I18N.fr
-  customPrompt: string
-  onCustomPromptChange: (v: string) => void
-}
+              {/* Genre */}
+              <Field label={ui.gender} confidence={result.genre.confidence} required>
+                <select
+                  value={result.genre.value}
+                  onChange={e => {
+                    setResult({
+                      ...result,
+                      genre: { value: e.target.value, confidence: 'manual' },
+                      vintedPath: { value: '', confidence: 'manual' },
+                      taille: { value: '', confidence: 'manual' },
+                    })
+                  }}
+                  className={inputCls(result.genre.confidence)}
+                >
+                  <option value="">{ui.choose}</option>
+                  {(['Femme', 'Homme', 'Enfant', 'Mixte', 'Maison', 'Électronique', 'Beauté', 'Sport'] as const).map(g => (
+                    <option key={g} value={g}>{tx(GENRE_LABELS, lang, g)}</option>
+                  ))}
+                </select>
+              </Field>
+            </div>
 
-function MannequinPanel({ selectedMannequin, onSelect, onGenerate, isGenerating, hasSlot0Photo, isLocked = false, planI18n, customPrompt, onCustomPromptChange }: MannequinPanelProps) {
-  const [gender, setGender]             = useState<'men' | 'women'>('men')
-  const [previewId, setPreviewId]       = useState<string | null>(null)
-  const [showCustomPrompt, setShowCustomPrompt] = useState(false)
-  const canGenerate = !!selectedMannequin && hasSlot0Photo && !isLocked
-  const mannequins  = gender === 'men' ? MEN_MANNEQUINS : WOMEN_MANNEQUINS
+            {/* Catégorie — sélecteur en cascade N1 > N2 > N3 > N4 */}
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-5">
+              <Field label={ui.category} confidence={result.vintedPath.confidence} required>
+                <select
+                  value={n1}
+                  onChange={e => {
+                    setResult({ ...result, vintedPath: { value: e.target.value, confidence: 'manual' }, taille: { value: '', confidence: 'manual' } })
+                  }}
+                  className={inputCls(result.vintedPath.confidence)}
+                >
+                  <option value="">{ui.choose}</option>
+                  {getN1List().map(v => <option key={v} value={v}>{v}</option>)}
+                </select>
+              </Field>
 
-  return (
-    <div className={`bg-purple-50 border border-purple-100 rounded-2xl p-4 space-y-3 ${isLocked ? 'opacity-70' : ''}`}>
-      <div className="flex items-center gap-2">
-        <div className="w-8 h-8 rounded-xl bg-purple-100 flex items-center justify-center shrink-0">
-          <User className="w-4 h-4 text-purple-600" />
-        </div>
-        <h3 className="font-display font-extrabold text-base text-purple-900">{planI18n.mannequinTitle}</h3>
-        {isLocked && (
-          <span className="text-[9px] font-bold bg-indigo-100 text-indigo-600 px-1.5 py-0.5 rounded-full uppercase tracking-wide ml-1">Pro</span>
-        )}
-      </div>
+              <Field label={ui.subCategory} confidence={result.vintedPath.confidence}>
+                <select
+                  value={n2}
+                  disabled={n2Options.length === 0}
+                  onChange={e => {
+                    setResult({ ...result, vintedPath: { value: n1 + ' > ' + e.target.value, confidence: 'manual' }, taille: { value: '', confidence: 'manual' } })
+                  }}
+                  className={inputCls(result.vintedPath.confidence)}
+                >
+                  <option value="">{ui.choose}</option>
+                  {n2Options.map(v => <option key={v} value={v}>{v}</option>)}
+                </select>
+              </Field>
+            </div>
 
-      {/* Gender pills — navigation autorisée sur tous les plans */}
-      <div className="flex gap-2">
-        {(['men', 'women'] as const).map(g => (
-          <button
-            key={g}
-            onClick={() => setGender(g)}
-            className={`flex-1 text-xs font-semibold py-2 rounded-xl transition-all ${
-              gender === g
-                ? 'bg-purple-600 text-white shadow-sm'
-                : 'bg-white text-purple-500 border border-purple-200 hover:border-purple-400'
-            }`}
-          >
-            {g === 'men' ? planI18n.mannequinMen : planI18n.mannequinWomen}
-          </button>
-        ))}
-      </div>
+            {/* N3 + N4 + N5 */}
+            {n2 && (
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-5">
+                <Field label={ui.subCategory} confidence={result.vintedPath.confidence}>
+                  <select
+                    value={n3}
+                    disabled={n3Options.length === 0}
+                    onChange={e => {
+                      setResult({ ...result, vintedPath: { value: n1 + ' > ' + n2 + ' > ' + e.target.value, confidence: 'manual' }, taille: { value: '', confidence: 'manual' } })
+                    }}
+                    className={inputCls(result.vintedPath.confidence)}
+                  >
+                    <option value="">{ui.choose}</option>
+                    {n3Options.map(v => <option key={v} value={v}>{v}</option>)}
+                  </select>
+                </Field>
 
-      {/* Mannequin grid — thumbnails cropped to head */}
-      <div className="flex gap-2 overflow-x-auto pb-1 snap-x">
-        {mannequins.map(id => (
-          <button
-            key={id}
-            onClick={() => { if (!isLocked) { onSelect(id); setPreviewId(id) } }}
-            className={`relative snap-start shrink-0 w-16 h-16 rounded-xl overflow-hidden transition-all ${
-              selectedMannequin === id
-                ? 'ring-2 ring-purple-500 ring-offset-1 scale-[1.06]'
-                : 'ring-1 ring-purple-200 hover:ring-purple-400'
-            }`}
-          >
-            <img
-              src={`/mannequins/${id}.jpg`} alt={id}
-              className="w-full h-full object-cover"
-              style={{ objectPosition: '50% 0%' }}
-              draggable={false}
-            />
-            {isLocked && (
-              <div className="absolute inset-0 flex items-center justify-center bg-black/30">
-                <Lock className="w-3 h-3 text-white drop-shadow" />
+                {n3 && n4Options.length > 0 && (
+                  <Field label={ui.subCategory} confidence={result.vintedPath.confidence}>
+                    <select
+                      value={n4}
+                      onChange={e => {
+                        setResult({ ...result, vintedPath: { value: n1 + ' > ' + n2 + ' > ' + n3 + ' > ' + e.target.value, confidence: 'manual' }, taille: { value: '', confidence: 'manual' } })
+                      }}
+                      className={inputCls(result.vintedPath.confidence)}
+                    >
+                      <option value="">{ui.choose}</option>
+                      {n4Options.map(v => <option key={v} value={v}>{v}</option>)}
+                    </select>
+                  </Field>
+                )}
+
+                {n4 && n5Options.length > 0 && (
+                  <Field label={ui.subCategory} confidence={result.vintedPath.confidence}>
+                    <select
+                      value={n5}
+                      onChange={e => {
+                        setResult({ ...result, vintedPath: { value: n1 + ' > ' + n2 + ' > ' + n3 + ' > ' + n4 + ' > ' + e.target.value, confidence: 'manual' }, taille: { value: '', confidence: 'manual' } })
+                      }}
+                      className={inputCls(result.vintedPath.confidence)}
+                    >
+                      <option value="">{ui.choose}</option>
+                      {n5Options.map(v => <option key={v} value={v}>{v}</option>)}
+                    </select>
+                  </Field>
+                )}
               </div>
             )}
-            {!isLocked && selectedMannequin === id && (
-              <div className="absolute inset-0 flex items-center justify-center bg-purple-600/20">
-                <Check className="w-4 h-4 text-white drop-shadow" />
+
+            {/* Avertissement N3 terminal */}
+            {n3 && !n4 && n4Options.length === 0 && n5Options.length === 0 && (
+              <div className="flex items-start gap-2 p-3 bg-amber-50 border border-amber-200 rounded-xl">
+                <AlertTriangle className="w-3.5 h-3.5 text-amber-500 shrink-0 mt-0.5" />
+                <p className="text-xs text-amber-700">{ui.subcategoryHint}</p>
               </div>
             )}
-          </button>
-        ))}
-      </div>
+          </section>
 
-      {/* Inline full-body preview — shown below grid on click (Pro only) */}
-      {!isLocked && previewId && (
-        <div className="rounded-xl overflow-hidden border border-purple-200 bg-white shadow-sm">
-          <div className="relative">
-            <img
-              src={`/mannequins/${previewId}.jpg`}
-              alt={previewId}
-              className="w-full object-contain"
-              style={{ maxHeight: '220px' }}
-              draggable={false}
-            />
-            <button
-              onClick={() => setPreviewId(null)}
-              className="absolute top-2 right-2 bg-white/90 text-gray-500 text-[10px] font-bold w-6 h-6 rounded-full shadow hover:bg-white transition-colors flex items-center justify-center"
-            >
-              ×
-            </button>
-          </div>
-          <div className="p-2 border-t border-purple-100">
-            <button
-              onClick={() => setPreviewId(null)}
-              className="w-full flex items-center justify-center gap-2 font-semibold text-sm py-2.5 rounded-xl bg-indigo-600 hover:bg-indigo-700 text-white active:scale-[0.98] transition-all"
-            >
-              <Check className="w-4 h-4" />
-              {planI18n.modalConfirmMannequin}
-            </button>
-          </div>
-        </div>
-      )}
+          {/* ── Section Caractéristiques ── */}
+          <section className="bg-white rounded-2xl border border-gray-100 shadow-sm p-5 space-y-5">
+            <h3 className="text-xs font-bold text-gray-400 uppercase tracking-widest">{ui.sectionChars}</h3>
 
-      {/* Champ prompt personnalisé — Pro uniquement, replié par défaut */}
-      {!isLocked && (
-        <div>
-          <button
-            type="button"
-            onClick={() => setShowCustomPrompt(v => !v)}
-            className="w-full flex items-center justify-between gap-2 text-sm font-semibold text-purple-600 bg-purple-50 hover:bg-purple-100 border border-purple-200 rounded-xl px-3 py-2.5 transition-colors"
-          >
-            <span>{planI18n.mannequinCustomPromptLabel}</span>
-            <span className="text-purple-400 text-base leading-none">{showCustomPrompt ? '▾' : '▸'}</span>
-          </button>
-          {showCustomPrompt && (
-            <textarea
-              value={customPrompt}
-              onChange={e => onCustomPromptChange(e.target.value)}
-              rows={2}
-              className="mt-1.5 w-full text-xs rounded-xl border border-purple-200 bg-white px-3 py-2 text-gray-700 focus:outline-none focus:ring-2 focus:ring-purple-300 resize-none"
-            />
-          )}
-        </div>
-      )}
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-5">
+              {/* Taille */}
+              <Field label={ui.size} confidence={result.taille.confidence}>
+                {tailleSizes.length > 0 ? (
+                  <select
+                    value={result.taille.value}
+                    onChange={e => update('taille', e.target.value)}
+                    className={inputCls(result.taille.confidence)}
+                  >
+                    <option value="">{ui.choose}</option>
+                    {tailleSizes.map(s => <option key={s} value={s}>{s}</option>)}
+                  </select>
+                ) : (
+                  <input
+                    type="text"
+                    value={result.taille.value}
+                    onChange={e => update('taille', e.target.value)}
+                    placeholder="Ex: M, 38, 40…"
+                    className={inputCls(result.taille.confidence)}
+                  />
+                )}
+              </Field>
 
-      {/* Bouton générer */}
-      <button
-        onClick={!isLocked ? onGenerate : undefined}
-        disabled={!canGenerate || isGenerating}
-        className={`w-full flex items-center justify-center gap-2 font-semibold text-sm py-3 rounded-xl transition-all ${
-          canGenerate && !isGenerating
-            ? 'bg-purple-600 hover:bg-purple-700 text-white active:scale-[0.98]'
-            : 'bg-purple-100 text-purple-400 cursor-not-allowed'
-        }`}
-      >
-        {isGenerating ? (
-          <>
-            <div className="w-4 h-4 border-2 border-purple-400 border-t-transparent rounded-full animate-spin" />
-            {planI18n.mannequinGenerating}
-          </>
-        ) : (
-          <>
-            <Sparkles className="w-4 h-4" />
-            {planI18n.mannequinGenerate}
-          </>
-        )}
-      </button>
+              {/* État */}
+              <Field label={ui.condition} confidence={result.etat.confidence} required>
+                <select
+                  value={result.etat.value}
+                  onChange={e => update('etat', e.target.value)}
+                  className={inputCls(result.etat.confidence)}
+                >
+                  <option value="">{ui.choose}</option>
+                  {CONDITIONS.map(c => (
+                    <option key={c.id} value={c.label}>{tx(CONDITION_LABELS, lang, c.label)}</option>
+                  ))}
+                </select>
+              </Field>
+            </div>
 
-      {isLocked ? (
-        <p className="text-xs text-purple-500 flex items-center justify-center gap-1.5">
-          <Lock className="w-3 h-3 shrink-0" />
-          {planI18n.mannequinLockedMsg}
-        </p>
-      ) : (
-        <>
-          {!hasSlot0Photo && (
-            <p className="text-xs text-purple-400 text-center">{planI18n.noSlot0Msg}</p>
-          )}
-          {hasSlot0Photo && !selectedMannequin && (
-            <p className="text-xs text-purple-400 text-center">{planI18n.noMannequinMsg}</p>
-          )}
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-5">
+              {/* Style */}
+              <Field label={ui.style} confidence={result.style.confidence}>
+                <select
+                  value={result.style.value}
+                  onChange={e => update('style', e.target.value)}
+                  className={inputCls(result.style.confidence)}
+                >
+                  <option value="">{ui.choose}</option>
+                  {STYLES.map(s => (
+                    <option key={s} value={s}>{tx(STYLE_LABELS, lang, s)}</option>
+                  ))}
+                </select>
+              </Field>
+
+              {/* Motif */}
+              <Field label={ui.pattern} confidence={result.motif.confidence}>
+                <select
+                  value={result.motif.value}
+                  onChange={e => update('motif', e.target.value)}
+                  className={inputCls(result.motif.confidence)}
+                >
+                  <option value="">{ui.choose}</option>
+                  {PATTERNS.map(p => (
+                    <option key={p} value={p}>{tx(PATTERN_LABELS, lang, p)}</option>
+                  ))}
+                </select>
+              </Field>
+            </div>
+
+            {/* Couleurs — max 2 */}
+            <Field label={ui.colors} confidence={result.couleurs.confidence} required>
+              <div className="flex flex-wrap gap-1.5 p-3 bg-gray-50 rounded-xl border border-gray-100 min-h-[44px]">
+                {COLORS.map(color => {
+                  const selected = result.couleurs.value.includes(color)
+                  const disabled = !selected && result.couleurs.value.length >= 2
+                  return (
+                    <button
+                      key={color}
+                      type="button"
+                      disabled={disabled}
+                      onClick={() => {
+                        const next = selected
+                          ? result.couleurs.value.filter(c => c !== color)
+                          : [...result.couleurs.value, color]
+                        update('couleurs', next)
+                      }}
+                      className={`text-xs font-semibold px-2.5 py-1 rounded-full border transition-all ${
+                        selected
+                          ? 'bg-indigo-600 text-white border-indigo-600'
+                          : disabled
+                          ? 'bg-gray-50 text-gray-300 border-gray-100 cursor-not-allowed'
+                          : 'bg-white text-gray-600 border-gray-200 hover:border-indigo-300 hover:text-indigo-600'
+                      }`}
+                    >
+                      {tx(COLOR_LABELS, lang, color)}
+                    </button>
+                  )
+                })}
+              </div>
+            </Field>
+
+            {/* Matières — max 3 */}
+            <Field label={ui.materials} confidence={result.matieres.confidence}>
+              <div className="flex flex-wrap gap-1.5 p-3 bg-gray-50 rounded-xl border border-gray-100 min-h-[44px]">
+                {MATERIALS.map(mat => {
+                  const selected = result.matieres.value.includes(mat)
+                  const disabled = !selected && result.matieres.value.length >= 3
+                  return (
+                    <button
+                      key={mat}
+                      type="button"
+                      disabled={disabled}
+                      onClick={() => {
+                        const next = selected
+                          ? result.matieres.value.filter(m => m !== mat)
+                          : [...result.matieres.value, mat]
+                        update('matieres', next)
+                      }}
+                      className={`text-xs font-semibold px-2.5 py-1 rounded-full border transition-all ${
+                        selected
+                          ? 'bg-indigo-600 text-white border-indigo-600'
+                          : disabled
+                          ? 'bg-gray-50 text-gray-300 border-gray-100 cursor-not-allowed'
+                          : 'bg-white text-gray-600 border-gray-200 hover:border-indigo-300 hover:text-indigo-600'
+                      }`}
+                    >
+                      {tx(MATERIAL_LABELS, lang, mat)}
+                    </button>
+                  )
+                })}
+              </div>
+            </Field>
+          </section>
+
+          {/* ── Section Défauts ── */}
+          <section className="bg-white rounded-2xl border border-gray-100 shadow-sm p-5 space-y-4">
+            <h3 className="text-xs font-bold text-gray-400 uppercase tracking-widest">{ui.sectionFlaws}</h3>
+
+            {result.defauts.value ? (
+              <div className="flex items-start gap-3 p-3.5 bg-orange-50 border border-orange-200 rounded-xl">
+                <AlertTriangle className="w-4 h-4 text-orange-500 shrink-0 mt-0.5" />
+                <div className="flex-1 min-w-0">
+                  <p className="text-xs font-semibold text-orange-700 mb-1">{ui.defectDetected}</p>
+                  <p className="text-sm text-orange-800">{result.defauts.value}</p>
+                </div>
+              </div>
+            ) : null}
+
+            <Field label={ui.flaws} confidence={result.defauts.confidence}>
+              <textarea
+                value={result.defauts.value}
+                onChange={e => update('defauts', e.target.value)}
+                rows={3}
+                placeholder="Ex: Légère décoloration sur l'épaule gauche, fil tiré sur la manche… (laisser vide si aucun défaut)"
+                className={`${inputCls(result.defauts.confidence)} resize-none`}
+              />
+            </Field>
+          </section>
+
+          {/* ── Section Informations complémentaires ── */}
+          <section className="bg-white rounded-2xl border border-gray-100 shadow-sm p-5 space-y-5">
+            <h3 className="text-xs font-bold text-gray-400 uppercase tracking-widest">{ui.sectionExtra}</h3>
+
+            {/* Bloc 1 — Infos générales */}
+            <div className="space-y-3">
+              <p className="text-[11px] font-semibold text-gray-500 uppercase tracking-wide">{ui.generalInfo}</p>
+
+              <div className="flex flex-wrap gap-1.5">
+                {EXTRA_INFO_PRESETS.map((label, idx) => {
+                  const validated    = result.extraInfo?.missingInfos?.find(i => i.label === label)
+                  const isOpen       = openExtraFields.includes(label)
+                  const displayLabel = extraPresets[idx] ?? label
+                  return (
+                    <button
+                      key={label}
+                      type="button"
+                      onClick={() => {
+                        if (validated) { removeValidatedInfo(label) }
+                        else if (!isOpen) { setOpenExtraFields(prev => [...prev, label]) }
+                      }}
+                      className={`text-xs font-semibold px-2.5 py-1 rounded-full border transition-all ${
+                        validated
+                          ? 'bg-green-50 text-green-700 border-green-200'
+                          : isOpen
+                          ? 'bg-orange-50 text-orange-600 border-orange-300'
+                          : 'bg-white text-gray-600 border-gray-200 hover:border-indigo-300'
+                      }`}
+                    >
+                      {validated ? `✓ ${displayLabel} : ${validated.value}` : `+ ${displayLabel}`}
+                    </button>
+                  )
+                })}
+                {(result.extraInfo?.missingInfos ?? [])
+                  .filter(i => !EXTRA_INFO_PRESETS.includes(i.label))
+                  .map(i => (
+                    <button
+                      key={i.label}
+                      type="button"
+                      onClick={() => removeValidatedInfo(i.label)}
+                      className="text-xs font-semibold px-2.5 py-1 rounded-full border transition-all bg-green-50 text-green-700 border-green-200"
+                    >
+                      ✓ {i.label} : {i.value}
+                    </button>
+                  ))
+                }
+                <button
+                  type="button"
+                  onClick={addCustomExtraRow}
+                  className="text-xs font-semibold px-2.5 py-1 rounded-full border bg-white text-gray-600 border-gray-200 hover:border-indigo-300 transition-all flex items-center gap-1"
+                >
+                  <Plus className="w-3 h-3" />
+                  {ui.other}
+                </button>
+              </div>
+
+              {openExtraFields.map(label => {
+                const idxFr = EXTRA_INFO_PRESETS.indexOf(label)
+                const displayLabel = idxFr >= 0 ? (extraPresets[idxFr] ?? label) : label
+                return (
+                  <div key={label} className="flex items-center gap-2">
+                    <span className="text-xs font-semibold text-gray-600 shrink-0 w-32 truncate">{displayLabel}</span>
+                    <input
+                      type="text"
+                      value={extraFieldInputs[label] ?? ''}
+                      onChange={e => setExtraFieldInputs(prev => ({ ...prev, [label]: e.target.value }))}
+                      onKeyDown={e => e.key === 'Enter' && validateMissingInfo(label)}
+                      placeholder={ui.infoValue}
+                      className="flex-1 text-sm rounded-xl border border-gray-200 px-3 py-2 focus:outline-none focus:ring-2 focus:ring-indigo-100 focus:border-indigo-400 transition-colors"
+                    />
+                    <button
+                      onClick={() => validateMissingInfo(label)}
+                      disabled={!(extraFieldInputs[label] ?? '').trim()}
+                      className="shrink-0 text-xs font-semibold px-3 py-2 bg-green-500 hover:bg-green-600 disabled:bg-gray-200 disabled:cursor-not-allowed text-white rounded-xl transition-colors whitespace-nowrap"
+                    >
+                      {ui.addToDesc}
+                    </button>
+                    <button
+                      onClick={() => setOpenExtraFields(prev => prev.filter(f => f !== label))}
+                      className="text-gray-400 hover:text-gray-600 transition-colors"
+                    >
+                      <X className="w-4 h-4" />
+                    </button>
+                  </div>
+                )
+              })}
+
+              {customExtraRows.map(row => (
+                <div key={row.id} className="flex items-center gap-2">
+                  <input
+                    type="text"
+                    value={row.nom}
+                    onChange={e => setCustomExtraRows(prev => prev.map(r => r.id === row.id ? { ...r, nom: e.target.value } : r))}
+                    placeholder={ui.measureName}
+                    className="w-32 text-sm rounded-xl border border-gray-200 px-3 py-2 focus:outline-none focus:ring-2 focus:ring-indigo-100 focus:border-indigo-400 transition-colors"
+                  />
+                  <input
+                    type="text"
+                    value={row.value}
+                    onChange={e => setCustomExtraRows(prev => prev.map(r => r.id === row.id ? { ...r, value: e.target.value } : r))}
+                    onKeyDown={e => e.key === 'Enter' && validateCustomExtraRow(row.id)}
+                    placeholder={ui.infoValue}
+                    className="flex-1 text-sm rounded-xl border border-gray-200 px-3 py-2 focus:outline-none focus:ring-2 focus:ring-indigo-100 focus:border-indigo-400 transition-colors"
+                  />
+                  <button
+                    onClick={() => validateCustomExtraRow(row.id)}
+                    disabled={!row.nom.trim() || !row.value.trim()}
+                    className="shrink-0 text-xs font-semibold px-3 py-2 bg-green-500 hover:bg-green-600 disabled:bg-gray-200 disabled:cursor-not-allowed text-white rounded-xl transition-colors whitespace-nowrap"
+                  >
+                    {ui.addToDesc}
+                  </button>
+                  <button
+                    onClick={() => removeCustomExtraRow(row.id)}
+                    className="text-gray-400 hover:text-gray-600 transition-colors"
+                  >
+                    <X className="w-4 h-4" />
+                  </button>
+                </div>
+              ))}
+
+              {/* Prix neuf */}
+              <div className="flex items-center gap-2">
+                <span className="text-xs font-semibold text-gray-600 shrink-0 w-32">{ui.retailPrice}</span>
+                <input
+                  type="number"
+                  min="0"
+                  step="0.01"
+                  value={prixNeuf}
+                  onChange={e => setPrixNeuf(e.target.value)}
+                  onKeyDown={e => e.key === 'Enter' && validatePrixNeuf()}
+                  placeholder="Ex: 49.90"
+                  className={`flex-1 text-sm rounded-xl border px-3 py-2 focus:outline-none focus:ring-2 transition-colors ${
+                    result.extraInfo?.prixAchatNeuf
+                      ? 'border-green-300 bg-green-50 focus:ring-green-100'
+                      : 'border-gray-200 bg-white focus:ring-indigo-100 focus:border-indigo-400'
+                  }`}
+                />
+                <span className="text-xs text-gray-400 shrink-0">€</span>
+                <button
+                  onClick={validatePrixNeuf}
+                  disabled={!parseFloat(prixNeuf)}
+                  className="shrink-0 w-8 h-8 flex items-center justify-center bg-green-500 hover:bg-green-600 disabled:bg-gray-200 disabled:cursor-not-allowed text-white rounded-xl transition-colors"
+                >
+                  <Check className="w-3.5 h-3.5" />
+                </button>
+              </div>
+            </div>
+
+            {/* Bloc 2 — Dimensions */}
+            <div className="space-y-3 pt-4 border-t border-gray-100">
+              <p className="text-[11px] font-semibold text-gray-500 uppercase tracking-wide">{ui.dimensions}</p>
+
+              <div className="flex flex-wrap gap-1.5">
+                {DIM_PRESETS_FR.map((nom, idx) => {
+                  const validated    = result.extraInfo?.dimensions?.find(d => d.nom === nom)
+                  const isOpen       = openDimFields.includes(nom)
+                  const displayLabel = dimPresets[idx]?.fr ?? nom
+                  return (
+                    <button
+                      key={nom}
+                      type="button"
+                      onClick={() => {
+                        if (validated) { removeValidatedDim(nom) }
+                        else if (!isOpen) { setOpenDimFields(prev => [...prev, nom]) }
+                      }}
+                      className={`text-xs font-semibold px-2.5 py-1 rounded-full border transition-all ${
+                        validated
+                          ? 'bg-green-50 text-green-700 border-green-200'
+                          : isOpen
+                          ? 'bg-orange-50 text-orange-600 border-orange-300'
+                          : 'bg-white text-gray-600 border-gray-200 hover:border-indigo-300'
+                      }`}
+                    >
+                      {validated ? `✓ ${displayLabel} : ${validated.valeur} cm` : `+ ${displayLabel}`}
+                    </button>
+                  )
+                })}
+                {(result.extraInfo?.dimensions ?? [])
+                  .filter(d => !DIM_PRESETS_FR.includes(d.nom))
+                  .map(d => (
+                    <button
+                      key={d.nom}
+                      type="button"
+                      onClick={() => removeValidatedDim(d.nom)}
+                      className="text-xs font-semibold px-2.5 py-1 rounded-full border transition-all bg-green-50 text-green-700 border-green-200"
+                    >
+                      ✓ {d.nom} : {d.valeur} cm
+                    </button>
+                  ))
+                }
+              </div>
+
+              {openDimFields.map(nom => {
+                const idx          = DIM_PRESETS_FR.indexOf(nom)
+                const displayLabel = idx >= 0 ? (dimPresets[idx]?.fr ?? nom) : nom
+                const nomEN        = DIM_PRESETS_EN[idx] ?? nom
+                return (
+                  <div key={nom} className="flex items-center gap-2">
+                    <span className="text-xs font-semibold text-gray-600 shrink-0 w-32 truncate">{displayLabel}</span>
+                    <input
+                      type="number"
+                      min="0"
+                      step="0.1"
+                      value={dimInputs[nom] ?? ''}
+                      onChange={e => setDimInputs(prev => ({ ...prev, [nom]: e.target.value }))}
+                      onKeyDown={e => { if (e.key === 'Enter') validateDimension(nom, nomEN) }}
+                      placeholder={ui.measureValue}
+                      className="flex-1 text-sm rounded-xl border border-gray-200 px-3 py-2 focus:outline-none focus:ring-2 focus:ring-indigo-100 focus:border-indigo-400 transition-colors"
+                    />
+                    <span className="text-xs text-gray-400 shrink-0">cm</span>
+                    <button
+                      onClick={() => validateDimension(nom, nomEN)}
+                      disabled={!(dimInputs[nom] ?? '').trim()}
+                      className="shrink-0 text-xs font-semibold px-3 py-2 bg-green-500 hover:bg-green-600 disabled:bg-gray-200 disabled:cursor-not-allowed text-white rounded-xl transition-colors whitespace-nowrap"
+                    >
+                      {ui.addToDesc}
+                    </button>
+                    <button
+                      onClick={() => setOpenDimFields(prev => prev.filter(f => f !== nom))}
+                      className="text-gray-400 hover:text-gray-600 transition-colors"
+                    >
+                      <X className="w-4 h-4" />
+                    </button>
+                  </div>
+                )
+              })}
+
+              {customDimRows.map(row => (
+                <div key={row.id} className="flex items-center gap-2">
+                  <input
+                    type="text"
+                    value={row.nom}
+                    onChange={e => setCustomDimRows(prev => prev.map(r => r.id === row.id ? { ...r, nom: e.target.value } : r))}
+                    placeholder={ui.measureName}
+                    className="w-32 text-sm rounded-xl border border-gray-200 px-3 py-2 focus:outline-none focus:ring-2 focus:ring-indigo-100 focus:border-indigo-400 transition-colors"
+                  />
+                  <input
+                    type="number"
+                    min="0"
+                    step="0.1"
+                    value={row.valeur}
+                    onChange={e => setCustomDimRows(prev => prev.map(r => r.id === row.id ? { ...r, valeur: e.target.value } : r))}
+                    onKeyDown={e => e.key === 'Enter' && validateCustomDimRow(row.id)}
+                    placeholder={ui.measureValue}
+                    className="w-20 text-sm rounded-xl border border-gray-200 px-3 py-2 focus:outline-none focus:ring-2 focus:ring-indigo-100 focus:border-indigo-400 transition-colors"
+                  />
+                  <span className="text-xs text-gray-400 shrink-0">cm</span>
+                  <button
+                    onClick={() => validateCustomDimRow(row.id)}
+                    disabled={!row.nom.trim() || !row.valeur.trim()}
+                    className="shrink-0 text-xs font-semibold px-3 py-2 bg-green-500 hover:bg-green-600 disabled:bg-gray-200 disabled:cursor-not-allowed text-white rounded-xl transition-colors whitespace-nowrap"
+                  >
+                    {ui.addToDesc}
+                  </button>
+                  <button
+                    onClick={() => removeCustomDimRow(row.id)}
+                    className="text-gray-400 hover:text-gray-600 transition-colors"
+                  >
+                    <X className="w-4 h-4" />
+                  </button>
+                </div>
+              ))}
+
+              <button
+                type="button"
+                onClick={addCustomDimRow}
+                className="flex items-center gap-1.5 text-xs font-semibold text-indigo-600 hover:text-indigo-800 transition-colors"
+              >
+                <Plus className="w-3.5 h-3.5" />
+                {ui.addMeasure}
+              </button>
+            </div>
+          </section>
+
         </>
       )}
-    </div>
-  )
-}
 
-/* ─── MannequinTeaser (kept for reference) ─────────────────────────────────── */
-
-function MannequinTeaser({ planI18n }: { planI18n: typeof PLAN_I18N.fr }) {
-  return (
-    <div className="mt-3 flex items-center gap-3 bg-gray-50 border border-dashed border-gray-200 rounded-2xl p-4">
-      <div className="w-9 h-9 rounded-xl bg-gray-100 flex items-center justify-center shrink-0">
-        <Lock className="w-4 h-4 text-gray-400" />
-      </div>
-      <div className="flex-1 min-w-0">
-        <div className="flex items-center gap-2 mb-0.5">
-          <span className="font-display font-extrabold text-sm text-gray-500">{planI18n.teaserTitle}</span>
-          <span className="text-[9px] font-bold bg-indigo-100 text-indigo-600 px-1.5 py-0.5 rounded-full uppercase tracking-wide">Pro</span>
-        </div>
-        <p className="text-xs text-gray-400 leading-tight">{planI18n.teaserDesc}</p>
-      </div>
     </div>
   )
 }

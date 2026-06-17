@@ -1,100 +1,118 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { readFileSync } from 'fs'
 import { join } from 'path'
-import { MANNEQUIN_DESCRIPTIONS } from '@/lib/mannequin-descriptions'
 
 const FASHN_BASE = 'https://api.fashn.ai/v1'
 
-async function runJob(
+/* ── Charge une pose en base64 PNG ───────────────────────────────────────── */
+
+function loadPose(mannequinId: string, suffix: string): string {
+  const filename = suffix ? `${mannequinId}-${suffix}.png` : `${mannequinId}.png`
+  const filePath = join(process.cwd(), 'public', 'mannequins', 'final', filename)
+  return `data:image/png;base64,${readFileSync(filePath).toString('base64')}`
+}
+
+/* ── Lance un job tryon-max et attend le résultat ────────────────────────── */
+
+async function runTryonJob(
   apiKey: string,
   product_image: string,
-  mannequinData: string,
+  model_image: string,
   prompt: string,
-  backgroundData: string | null,
-): Promise<string[]> {
-  console.log(`[mannequin] /run prompt="${prompt}"`)
-
-  const body = {
-    model_name: 'product-to-model',
-    inputs: {
-      product_image,
-      image_prompt: mannequinData,
-      num_images: 2,
-      prompt,
-      resolution: '1k',
-      ...(backgroundData ? { background_reference: backgroundData } : {}),
-    },
-  }
-
+): Promise<string | null> {
   const runRes = await fetch(`${FASHN_BASE}/run`, {
     method: 'POST',
     headers: { Authorization: `Bearer ${apiKey}`, 'Content-Type': 'application/json' },
-    body: JSON.stringify(body),
+    body: JSON.stringify({
+      model_name: 'tryon-max',
+      inputs: {
+        product_image,
+        model_image,
+        prompt,
+        resolution: '1k',
+        output_format: 'png',
+        seed: 42,
+      },
+    }),
   })
 
   const runText = await runRes.text()
   console.log('[mannequin] /run status:', runRes.status, runText)
-  if (!runRes.ok) return []
+  if (!runRes.ok) return null
 
   const { id } = JSON.parse(runText) as { id: string }
 
+  /* Polling — 60 tentatives toutes les 2 secondes (max ~2 min) */
   for (let i = 0; i < 60; i++) {
     await new Promise(r => setTimeout(r, 2000))
     const statusRes = await fetch(`${FASHN_BASE}/status/${id}`, {
       headers: { Authorization: `Bearer ${apiKey}` },
     })
     if (!statusRes.ok) continue
+
     const data = await statusRes.json() as { status: string; output?: string[]; error?: string }
     console.log(`[mannequin] poll ${i + 1} — ${data.status}`)
-    if (data.status === 'completed') return data.output ?? []
-    if (data.status === 'failed') { console.error('[mannequin] failed:', data.error); return [] }
+
+    if (data.status === 'completed') return data.output?.[0] ?? null
+    if (data.status === 'failed') {
+      console.error('[mannequin] job échoué:', data.error)
+      return null
+    }
   }
-  return []
+
+  console.error('[mannequin] timeout après 120s')
+  return null
 }
+
+/* ── Handler POST ─────────────────────────────────────────────────────────── */
 
 export async function POST(request: NextRequest) {
   const FASHN_API_KEY = process.env.FASHN_API_KEY
   console.log('[mannequin] FASHN_API_KEY présente:', !!FASHN_API_KEY)
-  if (!FASHN_API_KEY) return NextResponse.json({ error: 'FASHN_API_KEY non configurée' }, { status: 503 })
+  if (!FASHN_API_KEY) {
+    return NextResponse.json({ error: 'FASHN_API_KEY non configurée' }, { status: 503 })
+  }
 
   try {
-    const { product_image, mannequin_id, background_id, outfit_prompt } = await request.json() as {
+    const { product_image, mannequin_id, outfit_prompt, wearing_prompt } = await request.json() as {
       product_image: string
       mannequin_id: string
-      background_id?: number
       outfit_prompt?: string
+      wearing_prompt?: string
     }
+
     if (!product_image || !mannequin_id) {
       return NextResponse.json({ error: 'Missing required fields' }, { status: 400 })
     }
 
-    const description = MANNEQUIN_DESCRIPTIONS[mannequin_id] ?? mannequin_id
+    /* Construction du prompt commun aux 3 poses */
     const outfitPart  = (outfit_prompt ?? '').trim() || 'outfit adapted to the garment, contemporary 2026 casual style'
-    const prompt = `Full body, ${description}, ${outfitPart}, one natural pose per image but different from each other, natural Vinted selling photo`
+    const wearingPart = (wearing_prompt ?? '').trim()
+    const prompt      = `${outfitPart}${wearingPart ? ', ' + wearingPart : ''}`
 
-    console.log(`[mannequin] mannequin_id="${mannequin_id}" description="${description}"`)
-    console.log(`[mannequin] prompt final="${prompt}"`)
+    console.log(`[mannequin] mannequin_id="${mannequin_id}" prompt="${prompt}"`)
 
-    const mannequinPath = join(process.cwd(), 'public', 'mannequins', `${mannequin_id}.jpg`)
-    const mannequinData = `data:image/jpeg;base64,${readFileSync(mannequinPath).toString('base64')}`
-    console.log('[mannequin] mannequin chargé:', mannequinPath)
-
-    let backgroundData: string | null = null
-    if (background_id !== undefined && background_id !== null) {
-      try {
-        const bgFilename = background_id === 0
-          ? 'bg-white.jpg'
-          : `bg-${String(background_id).padStart(2, '0')}.jpg`
-        const bgPath = join(process.cwd(), 'public', 'backgrounds', bgFilename)
-        backgroundData = `data:image/jpeg;base64,${readFileSync(bgPath).toString('base64')}`
-        console.log('[mannequin] fond chargé:', bgFilename)
-      } catch {
-        console.warn('[mannequin] fond non trouvé, ignoré:', background_id)
-      }
+    /* Chargement des 3 poses (face, 3/4, dos) */
+    let poseFace: string, poseSide: string, poseBack: string
+    try {
+      poseFace = loadPose(mannequin_id, '')
+      poseSide = loadPose(mannequin_id, 'side')
+      poseBack = loadPose(mannequin_id, 'back')
+    } catch (err) {
+      console.error('[mannequin] pose introuvable:', err)
+      return NextResponse.json({ error: 'Mannequin introuvable' }, { status: 404 })
     }
 
-    const urls = await runJob(FASHN_API_KEY, product_image, mannequinData, prompt, backgroundData)
-    console.log('[mannequin] URLs générées:', urls)
+    /* 3 appels tryon-max en parallèle (face / 3/4 / dos) */
+    const [urlFace, urlSide, urlBack] = await Promise.all([
+      runTryonJob(FASHN_API_KEY, product_image, poseFace, prompt),
+      runTryonJob(FASHN_API_KEY, product_image, poseSide, prompt),
+      runTryonJob(FASHN_API_KEY, product_image, poseBack, prompt),
+    ])
+
+    const urls = [urlFace, urlSide, urlBack].filter(Boolean) as string[]
+    console.log('[mannequin] URLs générées:', urls.length, '/ 3')
+
     return NextResponse.json({ urls })
 
   } catch (err) {
