@@ -552,25 +552,32 @@ Conservé : `SIZES`, `COLORS`, `MATERIALS`, `CONDITIONS`, `STYLES`, `PATTERNS`, 
 
 ---
 
-## Prochaine session — Priorités
+## Prochaine session — À faire
 
-### P1 — Tests terrain & stabilisation
-1. **Tester la génération mannequin tryon-max** — vérifier la qualité des poses face/side/back sur plusieurs articles
-2. **Tester le style auto-adapté** — vérifier que les prompts générés produisent des tenues cohérentes
-3. **Stabilisation calcul de prix** — tester sur des vrais articles, affiner pondérations, fiabiliser l'API marché
+### Chantier traitement photos (priorité)
 
-### P2 — Qualité produit
-4. **Amélioration annonces/descriptions** — ton plus vendeur, SEO mots-clés mieux intégrés, option longueur courte/longue
-5. **Amélioration suppression de fond** — meilleure gestion des transparences, cas difficiles (cheveux, dentelle)
+1. **Tester le cycle complet** — une fois les crédits FASHN rechargés, tester la génération mannequin (tryon-max) et photos produit (product-to-model) de bout en bout sur un vrai article
 
-### P3 — Bookmarklet (polish)
-6. **Réduction délais bookmarklet** — délais adaptatifs (poll 200ms) plutôt que timeouts fixes
-7. **Support autres langues Vinted** — vérifier correspondance chemins de catégories sur vinted.es, vinted.de, etc.
+2. **2ème photo produit = dos/profil** — actuellement les 2 photos produit non portées sont générées avec le même prompt (face). La 2ème devrait être le dos de l'article (ou profil si chaussure). Modifier `handleGenerateProductPhoto` pour envoyer un prompt différent sur le 2ème appel.
 
-### P4 — Infrastructure & monétisation
-8. **Supabase Auth** — inscription/connexion, gestion des quotas freemium
-9. **Stripe paiements** — checkout Premium + Pro
-10. **Déploiement Vercel** — mise en ligne Phase 1
+3. **Gestion des photos/infos manquantes** — demander les photos obligatoires (face, dos, étiquettes) si absentes au moment du passage à l'étape 2, et demander les clarifications manquantes (taille non reconnue, couleur incertaine, etc.) avant génération
+
+4. **Simplifier l'UX du panneau Visuels** — mieux distinguer "suppression de fond" (gratuit/@imgly) et "génération IA FASHN" (Pro), permettre le choix de fond par photo individuelle, indiquer clairement "3 photos portées + 2 non portées" dans les libellés
+
+5. **Améliorer la classification** — photo de dos mal classée en "étiquette marque". Affiner le prompt de classification Claude Haiku pour mieux distinguer dos d'article vs étiquette
+
+6. **Liseré bleu résiduel** — artifact FASHN tryon-max sur certaines photos (halo bleu autour du vêtement). Rendre le prompt plus explicite : "seamless integration, no color fringe, no blue halo, clean edges"
+
+7. **Nettoyer le code mort dans RecognitionStep** — supprimer les fonctions/imports inutilisés : `ConfidenceBadge` dupliqué, `Field`, hook `useRecognition`, imports taxonomy non utilisés. Réduire la taille du fichier.
+
+8. **Décider : infos complémentaires → étape Annonce** — les champs dimensions/infos (pays, doublure, etc.) sont actuellement en étape Visuels. Les déplacer vers l'étape Annonce serait plus logique (regrouper tout ce qui sert à la description). À décider avant de coder.
+
+### Autres priorités
+
+9. **Stabilisation calcul de prix** — tester sur des vrais articles, affiner les pondérations marché/décote
+10. **Supabase Auth** — inscription/connexion, gestion des quotas freemium
+11. **Stripe paiements** — checkout Premium + Pro
+12. **Déploiement Vercel** — voir section ⚠️ ci-dessous (mannequins à migrer d'abord)
 
 ---
 
