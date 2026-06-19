@@ -8,6 +8,7 @@ import {
 import type { RecognitionResult, PriceResult, PricePrecisions } from '../types'
 import { useLang } from '@/app/providers'
 import type { Lang } from '@/lib/i18n'
+import { DECOTE_TABLE, normalizeEtat } from '@/lib/pricing'
 
 /* ─── Traductions UI — 7 langues ─────────────────────────────────────────── */
 
@@ -29,6 +30,10 @@ const UI: Record<Lang, {
   rareOptions: string[]; recalcBtn: string
   reseller: string; myBuyPrice: string; netMargin: string; marginPct: string
   estimatedVal: (bought: number, val: number, pct: number, state: string) => string
+  confidenceSource: (n: number) => string
+  confidenceSourceNoListings: string
+  synthBoth: string; synthDecoteOnly: string; synthMedianOnly: string; synthNoData: string
+  showMore: string; showLess: string
 }> = {
   fr: {
     loading: 'Calcul en cours…', loadingSub: "L'IA analyse les prix du marché en temps réel.",
@@ -48,6 +53,13 @@ const UI: Record<Lang, {
     rareOptions: ['Non', 'Collaboration', 'Édition limitée', 'Vintage'], recalcBtn: 'Recalculer avec ces informations',
     reseller: 'Je suis revendeur', myBuyPrice: "Mon prix d'achat (€)", netMargin: 'Marge nette estimée', marginPct: '% de marge',
     estimatedVal: (b, v, p, s) => `Acheté ${b}€ → valeur marché ~${v}€ en ${s.toLowerCase()} (${p}%)`,
+    confidenceSource: (n) => `${n} annonce${n > 1 ? 's' : ''} similaire${n > 1 ? 's' : ''} analysée${n > 1 ? 's' : ''}`,
+    confidenceSourceNoListings: 'Aucune annonce similaire trouvée',
+    synthBoth: "Estimé à partir du prix neuf et des ventes récentes d'articles similaires",
+    synthDecoteOnly: "Estimé à partir du prix neuf (peu d'annonces trouvées)",
+    synthMedianOnly: "Estimé à partir des ventes récentes d'articles similaires",
+    synthNoData: 'Estimation approximative (données de marché insuffisantes)',
+    showMore: 'Voir plus', showLess: 'Réduire',
   },
   en: {
     loading: 'Calculating…', loadingSub: 'AI is analyzing market prices in real time.',
@@ -67,6 +79,13 @@ const UI: Record<Lang, {
     rareOptions: ['No', 'Collaboration', 'Limited edition', 'Vintage'], recalcBtn: 'Recalculate with this info',
     reseller: 'I am a reseller', myBuyPrice: 'My purchase price (€)', netMargin: 'Estimated net margin', marginPct: '% margin',
     estimatedVal: (b, v, p, s) => `Bought for ${b}€ → market value ~${v}€ in ${s.toLowerCase()} condition (${p}%)`,
+    confidenceSource: (n) => `${n} similar listing${n > 1 ? 's' : ''} analysed`,
+    confidenceSourceNoListings: 'No similar listings found',
+    synthBoth: 'Estimated from the retail price and recent sales of similar items',
+    synthDecoteOnly: 'Estimated from the retail price (few listings found)',
+    synthMedianOnly: 'Estimated from recent sales of similar items',
+    synthNoData: 'Approximate estimate (insufficient market data)',
+    showMore: 'Show more', showLess: 'Show less',
   },
   es: {
     loading: 'Calculando…', loadingSub: 'La IA analiza los precios del mercado en tiempo real.',
@@ -86,6 +105,13 @@ const UI: Record<Lang, {
     rareOptions: ['No', 'Colaboración', 'Edición limitada', 'Vintage'], recalcBtn: 'Recalcular con esta información',
     reseller: 'Soy revendedor', myBuyPrice: 'Mi precio de compra (€)', netMargin: 'Margen neto estimado', marginPct: '% margen',
     estimatedVal: (b, v, p, s) => `Comprado a ${b}€ → valor de mercado ~${v}€ en ${s.toLowerCase()} (${p}%)`,
+    confidenceSource: (n) => `${n} anuncio${n > 1 ? 's' : ''} similar${n > 1 ? 'es' : ''} analizado${n > 1 ? 's' : ''}`,
+    confidenceSourceNoListings: 'No se encontraron anuncios similares',
+    synthBoth: 'Estimado a partir del precio nuevo y ventas recientes de artículos similares',
+    synthDecoteOnly: 'Estimado a partir del precio nuevo (pocos anuncios encontrados)',
+    synthMedianOnly: 'Estimado a partir de ventas recientes de artículos similares',
+    synthNoData: 'Estimación aproximada (datos de mercado insuficientes)',
+    showMore: 'Ver más', showLess: 'Ver menos',
   },
   de: {
     loading: 'Berechnung läuft…', loadingSub: 'Die KI analysiert Marktpreise in Echtzeit.',
@@ -105,6 +131,13 @@ const UI: Record<Lang, {
     rareOptions: ['Nein', 'Kollaboration', 'Limitierte Edition', 'Vintage'], recalcBtn: 'Mit diesen Infos neu berechnen',
     reseller: 'Ich bin Wiederverkäufer', myBuyPrice: 'Mein Kaufpreis (€)', netMargin: 'Geschätzter Nettogewinn', marginPct: '% Marge',
     estimatedVal: (b, v, p, s) => `Gekauft für ${b}€ → Marktwert ~${v}€ in ${s.toLowerCase()} (${p}%)`,
+    confidenceSource: (n) => `${n} ähnliche Anzeige${n > 1 ? 'n' : ''} analysiert`,
+    confidenceSourceNoListings: 'Keine ähnlichen Anzeigen gefunden',
+    synthBoth: 'Basierend auf dem Neupreis und aktuellen Verkäufen ähnlicher Artikel',
+    synthDecoteOnly: 'Basierend auf dem Neupreis (wenige Anzeigen gefunden)',
+    synthMedianOnly: 'Basierend auf aktuellen Verkäufen ähnlicher Artikel',
+    synthNoData: 'Ungefähre Schätzung (unzureichende Marktdaten)',
+    showMore: 'Mehr anzeigen', showLess: 'Weniger anzeigen',
   },
   it: {
     loading: 'Calcolo in corso…', loadingSub: "L'IA analizza i prezzi di mercato in tempo reale.",
@@ -124,6 +157,13 @@ const UI: Record<Lang, {
     rareOptions: ['No', 'Collaborazione', 'Edizione limitata', 'Vintage'], recalcBtn: 'Ricalcola con queste informazioni',
     reseller: 'Sono un rivenditore', myBuyPrice: "Il mio prezzo d'acquisto (€)", netMargin: 'Margine netto stimato', marginPct: '% margine',
     estimatedVal: (b, v, p, s) => `Acquistato a ${b}€ → valore di mercato ~${v}€ in ${s.toLowerCase()} (${p}%)`,
+    confidenceSource: (n) => `${n} annuncio${n > 1 ? 'i' : ''} simil${n > 1 ? 'i' : 'e'} analizzat${n > 1 ? 'i' : 'o'}`,
+    confidenceSourceNoListings: 'Nessun annuncio simile trovato',
+    synthBoth: 'Stimato dal prezzo nuovo e dalle vendite recenti di articoli simili',
+    synthDecoteOnly: 'Stimato dal prezzo nuovo (pochi annunci trovati)',
+    synthMedianOnly: 'Stimato dalle vendite recenti di articoli simili',
+    synthNoData: 'Stima approssimativa (dati di mercato insufficienti)',
+    showMore: 'Mostra di più', showLess: 'Mostra meno',
   },
   nl: {
     loading: 'Berekening bezig…', loadingSub: 'AI analyseert marktprijzen in realtime.',
@@ -143,6 +183,13 @@ const UI: Record<Lang, {
     rareOptions: ['Nee', 'Samenwerking', 'Beperkte editie', 'Vintage'], recalcBtn: 'Opnieuw berekenen met deze info',
     reseller: 'Ik ben een doorverkoper', myBuyPrice: 'Mijn aankoopprijs (€)', netMargin: 'Geschatte nettomarge', marginPct: '% marge',
     estimatedVal: (b, v, p, s) => `Gekocht voor ${b}€ → marktwaarde ~${v}€ in ${s.toLowerCase()} staat (${p}%)`,
+    confidenceSource: (n) => `${n} vergelijkbare advertentie${n > 1 ? 's' : ''} geanalyseerd`,
+    confidenceSourceNoListings: 'Geen vergelijkbare advertenties gevonden',
+    synthBoth: 'Geschat op basis van de nieuwprijs en recente verkopen van vergelijkbare artikelen',
+    synthDecoteOnly: 'Geschat op basis van de nieuwprijs (weinig advertenties gevonden)',
+    synthMedianOnly: 'Geschat op basis van recente verkopen van vergelijkbare artikelen',
+    synthNoData: 'Globale schatting (onvoldoende marktgegevens)',
+    showMore: 'Meer tonen', showLess: 'Minder tonen',
   },
   pl: {
     loading: 'Obliczanie…', loadingSub: 'AI analizuje ceny rynkowe w czasie rzeczywistym.',
@@ -162,6 +209,13 @@ const UI: Record<Lang, {
     rareOptions: ['Nie', 'Współpraca', 'Limitowana edycja', 'Vintage'], recalcBtn: 'Przelicz z tymi informacjami',
     reseller: 'Jestem odsprzedawcą', myBuyPrice: 'Moja cena zakupu (€)', netMargin: 'Szacowana marża netto', marginPct: '% marży',
     estimatedVal: (b, v, p, s) => `Kupiono za ${b}€ → wartość rynkowa ~${v}€ w stanie ${s.toLowerCase()} (${p}%)`,
+    confidenceSource: (n) => n === 1 ? '1 podobne ogłoszenie przeanalizowane' : `${n} podobnych ogłoszeń przeanalizowanych`,
+    confidenceSourceNoListings: 'Nie znaleziono podobnych ogłoszeń',
+    synthBoth: 'Oszacowano na podstawie ceny nowej i ostatnich sprzedaży podobnych artykułów',
+    synthDecoteOnly: 'Oszacowano na podstawie ceny nowej (znaleziono mało ogłoszeń)',
+    synthMedianOnly: 'Oszacowano na podstawie ostatnich sprzedaży podobnych artykułów',
+    synthNoData: 'Przybliżone szacowanie (niewystarczające dane rynkowe)',
+    showMore: 'Pokaż więcej', showLess: 'Pokaż mniej',
   },
 }
 
@@ -273,7 +327,8 @@ export default function PricingStep({ recognition, result, setResult }: Props) {
   const [rareteIdx, setRareteIdx]       = useState<number | null>(null)
   const [showMargin, setShowMargin]     = useState(false)
   const [showPrecisions, setShowPrecisions] = useState(false)
-  const [sliderVal, setSliderVal]       = useState<number | null>(null)
+  const [sliderVal, setSliderVal]           = useState<number | null>(null)
+  const [showFullRaisonnement, setShowFullRaisonnement] = useState(false)
 
   /* Initialise le slider sur le prixSuggere quand le résultat arrive */
   useEffect(() => {
@@ -370,20 +425,25 @@ export default function PricingStep({ recognition, result, setResult }: Props) {
     ? Math.round((marche.prixMinVinted + Math.round(result.prixSuggere * 0.75)) / 2)
     : Math.round(result.prixSuggere * 0.75)
 
+  /* Ligne de synthèse — décrit les données utilisées pour le calcul */
+  function getSynthLine(): string {
+    const hasRetailPrice = marche.prixNeufMarque !== null || prixAchat !== ''
+    const hasListings    = (marche.nbAnnonces ?? 0) > 0
+    const hasMedian      = marche.prixMedianVinted !== null
+    if (hasRetailPrice && hasMedian && hasListings) return t.synthBoth
+    if (hasRetailPrice) return t.synthDecoteOnly
+    if (hasMedian) return t.synthMedianOnly
+    return t.synthNoData
+  }
+
   /* Calcul marge revendeur */
   const prixAchatNum = prixAchat ? parseFloat(prixAchat) : null
   const marge = prixAchatNum !== null ? currentVal - prixAchatNum : null
 
-  /* Décote estimée selon état */
-  const DECOTE_MAP: Record<string, number> = {
-    'Neuf avec étiquette': 0.65,
-    'Neuf sans étiquette': 0.55,
-    'Très bon état': 0.40,
-    'Bon état': 0.30,
-    'Satisfaisant': 0.20,
-  }
-  const etatLabel = recognition?.etat.value ?? ''
-  const decoteRatio = DECOTE_MAP[etatLabel] ?? null
+  /* Décote estimée selon état et segment réel de l'article */
+  const etatLabel   = recognition.etat.value
+  const segment     = recognition.brand_segment ?? 'standard'
+  const decoteRatio = DECOTE_TABLE[normalizeEtat(etatLabel)]?.[segment] ?? null
   const valeurEstimee = prixAchatNum !== null && decoteRatio !== null
     ? Math.round(prixAchatNum * decoteRatio)
     : null
@@ -425,6 +485,13 @@ export default function PricingStep({ recognition, result, setResult }: Props) {
         <div className="bg-white rounded-2xl border border-gray-100 shadow-sm p-5 space-y-4">
           <ConfidenceBanner confidence={result.confidence} labels={t} />
 
+          {/* Source · synthèse — transparence en langage naturel */}
+          <div className="flex flex-col sm:flex-row sm:items-center gap-0.5 sm:gap-2 text-[11px] text-gray-400">
+            <span>{(marche.nbAnnonces ?? 0) > 0 ? t.confidenceSource(marche.nbAnnonces!) : t.confidenceSourceNoListings}</span>
+            <span className="hidden sm:block text-gray-200" aria-hidden>·</span>
+            <span>{getSynthLine()}</span>
+          </div>
+
           <div className="flex flex-col sm:flex-row items-start gap-5">
             {/* Gauche : prix + raisonnement */}
             <div className="flex-1 min-w-0">
@@ -435,7 +502,19 @@ export default function PricingStep({ recognition, result, setResult }: Props) {
               </div>
               <div className="flex items-start gap-2 p-3.5 bg-gray-50 rounded-xl">
                 <TrendingUp className="w-3.5 h-3.5 text-indigo-500 shrink-0 mt-0.5" />
-                <p className="text-sm text-gray-600 leading-relaxed">{result.raisonnement}</p>
+                <div className="min-w-0">
+                  <p className={`text-sm text-gray-600 leading-relaxed ${!showFullRaisonnement ? 'line-clamp-2' : ''}`}>
+                    {result.raisonnement}
+                  </p>
+                  {result.raisonnement.length > 120 && (
+                    <button
+                      onClick={() => setShowFullRaisonnement(v => !v)}
+                      className="text-[11px] font-semibold text-indigo-500 hover:text-indigo-700 mt-1 transition-colors"
+                    >
+                      {showFullRaisonnement ? t.showLess : t.showMore}
+                    </button>
+                  )}
+                </div>
               </div>
             </div>
 

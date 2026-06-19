@@ -5,9 +5,9 @@ import {
   Camera, Tag, X, Lock, Upload, Sparkles,
   GripVertical, AlertTriangle, Check, Link,
   Loader2, RefreshCw, CheckCircle2, XCircle, Pencil,
-  AlertCircle, ScanLine, Plus,
+  AlertCircle, ScanLine, Plus, ChevronDown,
 } from 'lucide-react'
-import type { PhotoSlot, RecognitionResult, RecognitionField, Confidence, ExtraInfo, Plan } from '../types'
+import type { PhotoSlot, PhotoContentType, RecognitionResult, RecognitionField, Confidence, ExtraInfo, Plan } from '../types'
 import {
   SIZES, COLORS, MATERIALS, CONDITIONS, STYLES, PATTERNS,
   tx, GENRE_LABELS, CONDITION_LABELS, COLOR_LABELS, MATERIAL_LABELS,
@@ -56,43 +56,43 @@ const SECTION_TITLES: Record<Lang, { s1: string; s2: string }> = {
 const SLOT_LABELS: Record<Lang, string[]> = {
   fr: [
     'Photo recto (cintre / à plat)', 'Photo verso (cintre / à plat)', 'Autre vue non portée',
-    'Étiquette marque', 'Étiquette taille', 'Étiquette compo.',
+    'Étiquette (marque, taille, compo.)', 'Étiquette (marque, taille, compo.)', 'Étiquette (marque, taille, compo.)',
     'Autre photo (détail, défaut, emballage...)', 'Autre photo (détail, défaut, emballage...)', 'Autre photo (détail, défaut, emballage...)',
     'Vue portée 1', 'Vue portée 2', 'Vue portée 3', 'Vue portée 4', 'Vue portée 5', 'Vue portée 6',
   ],
   en: [
     'Front (flat/hanger)', 'Back (flat/hanger)', 'Other flat view',
-    'Brand label', 'Size label', 'Care label',
+    'Label (brand, size, care)', 'Label (brand, size, care)', 'Label (brand, size, care)',
     'Other photo (detail, flaw, packaging...)', 'Other photo (detail, flaw, packaging...)', 'Other photo (detail, flaw, packaging...)',
     'Worn view 1', 'Worn view 2', 'Worn view 3', 'Worn view 4', 'Worn view 5', 'Worn view 6',
   ],
   es: [
     'Foto frontal (plano/percha)', 'Foto trasera (plano/percha)', 'Otra vista sin portar',
-    'Etiqueta marca', 'Etiqueta talla', 'Etiqueta compos.',
+    'Etiqueta (marca, talla, compos.)', 'Etiqueta (marca, talla, compos.)', 'Etiqueta (marca, talla, compos.)',
     'Otra foto (detalle, defecto, embalaje...)', 'Otra foto (detalle, defecto, embalaje...)', 'Otra foto (detalle, defecto, embalaje...)',
     'Vista vestida 1', 'Vista vestida 2', 'Vista vestida 3', 'Vista vestida 4', 'Vista vestida 5', 'Vista vestida 6',
   ],
   de: [
     'Vorderfoto (flach/Bügel)', 'Rückseite (flach/Bügel)', 'Andere Ansicht (nicht getragen)',
-    'Markenetikett', 'Größenetikett', 'Pflegeetikett',
+    'Etikett (Marke, Größe, Pflege)', 'Etikett (Marke, Größe, Pflege)', 'Etikett (Marke, Größe, Pflege)',
     'Anderes Foto (Detail, Mangel, Verpackung...)', 'Anderes Foto (Detail, Mangel, Verpackung...)', 'Anderes Foto (Detail, Mangel, Verpackung...)',
     'Getragen 1', 'Getragen 2', 'Getragen 3', 'Getragen 4', 'Getragen 5', 'Getragen 6',
   ],
   it: [
     'Foto fronte (piano/gruccia)', 'Foto retro (piano/gruccia)', 'Altra vista non indossata',
-    'Etich. marca', 'Etich. taglia', 'Etich. composiz.',
+    'Etich. (marca, taglia, compos.)', 'Etich. (marca, taglia, compos.)', 'Etich. (marca, taglia, compos.)',
     'Altra foto (dettaglio, difetto, imballaggio...)', 'Altra foto (dettaglio, difetto, imballaggio...)', 'Altra foto (dettaglio, difetto, imballaggio...)',
     'Indossato 1', 'Indossato 2', 'Indossato 3', 'Indossato 4', 'Indossato 5', 'Indossato 6',
   ],
   nl: [
     'Voorkant (plat/hanger)', 'Achterkant (plat/hanger)', 'Andere niet-gedragen weergave',
-    'Merklabel', 'Maatlabel', 'Samenst. label',
+    'Label (merk, maat, samenstelling)', 'Label (merk, maat, samenstelling)', 'Label (merk, maat, samenstelling)',
     'Andere foto (detail, gebrek, verpakking...)', 'Andere foto (detail, gebrek, verpakking...)', 'Andere foto (detail, gebrek, verpakking...)',
     'Gedragen 1', 'Gedragen 2', 'Gedragen 3', 'Gedragen 4', 'Gedragen 5', 'Gedragen 6',
   ],
   pl: [
     'Przód (płasko/wieszak)', 'Tył (płasko/wieszak)', 'Inny widok (nienoszone)',
-    'Etykieta marki', 'Etykieta rozm.', 'Etykieta skład',
+    'Etykieta (marka, rozmiar, skład)', 'Etykieta (marka, rozmiar, skład)', 'Etykieta (marka, rozmiar, skład)',
     'Inne zdjęcie (detal, wada, opakowanie...)', 'Inne zdjęcie (detal, wada, opakowanie...)', 'Inne zdjęcie (detal, wada, opakowanie...)',
     'Noszone 1', 'Noszone 2', 'Noszone 3', 'Noszone 4', 'Noszone 5', 'Noszone 6',
   ],
@@ -113,7 +113,7 @@ const DROP_I18N: Record<Lang, {
 }> = {
   fr: {
     title:          "Photos de l'article",
-    subtitle:       "Ajoutez jusqu'à 15 photos. La photo principale est obligatoire — l'IA supprime automatiquement son fond.",
+    subtitle:       "Ajoutez jusqu'à 15 photos. La photo principale est obligatoire.",
     classifying:    'Classification IA en cours…',
     classifyingSub: "L'IA identifie chaque vue et place les photos dans les bons slots",
     dropHere:       'Déposez les photos ici',
@@ -125,7 +125,7 @@ const DROP_I18N: Record<Lang, {
   },
   en: {
     title:          'Item photos',
-    subtitle:       'Add up to 15 photos. The main photo is required — AI automatically removes its background.',
+    subtitle:       'Add up to 15 photos. The main photo is required.',
     classifying:    'AI classification in progress…',
     classifyingSub: 'AI identifies each view and places photos in the correct slots',
     dropHere:       'Drop photos here',
@@ -137,7 +137,7 @@ const DROP_I18N: Record<Lang, {
   },
   es: {
     title:          'Fotos del artículo',
-    subtitle:       'Añade hasta 15 fotos. La foto principal es obligatoria — la IA elimina automáticamente el fondo.',
+    subtitle:       'Añade hasta 15 fotos. La foto principal es obligatoria.',
     classifying:    'Clasificación IA en curso…',
     classifyingSub: 'La IA identifica cada vista y coloca las fotos en los slots correctos',
     dropHere:       'Suelta las fotos aquí',
@@ -149,7 +149,7 @@ const DROP_I18N: Record<Lang, {
   },
   de: {
     title:          'Artikelfotos',
-    subtitle:       'Füge bis zu 15 Fotos hinzu. Das Hauptfoto ist Pflicht — die KI entfernt automatisch den Hintergrund.',
+    subtitle:       'Füge bis zu 15 Fotos hinzu. Das Hauptfoto ist Pflicht.',
     classifying:    'KI-Klassifizierung läuft…',
     classifyingSub: 'Die KI erkennt jede Ansicht und ordnet die Fotos den richtigen Slots zu',
     dropHere:       'Fotos hier ablegen',
@@ -161,7 +161,7 @@ const DROP_I18N: Record<Lang, {
   },
   it: {
     title:          "Foto dell'articolo",
-    subtitle:       "Aggiungi fino a 15 foto. La foto principale è obbligatoria — l'IA rimuove automaticamente lo sfondo.",
+    subtitle:       "Aggiungi fino a 15 foto. La foto principale è obbligatoria.",
     classifying:    'Classificazione IA in corso…',
     classifyingSub: "L'IA identifica ogni vista e posiziona le foto negli slot corretti",
     dropHere:       'Rilascia le foto qui',
@@ -173,7 +173,7 @@ const DROP_I18N: Record<Lang, {
   },
   nl: {
     title:          "Foto's van het artikel",
-    subtitle:       "Voeg maximaal 15 foto's toe. De hoofdfoto is verplicht — AI verwijdert automatisch de achtergrond.",
+    subtitle:       "Voeg maximaal 15 foto's toe. De hoofdfoto is verplicht.",
     classifying:    'AI-classificatie bezig…',
     classifyingSub: "AI identificeert elke weergave en plaatst foto's in de juiste slots",
     dropHere:       "Foto's hier neerzetten",
@@ -185,7 +185,7 @@ const DROP_I18N: Record<Lang, {
   },
   pl: {
     title:          'Zdjęcia przedmiotu',
-    subtitle:       'Dodaj do 15 zdjęć. Zdjęcie główne jest wymagane — AI automatycznie usuwa tło.',
+    subtitle:       'Dodaj do 15 zdjęć. Zdjęcie główne jest wymagane.',
     classifying:    'Klasyfikacja AI w toku…',
     classifyingSub: 'AI identyfikuje każdy widok i umieszcza zdjęcia w odpowiednich slotach',
     dropHere:       'Upuść zdjęcia tutaj',
@@ -592,9 +592,9 @@ const SLOT_DEFS = [
   { id: 6,  label: 'Autre photo (détail, défaut, emballage...)', badge: 'optional',    type: 'detail',  bgRemoval: 'none' },
   { id: 7,  label: 'Autre photo (détail, défaut, emballage...)', badge: 'optional',    type: 'detail',  bgRemoval: 'none' },
   { id: 8,  label: 'Autre photo (détail, défaut, emballage...)', badge: 'optional',    type: 'detail',  bgRemoval: 'none' },
-  { id: 9,  label: 'Vue portée 1',                               badge: 'recommended', type: 'garment', bgRemoval: 'pro'  },
-  { id: 10, label: 'Vue portée 2',                               badge: 'recommended', type: 'garment', bgRemoval: 'pro'  },
-  { id: 11, label: 'Vue portée 3',                               badge: 'recommended', type: 'garment', bgRemoval: 'pro'  },
+  { id: 9,  label: 'Vue portée 1',                               badge: 'optional',    type: 'garment', bgRemoval: 'pro'  },
+  { id: 10, label: 'Vue portée 2',                               badge: 'optional',    type: 'garment', bgRemoval: 'pro'  },
+  { id: 11, label: 'Vue portée 3',                               badge: 'optional',    type: 'garment', bgRemoval: 'pro'  },
   { id: 12, label: 'Vue portée 4',                               badge: 'optional',    type: 'garment', bgRemoval: 'pro'  },
   { id: 13, label: 'Vue portée 5',                               badge: 'optional',    type: 'garment', bgRemoval: 'pro'  },
   { id: 14, label: 'Vue portée 6',                               badge: 'optional',    type: 'garment', bgRemoval: 'pro'  },
@@ -606,14 +606,13 @@ type SlotDef = (typeof SLOT_DEFS)[number]
 
 interface ClassifyResult {
   fileIndex: number
-  type: 'flat' | 'worn' | 'detail'
-  detailSlot: number
+  type: PhotoContentType
 }
 
 function assignSlots(
   classifications: ClassifyResult[],
   taken: Set<number>,
-): Array<{ fileIndex: number; slot: number | null }> {
+): Array<{ fileIndex: number; slot: number | null; contentType: PhotoContentType }> {
   const local = new Set(taken)
 
   const tryPool = (pool: number[]): number | null => {
@@ -622,23 +621,22 @@ function assignSlots(
     return null
   }
 
-  return classifications.map(({ fileIndex, type, detailSlot }) => {
+  return classifications.map(({ fileIndex, type }) => {
     let slot: number | null = null
 
-    if (type === 'flat') {
+    if (type === 'recto') {
       slot = tryPool([0, 1, 2]) ?? tryPool([6, 7, 8])
+    } else if (type === 'verso') {
+      slot = tryPool([1, 2]) ?? tryPool([0, 6, 7, 8])
+    } else if (type === 'label') {
+      slot = tryPool([3, 4, 5]) ?? tryPool([6, 7, 8])
+    } else if (type === 'detail') {
+      slot = tryPool([6, 7, 8])
     } else if (type === 'worn') {
       slot = tryPool([9, 10, 11, 12, 13, 14]) ?? tryPool([6, 7, 8])
-    } else {
-      if (detailSlot >= 3 && detailSlot <= 8 && !local.has(detailSlot)) {
-        local.add(detailSlot)
-        slot = detailSlot
-      } else {
-        slot = tryPool([6, 7, 8])
-      }
     }
 
-    return { fileIndex, slot }
+    return { fileIndex, slot, contentType: type }
   })
 }
 
@@ -655,12 +653,16 @@ const UI_I18N: Record<Lang, {
   size: string; condition: string; colors: string; materials: string
   style: string; pattern: string; flaws: string; retailPrice: string
   defectDetected: string
+  defectConfirmBtn: string
+  defectRejectBtn: string
+  defectConfirmed: string
   generalInfo: string; dimensions: string
   summary: string
   choose: string
   subcategoryHint: string
   addToDesc: string; addMeasure: string; other: string
   infoValue: string; measureName: string; measureValue: string
+  noBrand: string
 }> = {
   fr: {
     high: 'Élevée', medium: 'Moyenne', low: 'Incertaine', manual: 'Modifié',
@@ -678,12 +680,16 @@ const UI_I18N: Record<Lang, {
     size: 'Taille', condition: 'État', colors: 'Couleurs (max 2)', materials: 'Matières (max 3)',
     style: 'Style', pattern: 'Motif', flaws: 'Description des défauts', retailPrice: 'Prix neuf',
     defectDetected: 'Défaut détecté — confirmez',
+    defectConfirmBtn: 'Confirmer le défaut',
+    defectRejectBtn: "Ce n'est pas un défaut",
+    defectConfirmed: 'Défaut confirmé',
     generalInfo: 'Infos générales', dimensions: 'Dimensions (optionnel)',
     summary: 'Récapitulatif',
     choose: '— Choisir —',
     subcategoryHint: 'Vérifiez la sous-catégorie précise sur Vinted après le remplissage automatique',
     addToDesc: 'Ajouter à la description', addMeasure: 'Ajouter une mesure personnalisée', other: 'Autre',
     infoValue: 'Valeur…', measureName: 'Nom de la mesure…', measureValue: 'cm',
+    noBrand: 'Sans marque',
   },
   en: {
     high: 'High', medium: 'Medium', low: 'Uncertain', manual: 'Edited',
@@ -701,12 +707,16 @@ const UI_I18N: Record<Lang, {
     size: 'Size', condition: 'Condition', colors: 'Colors (max 2)', materials: 'Materials (max 3)',
     style: 'Style', pattern: 'Pattern', flaws: 'Flaw description', retailPrice: 'Retail price',
     defectDetected: 'Flaw detected — please confirm',
+    defectConfirmBtn: 'Confirm flaw',
+    defectRejectBtn: 'Not a flaw',
+    defectConfirmed: 'Flaw confirmed',
     generalInfo: 'General info', dimensions: 'Dimensions (optional)',
     summary: 'Summary',
     choose: '— Choose —',
     subcategoryHint: 'Check the exact subcategory on Vinted after auto-fill',
     addToDesc: 'Add to description', addMeasure: 'Add custom measurement', other: 'Other',
     infoValue: 'Value…', measureName: 'Measurement name…', measureValue: 'cm',
+    noBrand: 'No brand',
   },
   es: {
     high: 'Alta', medium: 'Media', low: 'Incierta', manual: 'Editado',
@@ -724,12 +734,16 @@ const UI_I18N: Record<Lang, {
     size: 'Talla', condition: 'Estado', colors: 'Colores (máx 2)', materials: 'Materiales (máx 3)',
     style: 'Estilo', pattern: 'Motivo', flaws: 'Descripción de defectos', retailPrice: 'Precio nuevo',
     defectDetected: 'Defecto detectado — confirma',
+    defectConfirmBtn: 'Confirmar defecto',
+    defectRejectBtn: 'No es un defecto',
+    defectConfirmed: 'Defecto confirmado',
     generalInfo: 'Información general', dimensions: 'Dimensiones (opcional)',
     summary: 'Resumen',
     choose: '— Elegir —',
     subcategoryHint: 'Verifica la subcategoría exacta en Vinted tras el relleno automático',
     addToDesc: 'Añadir a la descripción', addMeasure: 'Añadir medida personalizada', other: 'Otro',
     infoValue: 'Valor…', measureName: 'Nombre de la medida…', measureValue: 'cm',
+    noBrand: 'Sin marca',
   },
   de: {
     high: 'Hoch', medium: 'Mittel', low: 'Unsicher', manual: 'Bearbeitet',
@@ -747,12 +761,16 @@ const UI_I18N: Record<Lang, {
     size: 'Größe', condition: 'Zustand', colors: 'Farben (max 2)', materials: 'Materialien (max 3)',
     style: 'Stil', pattern: 'Muster', flaws: 'Mängelbeschreibung', retailPrice: 'Neupreis',
     defectDetected: 'Mangel erkannt — bitte bestätigen',
+    defectConfirmBtn: 'Mangel bestätigen',
+    defectRejectBtn: 'Kein Mangel',
+    defectConfirmed: 'Mangel bestätigt',
     generalInfo: 'Allgemeine Infos', dimensions: 'Maße (optional)',
     summary: 'Zusammenfassung',
     choose: '— Wählen —',
     subcategoryHint: 'Überprüfe die genaue Unterkategorie auf Vinted nach dem automatischen Ausfüllen',
     addToDesc: 'Zur Beschreibung hinzufügen', addMeasure: 'Benutzerdefiniertes Maß hinzufügen', other: 'Sonstiges',
     infoValue: 'Wert…', measureName: 'Maßbezeichnung…', measureValue: 'cm',
+    noBrand: 'Keine Marke',
   },
   it: {
     high: 'Alta', medium: 'Media', low: 'Incerta', manual: 'Modificato',
@@ -770,12 +788,16 @@ const UI_I18N: Record<Lang, {
     size: 'Taglia', condition: 'Stato', colors: 'Colori (max 2)', materials: 'Materiali (max 3)',
     style: 'Stile', pattern: 'Motivo', flaws: 'Descrizione difetti', retailPrice: 'Prezzo nuovo',
     defectDetected: 'Difetto rilevato — conferma',
+    defectConfirmBtn: 'Conferma difetto',
+    defectRejectBtn: 'Non è un difetto',
+    defectConfirmed: 'Difetto confermato',
     generalInfo: 'Info generali', dimensions: 'Dimensioni (opzionale)',
     summary: 'Riepilogo',
     choose: '— Scegli —',
     subcategoryHint: 'Verifica la sottocategoria esatta su Vinted dopo il riempimento automatico',
     addToDesc: 'Aggiungi alla descrizione', addMeasure: 'Aggiungi misura personalizzata', other: 'Altro',
     infoValue: 'Valore…', measureName: 'Nome della misura…', measureValue: 'cm',
+    noBrand: 'Senza marca',
   },
   nl: {
     high: 'Hoog', medium: 'Gemiddeld', low: 'Onzeker', manual: 'Bewerkt',
@@ -793,12 +815,16 @@ const UI_I18N: Record<Lang, {
     size: 'Maat', condition: 'Staat', colors: "Kleuren (max 2)", materials: 'Materialen (max 3)',
     style: 'Stijl', pattern: 'Motief', flaws: 'Beschrijving gebreken', retailPrice: 'Nieuwprijs',
     defectDetected: 'Gebrek gedetecteerd — bevestig',
+    defectConfirmBtn: 'Gebrek bevestigen',
+    defectRejectBtn: 'Geen gebrek',
+    defectConfirmed: 'Gebrek bevestigd',
     generalInfo: 'Algemene info', dimensions: 'Afmetingen (optioneel)',
     summary: 'Samenvatting',
     choose: '— Kies —',
     subcategoryHint: 'Controleer de exacte subcategorie op Vinted na het automatisch invullen',
     addToDesc: 'Toevoegen aan beschrijving', addMeasure: 'Aangepaste meting toevoegen', other: 'Overig',
     infoValue: 'Waarde…', measureName: 'Naam meting…', measureValue: 'cm',
+    noBrand: 'Geen merk',
   },
   pl: {
     high: 'Wysoka', medium: 'Średnia', low: 'Niepewna', manual: 'Edytowano',
@@ -816,12 +842,16 @@ const UI_I18N: Record<Lang, {
     size: 'Rozmiar', condition: 'Stan', colors: 'Kolory (maks 2)', materials: 'Materiały (maks 3)',
     style: 'Styl', pattern: 'Wzór', flaws: 'Opis wad', retailPrice: 'Cena nowa',
     defectDetected: 'Wykryto wadę — potwierdź',
+    defectConfirmBtn: 'Potwierdź wadę',
+    defectRejectBtn: 'To nie wada',
+    defectConfirmed: 'Wada potwierdzona',
     generalInfo: 'Informacje ogólne', dimensions: 'Wymiary (opcjonalnie)',
     summary: 'Podsumowanie',
     choose: '— Wybierz —',
     subcategoryHint: 'Sprawdź dokładną podkategorię na Vinted po automatycznym wypełnieniu',
     addToDesc: 'Dodaj do opisu', addMeasure: 'Dodaj niestandardowy pomiar', other: 'Inne',
     infoValue: 'Wartość…', measureName: 'Nazwa pomiaru…', measureValue: 'cm',
+    noBrand: 'Bez marki',
   },
 }
 
@@ -887,6 +917,131 @@ const DIM_PRESETS_I18N: Record<Lang, { fr: string; en: string }[]> = {
     { fr: 'Rozmiar buta', en: 'Shoe size' }, { fr: 'Szerokość', en: 'Width' },
     { fr: 'Wysokość', en: 'Height' }, { fr: 'Głębokość', en: 'Depth' },
   ],
+}
+
+/* ─── Checklist de l'upload — 7 langues ──────────────────────────────────── */
+
+const CHECKLIST_I18N: Record<Lang, {
+  recto: string; rectoTip: string
+  verso: string; versoTip: string
+  labels: string; labelsTip: string
+  details: string; detailsTip: string
+  worn: string; wornTip: string
+}> = {
+  fr: {
+    recto:      'Photo principale',
+    rectoTip:   'Le recto de l\'article à plat ou sur cintre — la première photo que voient les acheteurs. Obligatoire pour continuer.',
+    verso:      'Photo verso',
+    versoTip:   'Le dos de l\'article — rassure les acheteurs sur l\'état général. Le plan Pro peut générer cette vue automatiquement.',
+    labels:     'Étiquettes',
+    labelsTip:  'Photographiez les étiquettes cousues : l\'IA lit la marque, la taille et la composition automatiquement.',
+    details:    'Détail ou défaut',
+    detailsTip: 'Gros plan sur une belle finition ou un défaut visible — renforce la confiance et réduit les litiges.',
+    worn:       'Photo portée',
+    wornTip:    'Portez l\'article vous-même ou générez une photo mannequin IA à l\'étape Visuels (plan Pro).',
+  },
+  en: {
+    recto:      'Main photo',
+    rectoTip:   'Front of the item laid flat or on a hanger — the first photo buyers see. Required to continue.',
+    verso:      'Back photo',
+    versoTip:   'Back of the item — reassures buyers about the overall condition. The Pro plan can generate this view automatically.',
+    labels:     'Labels',
+    labelsTip:  'Photograph the sewn-in labels: the AI reads brand, size and composition automatically.',
+    details:    'Detail or flaw',
+    detailsTip: 'Close-up of a quality finish or visible defect — builds trust and reduces disputes.',
+    worn:       'Worn photo',
+    wornTip:    'Wear the item yourself or generate an AI model photo in the Visuals step (Pro plan).',
+  },
+  es: {
+    recto:      'Foto principal',
+    rectoTip:   'El frente del artículo plano o en percha — la primera foto que ven los compradores. Obligatoria para continuar.',
+    verso:      'Foto trasera',
+    versoTip:   'La parte trasera del artículo — tranquiliza a los compradores sobre el estado general. El plan Pro puede generar esta vista automáticamente.',
+    labels:     'Etiquetas',
+    labelsTip:  'Fotografía las etiquetas cosidas: la IA lee la marca, la talla y la composición automáticamente.',
+    details:    'Detalle o defecto',
+    detailsTip: 'Primer plano de un acabado de calidad o un defecto visible — genera confianza y reduce disputas.',
+    worn:       'Foto vestida',
+    wornTip:    'Lleva el artículo tú mismo/a o genera una foto con maniquí IA en el paso Visuales (plan Pro).',
+  },
+  de: {
+    recto:      'Hauptfoto',
+    rectoTip:   'Vorderseite des Artikels, liegend oder auf dem Bügel — das erste Foto, das Käufer sehen. Pflichtfeld zum Fortfahren.',
+    verso:      'Rückseitenfoto',
+    versoTip:   'Rückseite des Artikels — beruhigt Käufer über den allgemeinen Zustand. Der Pro-Plan kann diese Ansicht automatisch generieren.',
+    labels:     'Etiketten',
+    labelsTip:  'Fotografiere die eingenähten Etiketten: die KI liest Marke, Größe und Zusammensetzung automatisch.',
+    details:    'Detail oder Mangel',
+    detailsTip: 'Nahaufnahme einer hochwertigen Verarbeitung oder eines sichtbaren Mangels — stärkt das Vertrauen und reduziert Streitigkeiten.',
+    worn:       'Anziehfoto',
+    wornTip:    'Trage den Artikel selbst oder generiere ein KI-Mannequin-Foto im Visuals-Schritt (Pro-Plan).',
+  },
+  it: {
+    recto:      'Foto principale',
+    rectoTip:   'Il fronte dell\'articolo disteso o su appendiabiti — la prima foto che vedono gli acquirenti. Obbligatoria per continuare.',
+    verso:      'Foto retro',
+    versoTip:   'Il retro dell\'articolo — rassicura gli acquirenti sullo stato generale. Il piano Pro può generare questa vista automaticamente.',
+    labels:     'Etichette',
+    labelsTip:  'Fotografa le etichette cucite: l\'IA legge automaticamente marca, taglia e composizione.',
+    details:    'Dettaglio o difetto',
+    detailsTip: 'Primo piano su una finitura di qualità o un difetto visibile — aumenta la fiducia e riduce le controversie.',
+    worn:       'Foto indossata',
+    wornTip:    'Indossa l\'articolo tu stesso/a o genera una foto con manichino IA nel passaggio Immagini (piano Pro).',
+  },
+  nl: {
+    recto:      'Hoofdfoto',
+    rectoTip:   'Voorkant van het artikel plat neergelegd of op een hanger — de eerste foto die kopers zien. Verplicht om verder te gaan.',
+    verso:      'Achterkantfoto',
+    versoTip:   'Achterkant van het artikel — stelt kopers gerust over de algemene staat. Het Pro-plan kan deze weergave automatisch genereren.',
+    labels:     'Labels',
+    labelsTip:  'Fotografeer de ingenaaide labels: de AI leest merk, maat en samenstelling automatisch.',
+    details:    'Detail of gebrek',
+    detailsTip: 'Close-up van een kwaliteitsdetail of een zichtbaar gebrek — vergroot het vertrouwen en vermindert geschillen.',
+    worn:       'Gedragen foto',
+    wornTip:    'Draag het artikel zelf of genereer een AI-mannequinfoto in de Visuals-stap (Pro-plan).',
+  },
+  pl: {
+    recto:      'Główne zdjęcie',
+    rectoTip:   'Przód artykułu leżącego lub na wieszaku — pierwsze zdjęcie, które widzą kupujący. Wymagane do kontynuowania.',
+    verso:      'Zdjęcie tyłu',
+    versoTip:   'Tył artykułu — uspokaja kupujących co do ogólnego stanu. Plan Pro może automatycznie wygenerować ten widok.',
+    labels:     'Etykiety',
+    labelsTip:  'Sfotografuj wszyte etykiety: AI automatycznie odczytuje markę, rozmiar i skład.',
+    details:    'Detal lub wada',
+    detailsTip: 'Zbliżenie na staranne wykończenie lub widoczną wadę — buduje zaufanie i redukuje spory.',
+    worn:       'Zdjęcie noszone',
+    wornTip:    'Załóż artykuł sam/sama lub wygeneruj zdjęcie z manekinem AI w kroku Zdjęcia (plan Pro).',
+  },
+}
+
+/* ─── Labels groupes de réassignation — 7 langues ────────────────────────── */
+
+const REASSIGN_I18N: Record<Lang, Record<string, string>> = {
+  fr: { recto: 'Recto', verso: 'Verso / autre vue', label: 'Étiquette (marque, taille, compo.)', detail: 'Détail / défaut', worn: 'Photo portée' },
+  en: { recto: 'Front', verso: 'Back / other view', label: 'Label (brand, size, care)', detail: 'Detail / flaw', worn: 'Worn photo' },
+  es: { recto: 'Frente', verso: 'Trasera / otra vista', label: 'Etiqueta (marca, talla, compos.)', detail: 'Detalle / defecto', worn: 'Foto vestida' },
+  de: { recto: 'Vorderseite', verso: 'Rückseite / andere Ansicht', label: 'Etikett (Marke, Größe, Pflege)', detail: 'Detail / Mangel', worn: 'Anziehfoto' },
+  it: { recto: 'Fronte', verso: 'Retro / altra vista', label: 'Etich. (marca, taglia, compos.)', detail: 'Dettaglio / difetto', worn: 'Foto indossata' },
+  nl: { recto: 'Voorkant', verso: 'Achterkant / andere weergave', label: 'Label (merk, maat, samenstelling)', detail: 'Detail / gebrek', worn: 'Gedragen foto' },
+  pl: { recto: 'Przód', verso: 'Tył / inny widok', label: 'Etykieta (marka, rozmiar, skład)', detail: 'Detal / wada', worn: 'Zdjęcie noszone' },
+}
+
+const REASSIGN_GROUPS: Array<{ key: string; slotIds: number[] }> = [
+  { key: 'recto',  slotIds: [0] },
+  { key: 'verso',  slotIds: [1, 2] },
+  { key: 'label',  slotIds: [3, 4, 5] },
+  { key: 'detail', slotIds: [6, 7, 8] },
+  { key: 'worn',   slotIds: [9, 10, 11, 12, 13, 14] },
+]
+
+const GALLERY_I18N: Record<Lang, { mainPhoto: string; makeMain: string }> = {
+  fr: { mainPhoto: 'Photo principale', makeMain: 'Définir comme principale' },
+  en: { mainPhoto: 'Main photo',       makeMain: 'Set as main photo' },
+  es: { mainPhoto: 'Foto principal',   makeMain: 'Definir como principal' },
+  de: { mainPhoto: 'Hauptfoto',        makeMain: 'Als Hauptfoto festlegen' },
+  it: { mainPhoto: 'Foto principale',  makeMain: 'Imposta come principale' },
+  nl: { mainPhoto: 'Hoofdfoto',        makeMain: 'Instellen als hoofdfoto' },
+  pl: { mainPhoto: 'Zdjęcie główne',   makeMain: 'Ustaw jako główne' },
 }
 
 const SYSTEM_LABELS_I18N: Record<Lang, Record<string, string>> = {
@@ -1112,7 +1267,6 @@ interface Props {
 export default function PhotoUploadStep({ slots, setSlots, result, setResult, plan }: Props) {
   const { lang } = useLang()
 
-  const [dragOverId, setDragOverId]               = useState<number | null>(null)
   const [isClassifying, setIsClassifying]         = useState(false)
   const [classifiedCount, setClassifiedCount]     = useState<number | null>(null)
   const [overflowCount, setOverflowCount]         = useState(0)
@@ -1129,13 +1283,12 @@ export default function PhotoUploadStep({ slots, setSlots, result, setResult, pl
 
   /* ── Helpers i18n ── */
   const planI18n      = PLAN_I18N[lang]      ?? PLAN_I18N.fr
-  const sectionTitles = SECTION_TITLES[lang] ?? SECTION_TITLES.fr
   const dropI18n      = DROP_I18N[lang]      ?? DROP_I18N.fr
-  const badgeI18n     = BADGE_I18N[lang]     ?? BADGE_I18N.fr
   const loadingI18n   = LOADING_I18N[lang]   ?? LOADING_I18N.fr
   const ui            = UI_I18N[lang]        ?? UI_I18N.fr
-  const dimPresets    = DIM_PRESETS_I18N[lang] ?? DIM_PRESETS_I18N.fr
-  const extraPresets  = EXTRA_INFO_PRESETS_I18N[lang] ?? EXTRA_INFO_PRESETS_I18N.fr
+  const checklistI18n = CHECKLIST_I18N[lang] ?? CHECKLIST_I18N.fr
+  const reassignI18n  = REASSIGN_I18N[lang]  ?? REASSIGN_I18N.fr
+  const galleryI18n   = GALLERY_I18N[lang]   ?? GALLERY_I18N.fr
 
   /* ── Reconnaissance automatique ── */
   const mainPhotoReady = (slots[0]?.file !== null)
@@ -1156,21 +1309,30 @@ export default function PhotoUploadStep({ slots, setSlots, result, setResult, pl
   const n3Options = n2 ? getN3List(n1, n2) : []
   const n4Options = n3 ? getN4List(n1, n2, n3) : []
   const n5Options = n4 ? getN5List(n1, n2, n3, n4) : []
-  const tailleSizes: string[] = useMemo(() => {
+  const tailleSystemsWithSizes = useMemo<Array<{ sys: SizeSystem; label: string; sizes: string[] }>>(() => {
     if (!result) return []
-    const sys = result.tailleSysteme.value[0] as SizeSystem | undefined
-    if (!sys) return []
-    return SIZES[sys] ?? []
-  }, [result])
+    return result.tailleSysteme.value
+      .filter((s): s is SizeSystem => s !== 'none' && s in SIZES && (SIZES[s as SizeSystem]?.length ?? 0) > 0)
+      .map(sys => ({
+        sys: sys as SizeSystem,
+        label: SYSTEM_LABELS_I18N[lang]?.[sys] ?? sys,
+        sizes: SIZES[sys as SizeSystem],
+      }))
+  }, [result, lang])
 
-  /* ── États formulaire infos complémentaires + dimensions ── */
-  const [openExtraFields,  setOpenExtraFields]  = useState<string[]>([])
-  const [extraFieldInputs, setExtraFieldInputs] = useState<Record<string, string>>({})
-  const [customExtraRows,  setCustomExtraRows]  = useState<{ id: number; nom: string; value: string }[]>([])
-  const [prixNeuf,         setPrixNeuf]         = useState('')
-  const [openDimFields,    setOpenDimFields]    = useState<string[]>([])
-  const [dimInputs,        setDimInputs]        = useState<Record<string, string>>({})
-  const [customDimRows,    setCustomDimRows]    = useState<{ id: number; nom: string; valeur: string }[]>([])
+  const allTailleSizes = useMemo(
+    () => [...new Set(tailleSystemsWithSizes.flatMap(s => s.sizes))],
+    [tailleSystemsWithSizes],
+  )
+
+  /* Si la valeur de taille n'est dans aucun des systèmes disponibles, forcer confidence → low */
+  const tailleEffectiveConf: Confidence = useMemo(() => {
+    if (!result) return 'low'
+    const val = result.taille.value
+    if (!val) return result.taille.confidence
+    if (allTailleSizes.length > 0 && !allTailleSizes.includes(val)) return 'low'
+    return result.taille.confidence
+  }, [result, allTailleSizes])
 
   /* ── update : modifie un champ RecognitionResult (confidence → 'manual') ── */
   const update = useCallback((field: keyof RecognitionResult, value: string | string[]) => {
@@ -1178,117 +1340,21 @@ export default function PhotoUploadStep({ slots, setSlots, result, setResult, pl
     setResult({ ...result, [field]: { value, confidence: 'manual' as const } })
   }, [result, setResult])
 
-  /* ── Infos complémentaires — présets ── */
-  const validateMissingInfo = useCallback((label: string) => {
-    const value = (extraFieldInputs[label] ?? '').trim()
-    if (!value || !result) return
-    const existing = result.extraInfo?.missingInfos ?? []
-    setResult({
-      ...result,
-      extraInfo: {
-        ...(result.extraInfo ?? { missingInfos: [], dimensions: [] }),
-        missingInfos: [...existing.filter(i => i.label !== label), { label, value }],
-      },
+  /* ── Réassignation de slot ── */
+  const reassignPhoto = useCallback((fromSlotId: number, groupKey: string) => {
+    const group = REASSIGN_GROUPS.find(g => g.key === groupKey)
+    if (!group || group.slotIds.includes(fromSlotId)) return
+    const targetId = group.slotIds.find(id => slots[id].file === null)
+    if (targetId === undefined) return
+    setSlots(prev => {
+      const next = [...prev]
+      next[targetId] = { ...prev[fromSlotId], id: targetId, contentType: groupKey as PhotoContentType }
+      next[fromSlotId] = { id: fromSlotId, file: null, preview: null, processedUrl: null, status: 'empty' as const }
+      return next
     })
-    setExtraFieldInputs(prev => { const n = { ...prev }; delete n[label]; return n })
-    setOpenExtraFields(prev => prev.filter(f => f !== label))
-  }, [extraFieldInputs, result, setResult])
+  }, [slots, setSlots])
 
-  const removeValidatedInfo = useCallback((label: string) => {
-    if (!result) return
-    setResult({
-      ...result,
-      extraInfo: {
-        ...(result.extraInfo ?? { missingInfos: [], dimensions: [] }),
-        missingInfos: (result.extraInfo?.missingInfos ?? []).filter(i => i.label !== label),
-      },
-    })
-  }, [result, setResult])
-
-  const addCustomExtraRow = useCallback(() => {
-    setCustomExtraRows(prev => [...prev, { id: Date.now(), nom: '', value: '' }])
-  }, [])
-
-  const validateCustomExtraRow = useCallback((id: number) => {
-    const row = customExtraRows.find(r => r.id === id)
-    if (!row || !row.nom.trim() || !row.value.trim() || !result) return
-    const existing = result.extraInfo?.missingInfos ?? []
-    setResult({
-      ...result,
-      extraInfo: {
-        ...(result.extraInfo ?? { missingInfos: [], dimensions: [] }),
-        missingInfos: [...existing.filter(i => i.label !== row.nom), { label: row.nom, value: row.value }],
-      },
-    })
-    setCustomExtraRows(prev => prev.filter(r => r.id !== id))
-  }, [customExtraRows, result, setResult])
-
-  const removeCustomExtraRow = useCallback((id: number) => {
-    setCustomExtraRows(prev => prev.filter(r => r.id !== id))
-  }, [])
-
-  /* ── Dimensions ── */
-  const validateDimension = useCallback((nom: string, nomEN: string) => {
-    const valeur = (dimInputs[nom] ?? '').trim()
-    if (!valeur || !result) return
-    const existing = result.extraInfo?.dimensions ?? []
-    setResult({
-      ...result,
-      extraInfo: {
-        ...(result.extraInfo ?? { missingInfos: [], dimensions: [] }),
-        dimensions: [...existing.filter(d => d.nom !== nom), { nom, nomEN, valeur }],
-      },
-    })
-    setDimInputs(prev => { const n = { ...prev }; delete n[nom]; return n })
-    setOpenDimFields(prev => prev.filter(f => f !== nom))
-  }, [dimInputs, result, setResult])
-
-  const removeValidatedDim = useCallback((nom: string) => {
-    if (!result) return
-    setResult({
-      ...result,
-      extraInfo: {
-        ...(result.extraInfo ?? { missingInfos: [], dimensions: [] }),
-        dimensions: (result.extraInfo?.dimensions ?? []).filter(d => d.nom !== nom),
-      },
-    })
-  }, [result, setResult])
-
-  const addCustomDimRow = useCallback(() => {
-    setCustomDimRows(prev => [...prev, { id: Date.now(), nom: '', valeur: '' }])
-  }, [])
-
-  const validateCustomDimRow = useCallback((id: number) => {
-    const row = customDimRows.find(r => r.id === id)
-    if (!row || !row.nom.trim() || !row.valeur.trim() || !result) return
-    const existing = result.extraInfo?.dimensions ?? []
-    setResult({
-      ...result,
-      extraInfo: {
-        ...(result.extraInfo ?? { missingInfos: [], dimensions: [] }),
-        dimensions: [...existing.filter(d => d.nom !== row.nom), { nom: row.nom, nomEN: row.nom, valeur: row.valeur }],
-      },
-    })
-    setCustomDimRows(prev => prev.filter(r => r.id !== id))
-  }, [customDimRows, result, setResult])
-
-  const removeCustomDimRow = useCallback((id: number) => {
-    setCustomDimRows(prev => prev.filter(r => r.id !== id))
-  }, [])
-
-  const validatePrixNeuf = useCallback(() => {
-    const v = parseFloat(prixNeuf)
-    if (!v || !result) return
-    setResult({
-      ...result,
-      extraInfo: {
-        ...(result.extraInfo ?? { missingInfos: [], dimensions: [] }),
-        prixAchatNeuf: v,
-      },
-    })
-  }, [prixNeuf, result, setResult])
-
-  const filledCount   = slots.filter(s => s.file !== null || (s.preview !== null && s.status !== 'empty')).length
+  const filledSlots = slots.filter(s => s.file !== null)
 
   /* ── Met à jour un seul slot ── */
   const updateSlot = useCallback(
@@ -1299,7 +1365,7 @@ export default function PhotoUploadStep({ slots, setSlots, result, setResult, pl
 
   /* ── Charge un fichier dans un slot (plan-aware) ── */
   const loadFileInSlot = useCallback(
-    async (originalFile: File, slotId: number, skipBgRemoval = false) => {
+    async (originalFile: File, slotId: number, skipBgRemoval = false, contentType?: PhotoContentType) => {
       /* Resize to max 1024 px before storing — prevents heavy files from breaking bg removal */
       let file: File = originalFile
       try {
@@ -1308,12 +1374,11 @@ export default function PhotoUploadStep({ slots, setSlots, result, setResult, pl
       } catch { /* keep original if canvas unavailable */ }
 
       const preview = URL.createObjectURL(file)
-      updateSlot(slotId, { file, preview, status: 'uploading', processedUrl: null, compositedUrl: undefined, error: undefined, isAiGenerated: undefined })
+      updateSlot(slotId, { file, preview, status: 'uploading', processedUrl: null, compositedUrl: undefined, error: undefined, isAiGenerated: undefined, contentType: undefined })
       await new Promise(r => setTimeout(r, 200))
 
-      const def = SLOT_DEFS[slotId as keyof typeof SLOT_DEFS] ?? SLOT_DEFS[0]
-      /* Auto-suppression fond uniquement pour freemium + slot 0 + upload individuel */
-      const shouldAutoRemove = plan === 'freemium' && (def as typeof SLOT_DEFS[0]).bgRemoval === 'free' && !skipBgRemoval
+      /* Pas de suppression de fond à l'étape Article — uniquement à l'étape Visuels */
+      const shouldAutoRemove = false
 
       if (shouldAutoRemove) {
         updateSlot(slotId, { status: 'processing-bg' })
@@ -1321,16 +1386,16 @@ export default function PhotoUploadStep({ slots, setSlots, result, setResult, pl
           const { removeBackground } = await import('@imgly/background-removal')
           const blob = new Blob([await file.arrayBuffer()], { type: file.type || 'image/jpeg' })
           const resultBlob = await removeBackground(blob)
-          updateSlot(slotId, { status: 'done', processedUrl: URL.createObjectURL(resultBlob) })
+          updateSlot(slotId, { status: 'done', processedUrl: URL.createObjectURL(resultBlob), ...(contentType ? { contentType } : {}) })
         } catch (err) {
           console.error('Background removal failed:', err)
-          updateSlot(slotId, { status: 'done', processedUrl: null, error: 'bg_failed' })
+          updateSlot(slotId, { status: 'done', processedUrl: null, error: 'bg_failed', ...(contentType ? { contentType } : {}) })
         }
       } else {
-        updateSlot(slotId, { status: 'done' })
+        updateSlot(slotId, { status: 'done', ...(contentType ? { contentType } : {}) })
       }
     },
-    [updateSlot, plan],
+    [updateSlot],
   )
 
   /* ── Upload multiple → classify → slots ── */
@@ -1364,7 +1429,7 @@ export default function PhotoUploadStep({ slots, setSlots, result, setResult, pl
         const res = await fetch('/api/classify-photos', { method: 'POST', body: fd })
         const rawResults: ClassifyResult[] = res.ok
           ? ((await res.json()) as { results: ClassifyResult[] }).results
-          : files.map((_, i) => ({ fileIndex: i, type: 'flat' as const, detailSlot: 6 }))
+          : files.map((_, i) => ({ fileIndex: i, type: 'recto' as const }))
 
         const taken = new Set<number>(
           slotsRef.current.map((s, i) => (s.file ? i : -1)).filter(i => i >= 0),
@@ -1372,10 +1437,10 @@ export default function PhotoUploadStep({ slots, setSlots, result, setResult, pl
         const assignments = assignSlots(rawResults, taken)
         let ignored = 0
 
-        for (const { fileIndex, slot } of assignments) {
+        for (const { fileIndex, slot, contentType } of assignments) {
           if (fileIndex >= files.length) continue
           if (slot === null) { ignored++; continue }
-          loadFileInSlot(files[fileIndex], slot, true)
+          loadFileInSlot(files[fileIndex], slot, true, contentType)
         }
 
         setClassifiedCount(assignments.filter(a => a.slot !== null).length)
@@ -1466,7 +1531,7 @@ export default function PhotoUploadStep({ slots, setSlots, result, setResult, pl
       setSlots(prev =>
         prev.map(s =>
           s.id === slotId
-            ? { ...s, file: null, preview: null, processedUrl: null, status: 'empty', error: undefined, isAiGenerated: undefined }
+            ? { ...s, file: null, preview: null, processedUrl: null, status: 'empty', error: undefined, isAiGenerated: undefined, contentType: undefined }
             : s,
         ),
       )
@@ -1565,43 +1630,75 @@ export default function PhotoUploadStep({ slots, setSlots, result, setResult, pl
         )}
       </div>
 
-      {/* ── Zone d'import multiple ── */}
+      {/* ── Zone d'import multiple avec checklist ── */}
       <div
         onDragOver={(e) => { e.preventDefault(); if (!dragSourceId.current) setGlobalDragOver(true) }}
         onDragLeave={() => setGlobalDragOver(false)}
         onDrop={handleGlobalDrop}
-        className={`relative rounded-2xl border-2 border-dashed transition-all p-5 text-center ${
+        className={`relative rounded-2xl border-2 border-dashed transition-all p-4 ${
           globalDragOver || isClassifying
             ? 'border-indigo-400 bg-indigo-50'
             : 'border-gray-200 bg-gray-50 hover:border-gray-300'
         }`}
       >
         {isClassifying ? (
-          <div className="flex flex-col items-center gap-2.5 py-1">
+          <div className="flex flex-col items-center gap-2.5 py-2 text-center">
             <div className="w-7 h-7 border-2 border-indigo-600 border-t-transparent rounded-full animate-spin" />
             <p className="text-sm font-semibold text-indigo-600">{dropI18n.classifying}</p>
             <p className="text-xs text-gray-400">{dropI18n.classifyingSub}</p>
           </div>
         ) : globalDragOver ? (
-          <div className="flex flex-col items-center gap-2 py-1">
+          <div className="flex flex-col items-center gap-2 py-2 text-center">
             <Sparkles className="w-7 h-7 text-indigo-500" />
             <p className="text-sm font-semibold text-indigo-600">{dropI18n.dropHere}</p>
           </div>
         ) : (
-          <div className="flex flex-col sm:flex-row items-center justify-center gap-3">
-            <label className="cursor-pointer">
+          <div className="flex flex-col sm:flex-row items-start gap-4">
+            <label className="cursor-pointer shrink-0">
               <input
                 type="file" accept="image/*" multiple className="hidden"
                 onChange={(e) =>
                   e.target.files && handleMultipleFiles(Array.from(e.target.files).filter(f => f.type.startsWith('image/')))
                 }
               />
-              <div className="flex items-center gap-2 bg-white border border-gray-200 rounded-full px-5 py-2.5 hover:border-indigo-300 hover:shadow-sm transition-all text-sm font-semibold text-gray-700 select-none">
+              <div className="flex items-center gap-2 bg-white border border-gray-200 rounded-full px-4 py-2.5 hover:border-indigo-300 hover:shadow-sm transition-all text-sm font-semibold text-gray-700 select-none whitespace-nowrap">
                 <Upload className="w-4 h-4" />
                 {dropI18n.importBtn}
               </div>
             </label>
-            <p className="text-xs text-gray-400">{dropI18n.importHint}</p>
+            <div className="space-y-1.5 flex-1">
+              {(() => {
+                const anyUploaded = filledSlots.length > 0
+                return ([
+                  { key: 'recto',   check: slots[0]?.file !== null },
+                  { key: 'verso',   check: slots[1]?.file !== null },
+                  { key: 'labels',  check: [3,4,5].some(i => slots[i]?.file !== null) },
+                  { key: 'details', check: [6,7,8].some(i => slots[i]?.file !== null) },
+                  { key: 'worn',    check: [9,10,11,12,13,14].some(i => slots[i]?.file !== null) },
+                ] as const).map(({ key, check }) => {
+                  const showRed = anyUploaded && !check
+                  return (
+                    <div key={key} className="flex items-center gap-2">
+                      {check ? (
+                        <div className="w-4 h-4 rounded-full bg-green-500 border-2 border-green-500 flex items-center justify-center shrink-0">
+                          <Check className="w-2.5 h-2.5 text-white" />
+                        </div>
+                      ) : showRed ? (
+                        <XCircle className="w-4 h-4 text-red-400 shrink-0" />
+                      ) : (
+                        <div className="w-4 h-4 rounded-full border-2 border-gray-300 shrink-0" />
+                      )}
+                      <span className={`text-xs font-semibold ${check ? 'text-green-700' : showRed ? 'text-gray-600' : 'text-gray-400'}`}>
+                        {checklistI18n[key]}
+                      </span>
+                      {!check && (
+                        <span className="text-[10px] text-gray-400">{checklistI18n[`${key}Tip` as keyof typeof checklistI18n]}</span>
+                      )}
+                    </div>
+                  )
+                })
+              })()}
+            </div>
           </div>
         )}
       </div>
@@ -1630,78 +1727,34 @@ export default function PhotoUploadStep({ slots, setSlots, result, setResult, pl
         </div>
       )}
 
-      {/* ══ Zones photos ════════════════════════════════════════════════════ */}
-      <div className="space-y-3">
-
-        {/* SECTION 1 — Photos non portées (slots 0–8) */}
+      {/* ══ Galerie photos ══════════════════════════════════════════════════ */}
+      {filledSlots.length > 0 && (
         <div>
-          <div className="flex items-center justify-between mb-1.5">
-            <p className="text-[10px] font-bold text-gray-400 tracking-widest">{sectionTitles.s1}</p>
-            {filledCount > 0 && <p className="text-xs text-gray-400 font-medium">{filledCount}/15</p>}
+          <div className="flex items-center justify-between mb-2">
+            <p className="text-[10px] font-bold text-gray-400 tracking-widest">{dropI18n.title.toUpperCase()}</p>
+            <p className="text-xs text-gray-400 font-medium">{filledSlots.length}/15</p>
           </div>
-          <div className="grid grid-cols-3 gap-2 mb-2">
-            {SLOT_DEFS.slice(0, 3).map(def => (
-              <SlotCard
-                key={def.id}
-                def={def}
-                slot={slots[def.id]}
-                isDragOver={dragOverId === def.id}
-                dragSourceId={dragSourceId}
-                displayLabel={SLOT_LABELS[lang]?.[def.id] ?? def.label}
-                badgeLabels={badgeI18n}
+          <div className="grid grid-cols-3 sm:grid-cols-4 gap-2">
+            {filledSlots.map(slot => (
+              <GalleryCard
+                key={slot.id}
+                slot={slot}
+                slotId={slot.id}
+                label={SLOT_LABELS[lang]?.[slot.id] ?? `Slot ${slot.id}`}
                 loadingLabels={loadingI18n}
-                onFileSelected={file => loadFileInSlot(file, def.id)}
-                onSwap={swapSlots}
-                onClear={() => clearSlot(def.id)}
-                onDragOverChange={over => setDragOverId(over ? def.id : null)}
-              />
-            ))}
-          </div>
-          <div className="grid grid-cols-6 gap-2">
-            {SLOT_DEFS.slice(3, 9).map(def => (
-              <SlotCard
-                key={def.id}
-                def={def}
-                slot={slots[def.id]}
-                isDragOver={dragOverId === def.id}
-                dragSourceId={dragSourceId}
-                displayLabel={SLOT_LABELS[lang]?.[def.id] ?? def.label}
-                badgeLabels={badgeI18n}
-                loadingLabels={loadingI18n}
-                onFileSelected={file => loadFileInSlot(file, def.id)}
-                onSwap={swapSlots}
-                onClear={() => clearSlot(def.id)}
-                onDragOverChange={over => setDragOverId(over ? def.id : null)}
+                onClear={() => clearSlot(slot.id)}
+                onReassign={(groupKey) => reassignPhoto(slot.id, groupKey)}
+                onMakeMain={() => swapSlots(slot.id, 0)}
+                slots={slots}
+                reassignI18n={reassignI18n}
+                isPrimary={slot.id === 0}
+                mainPhotoLabel={galleryI18n.mainPhoto}
+                makeMainLabel={galleryI18n.makeMain}
               />
             ))}
           </div>
         </div>
-
-        {/* SECTION 2 — Photos portées (slots 9–14) */}
-        <div>
-          <p className="text-[10px] font-bold text-gray-400 tracking-widest mb-1.5">{sectionTitles.s2}</p>
-          <div className="grid grid-cols-6 gap-2">
-            {SLOT_DEFS.slice(9).map(def => (
-              <SlotCard
-                key={def.id}
-                def={def}
-                slot={slots[def.id]}
-                isDragOver={dragOverId === def.id}
-                dragSourceId={dragSourceId}
-                displayLabel={SLOT_LABELS[lang]?.[def.id] ?? def.label}
-                badgeLabels={badgeI18n}
-                loadingLabels={loadingI18n}
-                onFileSelected={file => loadFileInSlot(file, def.id)}
-                onSwap={swapSlots}
-                onClear={() => clearSlot(def.id)}
-                onDragOverChange={over => setDragOverId(over ? def.id : null)}
-              />
-            ))}
-          </div>
-
-        </div>
-
-      </div>
+      )}
 
       {/* ── Reconnaissance : chargement ── */}
       {recogLoading && (
@@ -1764,7 +1817,7 @@ export default function PhotoUploadStep({ slots, setSlots, result, setResult, pl
 
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-5">
               {/* Marque */}
-              <Field label={ui.brand} confidence={result.marque.confidence}>
+              <Field label={ui.brand} confidence={result.marque.confidence} required>
                 <input
                   type="text"
                   value={result.marque.value}
@@ -1772,6 +1825,15 @@ export default function PhotoUploadStep({ slots, setSlots, result, setResult, pl
                   placeholder="Ex: Zara, H&M, Nike…"
                   className={inputCls(result.marque.confidence)}
                 />
+                {!result.marque.value && (
+                  <button
+                    type="button"
+                    onClick={() => update('marque', ui.noBrand)}
+                    className="text-[10px] font-semibold text-gray-400 hover:text-indigo-600 transition-colors text-left"
+                  >
+                    → {ui.noBrand}
+                  </button>
+                )}
               </Field>
 
               {/* Genre */}
@@ -1890,15 +1952,22 @@ export default function PhotoUploadStep({ slots, setSlots, result, setResult, pl
 
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-5">
               {/* Taille */}
-              <Field label={ui.size} confidence={result.taille.confidence}>
-                {tailleSizes.length > 0 ? (
+              <Field label={ui.size} confidence={tailleEffectiveConf} required={result.tailleSysteme.value[0] !== 'none'}>
+                {tailleSystemsWithSizes.length > 0 ? (
                   <select
-                    value={result.taille.value}
+                    value={allTailleSizes.includes(result.taille.value) ? result.taille.value : ''}
                     onChange={e => update('taille', e.target.value)}
-                    className={inputCls(result.taille.confidence)}
+                    className={inputCls(tailleEffectiveConf)}
                   >
                     <option value="">{ui.choose}</option>
-                    {tailleSizes.map(s => <option key={s} value={s}>{s}</option>)}
+                    {tailleSystemsWithSizes.length === 1
+                      ? tailleSystemsWithSizes[0].sizes.map(s => <option key={s} value={s}>{s}</option>)
+                      : tailleSystemsWithSizes.map(({ sys, label, sizes }) => (
+                          <optgroup key={sys} label={label}>
+                            {sizes.map(s => <option key={`${sys}-${s}`} value={s}>{s}</option>)}
+                          </optgroup>
+                        ))
+                    }
                   </select>
                 ) : (
                   <input
@@ -1906,7 +1975,7 @@ export default function PhotoUploadStep({ slots, setSlots, result, setResult, pl
                     value={result.taille.value}
                     onChange={e => update('taille', e.target.value)}
                     placeholder="Ex: M, 38, 40…"
-                    className={inputCls(result.taille.confidence)}
+                    className={inputCls(tailleEffectiveConf)}
                   />
                 )}
               </Field>
@@ -2022,307 +2091,195 @@ export default function PhotoUploadStep({ slots, setSlots, result, setResult, pl
           </section>
 
           {/* ── Section Défauts ── */}
-          <section className="bg-white rounded-2xl border border-gray-100 shadow-sm p-5 space-y-4">
-            <h3 className="text-xs font-bold text-gray-400 uppercase tracking-widest">{ui.sectionFlaws}</h3>
+          {(() => {
+            const pendingDefect = !!result.defauts.value && result.defauts.confidence !== 'manual'
+            return (
+              <section className={`bg-white rounded-2xl border shadow-sm p-5 space-y-4 transition-colors ${
+                pendingDefect ? 'border-orange-300 ring-1 ring-orange-100' : 'border-gray-100'
+              }`}>
+                <h3 className="text-xs font-bold text-gray-400 uppercase tracking-widest">{ui.sectionFlaws}</h3>
 
-            {result.defauts.value ? (
-              <div className="flex items-start gap-3 p-3.5 bg-orange-50 border border-orange-200 rounded-xl">
-                <AlertTriangle className="w-4 h-4 text-orange-500 shrink-0 mt-0.5" />
-                <div className="flex-1 min-w-0">
-                  <p className="text-xs font-semibold text-orange-700 mb-1">{ui.defectDetected}</p>
-                  <p className="text-sm text-orange-800">{result.defauts.value}</p>
-                </div>
-              </div>
-            ) : null}
-
-            <Field label={ui.flaws} confidence={result.defauts.confidence}>
-              <textarea
-                value={result.defauts.value}
-                onChange={e => update('defauts', e.target.value)}
-                rows={3}
-                placeholder="Ex: Légère décoloration sur l'épaule gauche, fil tiré sur la manche… (laisser vide si aucun défaut)"
-                className={`${inputCls(result.defauts.confidence)} resize-none`}
-              />
-            </Field>
-          </section>
-
-          {/* ── Section Informations complémentaires ── */}
-          <section className="bg-white rounded-2xl border border-gray-100 shadow-sm p-5 space-y-5">
-            <h3 className="text-xs font-bold text-gray-400 uppercase tracking-widest">{ui.sectionExtra}</h3>
-
-            {/* Bloc 1 — Infos générales */}
-            <div className="space-y-3">
-              <p className="text-[11px] font-semibold text-gray-500 uppercase tracking-wide">{ui.generalInfo}</p>
-
-              <div className="flex flex-wrap gap-1.5">
-                {EXTRA_INFO_PRESETS.map((label, idx) => {
-                  const validated    = result.extraInfo?.missingInfos?.find(i => i.label === label)
-                  const isOpen       = openExtraFields.includes(label)
-                  const displayLabel = extraPresets[idx] ?? label
-                  return (
-                    <button
-                      key={label}
-                      type="button"
-                      onClick={() => {
-                        if (validated) { removeValidatedInfo(label) }
-                        else if (!isOpen) { setOpenExtraFields(prev => [...prev, label]) }
-                      }}
-                      className={`text-xs font-semibold px-2.5 py-1 rounded-full border transition-all ${
-                        validated
-                          ? 'bg-green-50 text-green-700 border-green-200'
-                          : isOpen
-                          ? 'bg-orange-50 text-orange-600 border-orange-300'
-                          : 'bg-white text-gray-600 border-gray-200 hover:border-indigo-300'
-                      }`}
-                    >
-                      {validated ? `✓ ${displayLabel} : ${validated.value}` : `+ ${displayLabel}`}
-                    </button>
-                  )
-                })}
-                {(result.extraInfo?.missingInfos ?? [])
-                  .filter(i => !EXTRA_INFO_PRESETS.includes(i.label))
-                  .map(i => (
-                    <button
-                      key={i.label}
-                      type="button"
-                      onClick={() => removeValidatedInfo(i.label)}
-                      className="text-xs font-semibold px-2.5 py-1 rounded-full border transition-all bg-green-50 text-green-700 border-green-200"
-                    >
-                      ✓ {i.label} : {i.value}
-                    </button>
-                  ))
-                }
-                <button
-                  type="button"
-                  onClick={addCustomExtraRow}
-                  className="text-xs font-semibold px-2.5 py-1 rounded-full border bg-white text-gray-600 border-gray-200 hover:border-indigo-300 transition-all flex items-center gap-1"
-                >
-                  <Plus className="w-3 h-3" />
-                  {ui.other}
-                </button>
-              </div>
-
-              {openExtraFields.map(label => {
-                const idxFr = EXTRA_INFO_PRESETS.indexOf(label)
-                const displayLabel = idxFr >= 0 ? (extraPresets[idxFr] ?? label) : label
-                return (
-                  <div key={label} className="flex items-center gap-2">
-                    <span className="text-xs font-semibold text-gray-600 shrink-0 w-32 truncate">{displayLabel}</span>
-                    <input
-                      type="text"
-                      value={extraFieldInputs[label] ?? ''}
-                      onChange={e => setExtraFieldInputs(prev => ({ ...prev, [label]: e.target.value }))}
-                      onKeyDown={e => e.key === 'Enter' && validateMissingInfo(label)}
-                      placeholder={ui.infoValue}
-                      className="flex-1 text-sm rounded-xl border border-gray-200 px-3 py-2 focus:outline-none focus:ring-2 focus:ring-indigo-100 focus:border-indigo-400 transition-colors"
-                    />
-                    <button
-                      onClick={() => validateMissingInfo(label)}
-                      disabled={!(extraFieldInputs[label] ?? '').trim()}
-                      className="shrink-0 text-xs font-semibold px-3 py-2 bg-green-500 hover:bg-green-600 disabled:bg-gray-200 disabled:cursor-not-allowed text-white rounded-xl transition-colors whitespace-nowrap"
-                    >
-                      {ui.addToDesc}
-                    </button>
-                    <button
-                      onClick={() => setOpenExtraFields(prev => prev.filter(f => f !== label))}
-                      className="text-gray-400 hover:text-gray-600 transition-colors"
-                    >
-                      <X className="w-4 h-4" />
-                    </button>
+                {pendingDefect ? (
+                  <div className="flex items-start gap-3 p-3.5 bg-orange-50 border border-orange-200 rounded-xl">
+                    <AlertTriangle className="w-4 h-4 text-orange-500 shrink-0 mt-0.5" />
+                    <div className="flex-1 min-w-0">
+                      <p className="text-xs font-semibold text-orange-700 mb-1">{ui.defectDetected}</p>
+                      <p className="text-sm text-orange-800 mb-3">{result.defauts.value}</p>
+                      <div className="flex flex-wrap gap-2">
+                        <button
+                          type="button"
+                          onClick={() => update('defauts', result.defauts.value)}
+                          className="text-xs font-semibold bg-orange-500 hover:bg-orange-600 text-white px-3 py-1.5 rounded-lg transition-colors"
+                        >
+                          {ui.defectConfirmBtn}
+                        </button>
+                        <button
+                          type="button"
+                          onClick={() => setResult({ ...result, defauts: { value: '', confidence: 'manual' } })}
+                          className="text-xs font-semibold bg-white hover:bg-gray-50 text-gray-600 border border-gray-200 px-3 py-1.5 rounded-lg transition-colors"
+                        >
+                          {ui.defectRejectBtn}
+                        </button>
+                      </div>
+                    </div>
                   </div>
-                )
-              })}
-
-              {customExtraRows.map(row => (
-                <div key={row.id} className="flex items-center gap-2">
-                  <input
-                    type="text"
-                    value={row.nom}
-                    onChange={e => setCustomExtraRows(prev => prev.map(r => r.id === row.id ? { ...r, nom: e.target.value } : r))}
-                    placeholder={ui.measureName}
-                    className="w-32 text-sm rounded-xl border border-gray-200 px-3 py-2 focus:outline-none focus:ring-2 focus:ring-indigo-100 focus:border-indigo-400 transition-colors"
-                  />
-                  <input
-                    type="text"
-                    value={row.value}
-                    onChange={e => setCustomExtraRows(prev => prev.map(r => r.id === row.id ? { ...r, value: e.target.value } : r))}
-                    onKeyDown={e => e.key === 'Enter' && validateCustomExtraRow(row.id)}
-                    placeholder={ui.infoValue}
-                    className="flex-1 text-sm rounded-xl border border-gray-200 px-3 py-2 focus:outline-none focus:ring-2 focus:ring-indigo-100 focus:border-indigo-400 transition-colors"
-                  />
-                  <button
-                    onClick={() => validateCustomExtraRow(row.id)}
-                    disabled={!row.nom.trim() || !row.value.trim()}
-                    className="shrink-0 text-xs font-semibold px-3 py-2 bg-green-500 hover:bg-green-600 disabled:bg-gray-200 disabled:cursor-not-allowed text-white rounded-xl transition-colors whitespace-nowrap"
-                  >
-                    {ui.addToDesc}
-                  </button>
-                  <button
-                    onClick={() => removeCustomExtraRow(row.id)}
-                    className="text-gray-400 hover:text-gray-600 transition-colors"
-                  >
-                    <X className="w-4 h-4" />
-                  </button>
-                </div>
-              ))}
-
-              {/* Prix neuf */}
-              <div className="flex items-center gap-2">
-                <span className="text-xs font-semibold text-gray-600 shrink-0 w-32">{ui.retailPrice}</span>
-                <input
-                  type="number"
-                  min="0"
-                  step="0.01"
-                  value={prixNeuf}
-                  onChange={e => setPrixNeuf(e.target.value)}
-                  onKeyDown={e => e.key === 'Enter' && validatePrixNeuf()}
-                  placeholder="Ex: 49.90"
-                  className={`flex-1 text-sm rounded-xl border px-3 py-2 focus:outline-none focus:ring-2 transition-colors ${
-                    result.extraInfo?.prixAchatNeuf
-                      ? 'border-green-300 bg-green-50 focus:ring-green-100'
-                      : 'border-gray-200 bg-white focus:ring-indigo-100 focus:border-indigo-400'
-                  }`}
-                />
-                <span className="text-xs text-gray-400 shrink-0">€</span>
-                <button
-                  onClick={validatePrixNeuf}
-                  disabled={!parseFloat(prixNeuf)}
-                  className="shrink-0 w-8 h-8 flex items-center justify-center bg-green-500 hover:bg-green-600 disabled:bg-gray-200 disabled:cursor-not-allowed text-white rounded-xl transition-colors"
-                >
-                  <Check className="w-3.5 h-3.5" />
-                </button>
-              </div>
-            </div>
-
-            {/* Bloc 2 — Dimensions */}
-            <div className="space-y-3 pt-4 border-t border-gray-100">
-              <p className="text-[11px] font-semibold text-gray-500 uppercase tracking-wide">{ui.dimensions}</p>
-
-              <div className="flex flex-wrap gap-1.5">
-                {DIM_PRESETS_FR.map((nom, idx) => {
-                  const validated    = result.extraInfo?.dimensions?.find(d => d.nom === nom)
-                  const isOpen       = openDimFields.includes(nom)
-                  const displayLabel = dimPresets[idx]?.fr ?? nom
-                  return (
-                    <button
-                      key={nom}
-                      type="button"
-                      onClick={() => {
-                        if (validated) { removeValidatedDim(nom) }
-                        else if (!isOpen) { setOpenDimFields(prev => [...prev, nom]) }
-                      }}
-                      className={`text-xs font-semibold px-2.5 py-1 rounded-full border transition-all ${
-                        validated
-                          ? 'bg-green-50 text-green-700 border-green-200'
-                          : isOpen
-                          ? 'bg-orange-50 text-orange-600 border-orange-300'
-                          : 'bg-white text-gray-600 border-gray-200 hover:border-indigo-300'
-                      }`}
-                    >
-                      {validated ? `✓ ${displayLabel} : ${validated.valeur} cm` : `+ ${displayLabel}`}
-                    </button>
-                  )
-                })}
-                {(result.extraInfo?.dimensions ?? [])
-                  .filter(d => !DIM_PRESETS_FR.includes(d.nom))
-                  .map(d => (
-                    <button
-                      key={d.nom}
-                      type="button"
-                      onClick={() => removeValidatedDim(d.nom)}
-                      className="text-xs font-semibold px-2.5 py-1 rounded-full border transition-all bg-green-50 text-green-700 border-green-200"
-                    >
-                      ✓ {d.nom} : {d.valeur} cm
-                    </button>
-                  ))
-                }
-              </div>
-
-              {openDimFields.map(nom => {
-                const idx          = DIM_PRESETS_FR.indexOf(nom)
-                const displayLabel = idx >= 0 ? (dimPresets[idx]?.fr ?? nom) : nom
-                const nomEN        = DIM_PRESETS_EN[idx] ?? nom
-                return (
-                  <div key={nom} className="flex items-center gap-2">
-                    <span className="text-xs font-semibold text-gray-600 shrink-0 w-32 truncate">{displayLabel}</span>
-                    <input
-                      type="number"
-                      min="0"
-                      step="0.1"
-                      value={dimInputs[nom] ?? ''}
-                      onChange={e => setDimInputs(prev => ({ ...prev, [nom]: e.target.value }))}
-                      onKeyDown={e => { if (e.key === 'Enter') validateDimension(nom, nomEN) }}
-                      placeholder={ui.measureValue}
-                      className="flex-1 text-sm rounded-xl border border-gray-200 px-3 py-2 focus:outline-none focus:ring-2 focus:ring-indigo-100 focus:border-indigo-400 transition-colors"
-                    />
-                    <span className="text-xs text-gray-400 shrink-0">cm</span>
-                    <button
-                      onClick={() => validateDimension(nom, nomEN)}
-                      disabled={!(dimInputs[nom] ?? '').trim()}
-                      className="shrink-0 text-xs font-semibold px-3 py-2 bg-green-500 hover:bg-green-600 disabled:bg-gray-200 disabled:cursor-not-allowed text-white rounded-xl transition-colors whitespace-nowrap"
-                    >
-                      {ui.addToDesc}
-                    </button>
-                    <button
-                      onClick={() => setOpenDimFields(prev => prev.filter(f => f !== nom))}
-                      className="text-gray-400 hover:text-gray-600 transition-colors"
-                    >
-                      <X className="w-4 h-4" />
-                    </button>
+                ) : result.defauts.value && result.defauts.confidence === 'manual' ? (
+                  <div className="flex items-center gap-2 p-3 bg-green-50 border border-green-200 rounded-xl">
+                    <Check className="w-4 h-4 text-green-600 shrink-0" />
+                    <p className="text-sm text-green-800 font-semibold">{ui.defectConfirmed}</p>
                   </div>
-                )
-              })}
+                ) : null}
 
-              {customDimRows.map(row => (
-                <div key={row.id} className="flex items-center gap-2">
-                  <input
-                    type="text"
-                    value={row.nom}
-                    onChange={e => setCustomDimRows(prev => prev.map(r => r.id === row.id ? { ...r, nom: e.target.value } : r))}
-                    placeholder={ui.measureName}
-                    className="w-32 text-sm rounded-xl border border-gray-200 px-3 py-2 focus:outline-none focus:ring-2 focus:ring-indigo-100 focus:border-indigo-400 transition-colors"
+                <Field label={ui.flaws} confidence={result.defauts.confidence}>
+                  <textarea
+                    value={result.defauts.value}
+                    onChange={e => update('defauts', e.target.value)}
+                    rows={3}
+                    placeholder="Ex: Légère décoloration sur l'épaule gauche, fil tiré sur la manche… (laisser vide si aucun défaut)"
+                    className={`${inputCls(result.defauts.confidence)} resize-none`}
                   />
-                  <input
-                    type="number"
-                    min="0"
-                    step="0.1"
-                    value={row.valeur}
-                    onChange={e => setCustomDimRows(prev => prev.map(r => r.id === row.id ? { ...r, valeur: e.target.value } : r))}
-                    onKeyDown={e => e.key === 'Enter' && validateCustomDimRow(row.id)}
-                    placeholder={ui.measureValue}
-                    className="w-20 text-sm rounded-xl border border-gray-200 px-3 py-2 focus:outline-none focus:ring-2 focus:ring-indigo-100 focus:border-indigo-400 transition-colors"
-                  />
-                  <span className="text-xs text-gray-400 shrink-0">cm</span>
-                  <button
-                    onClick={() => validateCustomDimRow(row.id)}
-                    disabled={!row.nom.trim() || !row.valeur.trim()}
-                    className="shrink-0 text-xs font-semibold px-3 py-2 bg-green-500 hover:bg-green-600 disabled:bg-gray-200 disabled:cursor-not-allowed text-white rounded-xl transition-colors whitespace-nowrap"
-                  >
-                    {ui.addToDesc}
-                  </button>
-                  <button
-                    onClick={() => removeCustomDimRow(row.id)}
-                    className="text-gray-400 hover:text-gray-600 transition-colors"
-                  >
-                    <X className="w-4 h-4" />
-                  </button>
-                </div>
-              ))}
-
-              <button
-                type="button"
-                onClick={addCustomDimRow}
-                className="flex items-center gap-1.5 text-xs font-semibold text-indigo-600 hover:text-indigo-800 transition-colors"
-              >
-                <Plus className="w-3.5 h-3.5" />
-                {ui.addMeasure}
-              </button>
-            </div>
-          </section>
+                </Field>
+              </section>
+            )
+          })()}
 
         </>
       )}
 
+    </div>
+  )
+}
+
+/* ─── Gallery Card ────────────────────────────────────────────────────────── */
+
+function GalleryCard({
+  slot, slotId, label, loadingLabels, onClear, onReassign, onMakeMain, slots, reassignI18n, isPrimary, mainPhotoLabel, makeMainLabel,
+}: {
+  slot: PhotoSlot
+  slotId: number
+  label: string
+  loadingLabels: { removingBg: string; applyingBg: string; loading: string; bgRemoved: string; bgFailed: string; bgPro: string }
+  onClear: () => void
+  onReassign: (groupKey: string) => void
+  onMakeMain: () => void
+  slots: PhotoSlot[]
+  reassignI18n: Record<string, string>
+  isPrimary: boolean
+  mainPhotoLabel: string
+  makeMainLabel: string
+}) {
+  const [showMenu, setShowMenu] = useState(false)
+  const menuRef = useRef<HTMLDivElement>(null)
+  const displayUrl = slot.processedUrl ?? slot.preview
+  const isLoading  = slot.status === 'uploading' || slot.status === 'processing-bg'
+  const chipLabel  = slot.contentType ? (reassignI18n[slot.contentType] ?? label) : label
+
+  useEffect(() => {
+    if (!showMenu) return
+    const close = (e: MouseEvent) => {
+      if (menuRef.current && !menuRef.current.contains(e.target as Node)) setShowMenu(false)
+    }
+    document.addEventListener('mousedown', close)
+    return () => document.removeEventListener('mousedown', close)
+  }, [showMenu])
+
+  return (
+    <div className="relative">
+      <div className="relative w-full aspect-square rounded-xl overflow-hidden border border-gray-200 group bg-gray-50">
+        {displayUrl && !isLoading && (
+          <img src={displayUrl} alt={label} className="w-full h-full object-contain" draggable={false} />
+        )}
+        {isLoading && (
+          <div className="absolute inset-0 flex flex-col items-center justify-center gap-1">
+            <div className="w-4 h-4 border-2 border-indigo-600 border-t-transparent rounded-full animate-spin" />
+            <span className="text-[9px] text-gray-400">
+              {slot.status === 'processing-bg' ? loadingLabels.removingBg : loadingLabels.loading}
+            </span>
+          </div>
+        )}
+        {/* Overlay */}
+        {!isLoading && (
+          <>
+            <div className="absolute inset-0 bg-black/0 group-hover:bg-black/15 transition-colors" />
+            <button
+              onClick={(e) => { e.stopPropagation(); onClear() }}
+              className="absolute top-1 right-1 w-5 h-5 rounded-full bg-black/50 hover:bg-red-500 text-white flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity"
+            >
+              <X className="w-2.5 h-2.5" />
+            </button>
+          </>
+        )}
+        {/* Badge "Photo principale" — coin supérieur gauche */}
+        {isPrimary && !isLoading && (
+          <div className="absolute top-1 left-1">
+            <span className="text-[9px] font-bold bg-indigo-600 text-white px-1.5 py-0.5 rounded-full flex items-center gap-0.5 leading-none whitespace-nowrap">
+              ★ {mainPhotoLabel}
+            </span>
+          </div>
+        )}
+        {/* Chip fond supprimé */}
+        {slot.processedUrl && !isLoading && (
+          <div className="absolute bottom-1 left-1 right-1 flex justify-center opacity-0 group-hover:opacity-100 transition-opacity">
+            <span className="text-[9px] font-bold bg-green-500 text-white px-1.5 py-0.5 rounded-full">
+              ✓ {loadingLabels.bgRemoved}
+            </span>
+          </div>
+        )}
+      </div>
+
+      {/* Chip label / réassignation */}
+      <div className="relative mt-1" ref={menuRef}>
+        <button
+          type="button"
+          onClick={() => setShowMenu(v => !v)}
+          className="w-full text-[10px] font-semibold bg-indigo-50 text-indigo-700 border border-indigo-200 rounded-lg px-2 py-1 flex items-center justify-between gap-1 hover:bg-indigo-100 hover:border-indigo-300 active:scale-95 transition-all"
+        >
+          <span className="truncate">{chipLabel}</span>
+          <ChevronDown className={`w-3 h-3 shrink-0 transition-transform ${showMenu ? 'rotate-180' : ''}`} />
+        </button>
+        {showMenu && (
+          <div className="absolute left-0 top-full mt-1 z-50 bg-white rounded-xl border border-gray-200 shadow-lg min-w-[160px] py-1">
+            {/* Définir comme principale */}
+            {!isPrimary && (
+              <>
+                <button
+                  type="button"
+                  onClick={() => { onMakeMain(); setShowMenu(false) }}
+                  className="w-full text-left px-3 py-1.5 text-xs font-semibold text-indigo-600 hover:bg-indigo-50 transition-colors"
+                >
+                  ★ {makeMainLabel}
+                </button>
+                <div className="h-px bg-gray-100 mx-2 my-1" />
+              </>
+            )}
+            {REASSIGN_GROUPS.map(group => {
+              const isCurrent  = group.slotIds.includes(slotId)
+              const firstEmpty = group.slotIds.find(id => id !== slotId && slots[id].file === null)
+              const disabled   = isCurrent || firstEmpty === undefined
+              return (
+                <button
+                  key={group.key}
+                  type="button"
+                  disabled={disabled}
+                  onClick={() => {
+                    onReassign(group.key)
+                    setShowMenu(false)
+                  }}
+                  className={`w-full text-left px-3 py-1.5 text-xs font-semibold transition-colors ${
+                    isCurrent
+                      ? 'text-indigo-600 bg-indigo-50'
+                      : disabled
+                      ? 'text-gray-300 cursor-not-allowed'
+                      : 'text-gray-700 hover:bg-gray-50'
+                  }`}
+                >
+                  {isCurrent ? `✓ ${reassignI18n[group.key] ?? group.key}` : reassignI18n[group.key] ?? group.key}
+                </button>
+              )
+            })}
+          </div>
+        )}
+      </div>
     </div>
   )
 }

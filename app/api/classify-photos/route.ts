@@ -76,17 +76,13 @@ export async function POST(request: NextRequest) {
 
 RÈGLES (applique la première qui correspond) :
 1. Une personne porte l'article sur elle → type "worn"
-2. L'article entier est visible à plat ou sur cintre, sans personne → type "flat"
-3. Du texte lisible apparaît sur une étiquette cousue/imprimée → type "detail"
-4. Sinon (gros plan, défaut, emballage, accessoire) → type "detail"
-
-Si type = "detail", détermine detailSlot :
-3 = étiquette marque  |  4 = étiquette taille/compo  |  5 = compo seule
-6 = gros plan  |  7 = défaut visible  |  8 = emballage/accessoire
-Si type = "flat" ou "worn" → detailSlot = 6 (champ ignoré)
+2. Du texte lisible apparaît sur une étiquette cousue/imprimée → type "label"
+3. L'article entier est visible de FACE, à plat ou sur cintre, sans personne → type "recto"
+4. L'article entier est visible de DOS ou de CÔTÉ, à plat ou sur cintre, sans personne → type "verso"
+5. Sinon (gros plan, défaut, emballage, accessoire) → type "detail"
 
 Réponds UNIQUEMENT avec ce JSON array (sans texte avant ni après) :
-[{"index":0,"type":"flat"|"worn"|"detail","detailSlot":3|4|5|6|7|8},{"index":1,...},...]`,
+[{"index":0,"type":"recto"|"verso"|"label"|"detail"|"worn"},{"index":1,...},...]`,
     })
 
     const msg = await client.messages.create({
@@ -98,19 +94,18 @@ Réponds UNIQUEMENT avec ce JSON array (sans texte avant ni après) :
     const raw = msg.content[0].type === 'text' ? msg.content[0].text.trim() : '[]'
     console.log('[classify] batch raw:', JSON.stringify(raw))
 
-    const results: { fileIndex: number; type: 'flat' | 'worn' | 'detail'; detailSlot: number }[] = []
+    type ContentType = 'recto' | 'verso' | 'label' | 'detail' | 'worn'
+    const VALID_TYPES = new Set<string>(['recto', 'verso', 'label', 'detail', 'worn'])
+    const results: { fileIndex: number; type: ContentType }[] = []
 
     try {
       const match = raw.replace(/```(?:json)?/g, '').trim().match(/\[[\s\S]*\]/)
       if (match) {
-        const parsed = JSON.parse(match[0]) as Array<{ index: number; type: string; detailSlot: number }>
+        const parsed = JSON.parse(match[0]) as Array<{ index: number; type: string }>
         for (const item of parsed) {
           if (typeof item.index === 'number' && item.index >= 0 && item.index < count) {
-            const t: 'flat' | 'worn' | 'detail' = ['flat', 'worn', 'detail'].includes(item.type)
-              ? (item.type as 'flat' | 'worn' | 'detail')
-              : 'flat'
-            const ds = parseInt(String(item.detailSlot))
-            results.push({ fileIndex: item.index, type: t, detailSlot: [3, 4, 5, 6, 7, 8].includes(ds) ? ds : 6 })
+            const t: ContentType = VALID_TYPES.has(item.type) ? (item.type as ContentType) : 'recto'
+            results.push({ fileIndex: item.index, type: t })
           }
         }
       }
@@ -119,14 +114,14 @@ Réponds UNIQUEMENT avec ce JSON array (sans texte avant ni après) :
     /* Ensure every index has an entry */
     const covered = new Set(results.map(r => r.fileIndex))
     for (let i = 0; i < count; i++) {
-      if (!covered.has(i)) results.push({ fileIndex: i, type: 'flat', detailSlot: 6 })
+      if (!covered.has(i)) results.push({ fileIndex: i, type: 'recto' })
     }
 
     return NextResponse.json({ results })
   } catch (err) {
     console.error('[classify] batch error:', err)
     return NextResponse.json({
-      results: Array.from({ length: count }, (_, i) => ({ fileIndex: i, type: 'flat', detailSlot: 6 })),
+      results: Array.from({ length: count }, (_, i) => ({ fileIndex: i, type: 'recto' })),
     })
   }
 }

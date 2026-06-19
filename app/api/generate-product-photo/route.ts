@@ -7,9 +7,9 @@ const FASHN_BASE = 'https://api.fashn.ai/v1'
 /* ── Prompts selon le mode d'affichage ───────────────────────────────────── */
 
 const PROMPTS: Record<string, string> = {
-  bust:   "garment displayed on a tailor's mannequin bust, front view, clean professional product photo",
-  hanger: 'garment displayed hanging on a wooden hanger, front view, clean professional product photo',
-  flat:   'garment laid flat neatly, top-down flat lay product photo, wrinkle-free',
+  bust:   'garment on an off-white headless footless display bust, soft diffused studio lighting, matte neutral background, seamless edges, product photo',
+  hanger: 'garment hanging on a slim wooden hanger, front view, clean professional product photo, neutral background',
+  flat:   'garment laid flat neatly, top-down flat lay product photo, wrinkle-free, neutral background',
 }
 
 /* ── Charge un fond en base64 JPEG ───────────────────────────────────────── */
@@ -48,7 +48,7 @@ async function runProductJob(
         resolution: '1k',
         generation_mode: 'fast',
         output_format: 'png',
-        seed: 42,
+        seed: 77777,
         ...(backgroundData ? { background_reference: backgroundData } : {}),
       },
     }),
@@ -92,10 +92,10 @@ export async function POST(request: NextRequest) {
   }
 
   try {
-    const { product_image, display_mode, num_images } = await request.json() as {
+    const { product_image, verso_image, display_mode } = await request.json() as {
       product_image: string
+      verso_image?: string
       display_mode: 'bust' | 'hanger' | 'flat'
-      num_images?: number
     }
 
     if (!product_image || !display_mode) {
@@ -107,12 +107,17 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ error: `display_mode invalide : "${display_mode}"` }, { status: 400 })
     }
 
-    const numImages = num_images ?? 2
+    console.log(`[product-photo] display_mode="${display_mode}" verso=${!!verso_image}`)
 
-    console.log(`[product-photo] display_mode="${display_mode}" num_images=${numImages}`)
-    console.log(`[product-photo] prompt="${prompt}"`)
+    const jobs: Promise<string[]>[] = [
+      runProductJob(FASHN_API_KEY, product_image, prompt, 1, null),
+    ]
+    if (verso_image) {
+      jobs.push(runProductJob(FASHN_API_KEY, verso_image, prompt, 1, null))
+    }
 
-    const urls = await runProductJob(FASHN_API_KEY, product_image, prompt, numImages, null)
+    const results = await Promise.all(jobs)
+    const urls = results.flat()
     console.log('[product-photo] URLs générées:', urls.length)
 
     return NextResponse.json({ urls })

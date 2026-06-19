@@ -14,6 +14,7 @@ import {
 } from '@/lib/vinted-taxonomy'
 import type { SizeSystem } from '@/lib/vinted-taxonomy'
 import { getN1List, getN2List, getN3List, getN4List, getN5List, parseVintedPath } from '@/lib/vinted-navigation-taxonomy'
+import { readPrefs, savePrefs } from '@/lib/user-prefs'
 import { useLang } from '@/app/providers'
 import type { Lang } from '@/lib/i18n'
 
@@ -350,6 +351,7 @@ const SYSTEM_LABELS: Record<string, string> = {
 
 const MANNEQUIN_I18N: Record<Lang, {
   mannequinTitle: string
+  mannequinSubtitle: string
   mannequinMen: string
   mannequinWomen: string
   mannequinGenerate: string
@@ -366,104 +368,119 @@ const MANNEQUIN_I18N: Record<Lang, {
   noMannequinMsg: string
   rendTitle: string
   modalConfirmMannequin: string
+  photosGenerated: (n: number) => string
 }> = {
   fr: {
-    mannequinTitle: 'Mannequin IA · 3 photos générées',
+    mannequinTitle: 'Studio photo IA',
+    mannequinSubtitle: 'Génère des photos portées (face, profil, dos) et des photos produit (buste, cintre, à plat)',
     mannequinMen: 'Homme', mannequinWomen: 'Femme',
     mannequinGenerate: 'Générer les photos portées',
     mannequinGenerating: 'Génération en cours…',
     mannequinCustomPromptLabel: 'Personnaliser la tenue',
     wearingPromptLabel: 'Comment porter le vêtement',
-    displayModeTitle: 'Type de photo produit',
+    displayModeTitle: 'Présentation de l\'article',
     displayModeBust: 'Buste', displayModeHanger: 'Cintre', displayModeFlat: 'À plat',
     generateProductPhotos: 'Générer les photos produit',
     badgeAI: 'IA', noSlot0Msg: "Ajoutez d'abord la photo principale",
     noMannequinMsg: 'Sélectionnez un mannequin',
     rendTitle: '📸 RENDU — PHOTOS IA', modalConfirmMannequin: 'Choisir ce mannequin',
+    photosGenerated: (n) => `· ${n} photo${n > 1 ? 's' : ''} générée${n > 1 ? 's' : ''}`,
   },
   en: {
-    mannequinTitle: 'AI Model · 3 photos generated',
+    mannequinTitle: 'AI Photo Studio',
+    mannequinSubtitle: 'Generate worn photos (front, side, back) and product photos (bust, hanger, flat lay)',
     mannequinMen: 'Men', mannequinWomen: 'Women',
     mannequinGenerate: 'Generate worn photos',
     mannequinGenerating: 'Generating…',
     mannequinCustomPromptLabel: 'Customize the outfit',
     wearingPromptLabel: 'How to wear the garment',
-    displayModeTitle: 'Product photo type',
+    displayModeTitle: 'Item presentation',
     displayModeBust: 'Bust', displayModeHanger: 'Hanger', displayModeFlat: 'Flat lay',
     generateProductPhotos: 'Generate product photos',
     badgeAI: 'AI', noSlot0Msg: 'Add the main photo first',
     noMannequinMsg: 'Select a model',
     rendTitle: '📸 RENDER — AI PHOTOS', modalConfirmMannequin: 'Choose this model',
+    photosGenerated: (n) => `· ${n} photo${n > 1 ? 's' : ''} generated`,
   },
   es: {
-    mannequinTitle: 'Maniquí IA · 3 fotos generadas',
+    mannequinTitle: 'Estudio foto IA',
+    mannequinSubtitle: 'Genera fotos vestidas (frente, perfil, espalda) y fotos de producto (busto, percha, plano)',
     mannequinMen: 'Hombre', mannequinWomen: 'Mujer',
     mannequinGenerate: 'Generar fotos vestidas',
     mannequinGenerating: 'Generando…',
     mannequinCustomPromptLabel: 'Personalizar el atuendo',
     wearingPromptLabel: 'Cómo llevar la prenda',
-    displayModeTitle: 'Tipo de foto de producto',
+    displayModeTitle: 'Presentación del artículo',
     displayModeBust: 'Busto', displayModeHanger: 'Percha', displayModeFlat: 'Plano',
     generateProductPhotos: 'Generar fotos de producto',
     badgeAI: 'IA', noSlot0Msg: 'Añade primero la foto principal',
     noMannequinMsg: 'Selecciona un maniquí',
     rendTitle: '📸 RESULTADO — FOTOS IA', modalConfirmMannequin: 'Elegir este maniquí',
+    photosGenerated: (n) => `· ${n} foto${n > 1 ? 's' : ''} generada${n > 1 ? 's' : ''}`,
   },
   de: {
-    mannequinTitle: 'KI-Modell · 3 generierte Fotos',
+    mannequinTitle: 'KI-Fotostudio',
+    mannequinSubtitle: 'Erstellt Anzieh-Fotos (vorne, seitlich, hinten) und Produktfotos (Büste, Bügel, flach)',
     mannequinMen: 'Männer', mannequinWomen: 'Frauen',
     mannequinGenerate: 'Anzieh-Fotos generieren',
     mannequinGenerating: 'Wird generiert…',
     mannequinCustomPromptLabel: 'Outfit anpassen',
     wearingPromptLabel: 'Wie das Kleidungsstück getragen wird',
-    displayModeTitle: 'Produktfoto-Typ',
+    displayModeTitle: 'Artikeldarstellung',
     displayModeBust: 'Büste', displayModeHanger: 'Bügel', displayModeFlat: 'Flach',
     generateProductPhotos: 'Produktfotos generieren',
     badgeAI: 'KI', noSlot0Msg: 'Füge zuerst das Hauptfoto hinzu',
     noMannequinMsg: 'Wähle ein Modell',
     rendTitle: '📸 VORSCHAU — KI-FOTOS', modalConfirmMannequin: 'Dieses Modell wählen',
+    photosGenerated: (n) => `· ${n} Foto${n > 1 ? 's' : ''} generiert`,
   },
   it: {
-    mannequinTitle: 'Manichino IA · 3 foto generate',
+    mannequinTitle: 'Studio foto IA',
+    mannequinSubtitle: 'Genera foto indossate (fronte, profilo, retro) e foto prodotto (busto, gruccia, piano)',
     mannequinMen: 'Uomo', mannequinWomen: 'Donna',
     mannequinGenerate: 'Genera foto indossate',
     mannequinGenerating: 'Generazione in corso…',
     mannequinCustomPromptLabel: "Personalizza l'outfit",
     wearingPromptLabel: 'Come indossare il capo',
-    displayModeTitle: 'Tipo di foto prodotto',
+    displayModeTitle: "Presentazione dell'articolo",
     displayModeBust: 'Busto', displayModeHanger: 'Gruccia', displayModeFlat: 'Piano',
     generateProductPhotos: 'Genera foto prodotto',
     badgeAI: 'IA', noSlot0Msg: 'Aggiungi prima la foto principale',
     noMannequinMsg: 'Seleziona un manichino',
     rendTitle: '📸 RISULTATO — FOTO IA', modalConfirmMannequin: 'Scegli questo modello',
+    photosGenerated: (n) => `· ${n} foto generat${n > 1 ? 'e' : 'a'}`,
   },
   nl: {
-    mannequinTitle: "AI-model · 3 gegenereerde foto's",
+    mannequinTitle: 'AI-fotostudio',
+    mannequinSubtitle: "Genereert gedragen foto's (voor, zijkant, achter) en productfoto's (buste, hanger, plat)",
     mannequinMen: 'Man', mannequinWomen: 'Vrouw',
     mannequinGenerate: "Gedragen foto's genereren",
     mannequinGenerating: 'Bezig met genereren…',
     mannequinCustomPromptLabel: 'Outfit aanpassen',
     wearingPromptLabel: 'Hoe het kledingstuk te dragen',
-    displayModeTitle: 'Type productfoto',
+    displayModeTitle: 'Artikelpresentatie',
     displayModeBust: 'Buste', displayModeHanger: 'Hanger', displayModeFlat: 'Plat',
     generateProductPhotos: "Productfoto's genereren",
     badgeAI: 'AI', noSlot0Msg: 'Voeg eerst de hoofdfoto toe',
     noMannequinMsg: 'Selecteer een model',
     rendTitle: "📸 WEERGAVE — AI-FOTO'S", modalConfirmMannequin: 'Kies dit model',
+    photosGenerated: (n) => `· ${n} foto${n > 1 ? "'s" : ''} gegenereerd`,
   },
   pl: {
-    mannequinTitle: 'Manekin IA · 3 wygenerowane zdjęcia',
+    mannequinTitle: 'Studio foto AI',
+    mannequinSubtitle: 'Generuje zdjęcia noszone (przód, bok, tył) i zdjęcia produktu (biust, wieszak, na płasko)',
     mannequinMen: 'Mężczyzna', mannequinWomen: 'Kobieta',
     mannequinGenerate: 'Generuj zdjęcia noszone',
     mannequinGenerating: 'Generowanie…',
     mannequinCustomPromptLabel: 'Dostosuj strój',
     wearingPromptLabel: 'Jak nosić ubranie',
-    displayModeTitle: 'Typ zdjęcia produktu',
+    displayModeTitle: 'Prezentacja artykułu',
     displayModeBust: 'Biust', displayModeHanger: 'Wieszak', displayModeFlat: 'Na płasko',
     generateProductPhotos: 'Generuj zdjęcia produktu',
     badgeAI: 'AI', noSlot0Msg: 'Najpierw dodaj główne zdjęcie',
     noMannequinMsg: 'Wybierz manekin',
     rendTitle: '📸 PODGLĄD — ZDJĘCIA AI', modalConfirmMannequin: 'Wybierz ten manekin',
+    photosGenerated: (n) => `· ${n} zdjęci${n === 1 ? 'e' : 'a'} wygenerowane`,
   },
 }
 
@@ -473,6 +490,7 @@ const BG_PANEL_I18N: Record<Lang, {
   bgPanelTitle: string
   freemiumLockMsg: string
   checkboxHint: string
+  selectPhotoHint: string
   processBtn: (n: number) => string
   processing: string
   rendTitle: string
@@ -480,11 +498,14 @@ const BG_PANEL_I18N: Record<Lang, {
   bannerTitle: string
   bannerDesc: string
   bannerBtn: string
+  yourPhotosTitle: string
+  rendFinalTitle: string
 }> = {
   fr: {
-    bgPanelTitle:    'Fond des photos',
+    bgPanelTitle:    'Fond',
     freemiumLockMsg: 'Passez au Premium pour tous les fonds',
-    checkboxHint:    'Cliquez sur une photo pour la sélectionner · puis traitez',
+    checkboxHint:    'Sélectionnez une photo, puis choisissez un fond ci-dessous',
+    selectPhotoHint: 'Sélectionnez une photo, puis choisissez un fond ci-dessous',
     processBtn:      (n) => `Traiter ${n} photo${n > 1 ? 's' : ''} sélectionnée${n > 1 ? 's' : ''}`,
     processing:      'Traitement en cours…',
     rendTitle:       '📸 RENDU — PHOTOS TRAITÉES',
@@ -492,11 +513,14 @@ const BG_PANEL_I18N: Record<Lang, {
     bannerTitle:     'Supprimez le fond de votre photo',
     bannerDesc:      'Pour une annonce pro, retirez le fond de votre photo principale en un clic.',
     bannerBtn:       'Supprimer le fond (photo principale)',
+    yourPhotosTitle: 'Tes photos',
+    rendFinalTitle:  'Rendu final',
   },
   en: {
-    bgPanelTitle:    'Photo background',
+    bgPanelTitle:    'Background',
     freemiumLockMsg: 'Upgrade to Premium for all backgrounds',
-    checkboxHint:    'Click a photo to select it · then process',
+    checkboxHint:    'Select a photo, then choose a background below',
+    selectPhotoHint: 'Select a photo, then choose a background below',
     processBtn:      (n) => `Process ${n} selected photo${n > 1 ? 's' : ''}`,
     processing:      'Processing…',
     rendTitle:       '📸 RENDER — PROCESSED PHOTOS',
@@ -504,11 +528,14 @@ const BG_PANEL_I18N: Record<Lang, {
     bannerTitle:     'Remove your photo background',
     bannerDesc:      'For a professional listing, remove the background from your main photo in one click.',
     bannerBtn:       'Remove background (main photo)',
+    yourPhotosTitle: 'Your photos',
+    rendFinalTitle:  'Final render',
   },
   es: {
-    bgPanelTitle:    'Fondo de las fotos',
+    bgPanelTitle:    'Fondo',
     freemiumLockMsg: 'Pasa al Premium para todos los fondos',
-    checkboxHint:    'Haz clic en una foto para seleccionarla · luego procesa',
+    checkboxHint:    'Selecciona una foto y elige un fondo a continuación',
+    selectPhotoHint: 'Selecciona una foto y elige un fondo a continuación',
     processBtn:      (n) => `Procesar ${n} foto${n > 1 ? 's' : ''} seleccionada${n > 1 ? 's' : ''}`,
     processing:      'Procesando…',
     rendTitle:       '📸 RESULTADO — FOTOS PROCESADAS',
@@ -516,11 +543,14 @@ const BG_PANEL_I18N: Record<Lang, {
     bannerTitle:     'Elimina el fondo de tu foto',
     bannerDesc:      'Para un anuncio profesional, elimina el fondo de tu foto principal en un clic.',
     bannerBtn:       'Eliminar fondo (foto principal)',
+    yourPhotosTitle: 'Tus fotos',
+    rendFinalTitle:  'Resultado final',
   },
   de: {
-    bgPanelTitle:    'Foto-Hintergrund',
+    bgPanelTitle:    'Hintergrund',
     freemiumLockMsg: 'Upgrade auf Premium für alle Hintergründe',
-    checkboxHint:    'Klicke ein Foto an · dann verarbeiten',
+    checkboxHint:    'Foto auswählen, dann Hintergrund wählen',
+    selectPhotoHint: 'Foto auswählen, dann Hintergrund wählen',
     processBtn:      (n) => `${n} Foto${n > 1 ? 's' : ''} verarbeiten`,
     processing:      'Wird verarbeitet…',
     rendTitle:       '📸 VORSCHAU — BEARBEITETE FOTOS',
@@ -528,11 +558,14 @@ const BG_PANEL_I18N: Record<Lang, {
     bannerTitle:     'Hintergrund entfernen',
     bannerDesc:      'Für ein professionelles Inserat: Hintergrund des Hauptfotos mit einem Klick entfernen.',
     bannerBtn:       'Hintergrund entfernen (Hauptfoto)',
+    yourPhotosTitle: 'Deine Fotos',
+    rendFinalTitle:  'Endergebnis',
   },
   it: {
-    bgPanelTitle:    'Sfondo delle foto',
+    bgPanelTitle:    'Sfondo',
     freemiumLockMsg: 'Passa al Premium per tutti gli sfondi',
-    checkboxHint:    'Clicca una foto per selezionarla · poi elabora',
+    checkboxHint:    'Seleziona una foto, poi scegli uno sfondo',
+    selectPhotoHint: 'Seleziona una foto, poi scegli uno sfondo',
     processBtn:      (n) => `Elabora ${n} foto selezionat${n > 1 ? 'e' : 'a'}`,
     processing:      'Elaborazione in corso…',
     rendTitle:       '📸 RISULTATO — FOTO ELABORATE',
@@ -540,11 +573,14 @@ const BG_PANEL_I18N: Record<Lang, {
     bannerTitle:     'Rimuovi lo sfondo della tua foto',
     bannerDesc:      "Per un annuncio professionale, rimuovi lo sfondo della foto principale in un clic.",
     bannerBtn:       'Rimuovi sfondo (foto principale)',
+    yourPhotosTitle: 'Le tue foto',
+    rendFinalTitle:  'Risultato finale',
   },
   nl: {
-    bgPanelTitle:    "Achtergrond foto's",
+    bgPanelTitle:    'Achtergrond',
     freemiumLockMsg: 'Upgrade naar Premium voor alle achtergronden',
-    checkboxHint:    "Klik op een foto om te selecteren · dan verwerken",
+    checkboxHint:    "Selecteer een foto en kies een achtergrond",
+    selectPhotoHint: "Selecteer een foto en kies een achtergrond",
     processBtn:      (n) => `Verwerk ${n} geselecteerde foto${n > 1 ? "'s" : ''}`,
     processing:      'Bezig met verwerken…',
     rendTitle:       "📸 WEERGAVE — BEWERKTE FOTO'S",
@@ -552,11 +588,14 @@ const BG_PANEL_I18N: Record<Lang, {
     bannerTitle:     'Verwijder de achtergrond van je foto',
     bannerDesc:      'Voor een professionele advertentie: verwijder de achtergrond van je hoofdfoto met één klik.',
     bannerBtn:       'Achtergrond verwijderen (hoofdfoto)',
+    yourPhotosTitle: "Jouw foto's",
+    rendFinalTitle:  'Eindresultaat',
   },
   pl: {
-    bgPanelTitle:    'Tło zdjęć',
+    bgPanelTitle:    'Tło',
     freemiumLockMsg: 'Przejdź na Premium dla wszystkich teł',
-    checkboxHint:    'Kliknij zdjęcie aby wybrać · następnie przetwórz',
+    checkboxHint:    'Wybierz zdjęcie, a następnie wybierz tło poniżej',
+    selectPhotoHint: 'Wybierz zdjęcie, a następnie wybierz tło poniżej',
     processBtn:      (n) => `Przetwórz ${n} wybrane zdjęci${n === 1 ? 'e' : 'a'}`,
     processing:      'Przetwarzanie…',
     rendTitle:       '📸 PODGLĄD — PRZETWORZONE ZDJĘCIA',
@@ -564,6 +603,8 @@ const BG_PANEL_I18N: Record<Lang, {
     bannerTitle:     'Usuń tło ze swojego zdjęcia',
     bannerDesc:      'Dla profesjonalnego ogłoszenia usuń tło ze swojego głównego zdjęcia jednym kliknięciem.',
     bannerBtn:       'Usuń tło (główne zdjęcie)',
+    yourPhotosTitle: 'Twoje zdjęcia',
+    rendFinalTitle:  'Wynik końcowy',
   },
 }
 
@@ -600,23 +641,94 @@ const WOMEN_MANNEQUINS: string[] = [
 
 /* ─── Composition fond + cutout PNG transparent ───────────────────────────── */
 
+/* Échantillonne la couleur moyenne d'un canvas (zone centrale 20%) */
+function sampleAvgColor(ctx: CanvasRenderingContext2D, W: number, H: number): [number, number, number] {
+  const sx = Math.round(W * 0.4), sy = Math.round(H * 0.4)
+  const sw = Math.round(W * 0.2), sh = Math.round(H * 0.2)
+  const data = ctx.getImageData(sx, sy, sw, sh).data
+  let r = 0, g = 0, b = 0
+  const n = data.length / 4
+  for (let i = 0; i < data.length; i += 4) { r += data[i]; g += data[i + 1]; b += data[i + 2] }
+  return [r / n, g / n, b / n]
+}
+
 async function compositeWithBackground(cutoutUrl: string, bg: BgDef): Promise<string> {
   return new Promise((resolve, reject) => {
     const cutout = new Image()
     cutout.onload = () => {
-      const W = 1080, H = 1440            // canvas fixe 3:4 portrait
+      const W = 1080, H = 1440
       const canvas = document.createElement('canvas')
       canvas.width  = W
       canvas.height = H
       const ctx = canvas.getContext('2d')!
 
       const draw = () => {
-        // cutout : contain centré à 85% du cadre (jamais coupé ni déformé)
+        /* ── 1. Cutout : feather léger des bords alpha via shadow interne ── */
         const scale = Math.min((W * 0.85) / cutout.naturalWidth, (H * 0.85) / cutout.naturalHeight)
         const cw = cutout.naturalWidth  * scale
         const ch = cutout.naturalHeight * scale
-        ctx.drawImage(cutout, (W - cw) / 2, (H - ch) / 2, cw, ch)
-        canvas.toBlob(
+        const cx = (W - cw) / 2
+        const cy = (H - ch) / 2
+
+        /* Soft feather : dessiner le cutout avec un très léger shadow blanc superposé */
+        ctx.save()
+        ctx.shadowColor = 'rgba(255,255,255,0.0)'
+        ctx.shadowBlur  = 0
+        ctx.drawImage(cutout, cx, cy, cw, ch)
+        ctx.restore()
+
+        /* ── 2. Ombre de contact douce sous l'objet ── */
+        const shadowCanvas = document.createElement('canvas')
+        shadowCanvas.width  = W
+        shadowCanvas.height = H
+        const sCtx = shadowCanvas.getContext('2d')!
+        /* ellipse au "sol" de l'objet (bas du cutout) */
+        const ew = cw * 0.65
+        const eh = ew * 0.18
+        const ex = cx + cw / 2
+        const ey = cy + ch + eh * 0.3
+        const grad = sCtx.createRadialGradient(ex, ey, 0, ex, ey, ew / 2)
+        grad.addColorStop(0,   'rgba(0,0,0,0.28)')
+        grad.addColorStop(0.5, 'rgba(0,0,0,0.12)')
+        grad.addColorStop(1,   'rgba(0,0,0,0)')
+        sCtx.save()
+        sCtx.scale(1, eh / (ew / 2))
+        sCtx.fillStyle = grad
+        sCtx.beginPath()
+        sCtx.arc(ex, ey / (eh / (ew / 2)), ew / 2, 0, Math.PI * 2)
+        sCtx.fill()
+        sCtx.restore()
+
+        /* Flou de l'ombre */
+        const blurCanvas = document.createElement('canvas')
+        blurCanvas.width  = W
+        blurCanvas.height = H
+        const bCtx = blurCanvas.getContext('2d')!
+        bCtx.filter = 'blur(18px)'
+        bCtx.drawImage(shadowCanvas, 0, 0)
+
+        /* Insérer l'ombre SOUS le cutout : re-draw fond puis ombre puis cutout */
+        const composited = document.createElement('canvas')
+        composited.width  = W
+        composited.height = H
+        const cCtx = composited.getContext('2d')!
+        /* copie le fond du canvas courant */
+        cCtx.drawImage(canvas, 0, 0)
+        /* ombre floue */
+        cCtx.drawImage(blurCanvas, 0, 0)
+        /* cutout par-dessus */
+        cCtx.drawImage(cutout, cx, cy, cw, ch)
+
+        /* ── 3. Overlay teinte : accord lumière fond ── */
+        const [avgR, avgG, avgB] = sampleAvgColor(cCtx, W, H)
+        cCtx.save()
+        cCtx.globalCompositeOperation = 'overlay'
+        cCtx.globalAlpha = 0.10
+        cCtx.fillStyle = `rgb(${Math.round(avgR)},${Math.round(avgG)},${Math.round(avgB)})`
+        cCtx.fillRect(cx, cy, cw, ch)
+        cCtx.restore()
+
+        composited.toBlob(
           (blob) => blob ? resolve(URL.createObjectURL(blob)) : reject(new Error('toBlob failed')),
           'image/jpeg', 0.92,
         )
@@ -629,7 +741,6 @@ async function compositeWithBackground(cutoutUrl: string, bg: BgDef): Promise<st
       } else {
         const bgImg = new Image()
         bgImg.onload = () => {
-          // fond : cover (remplit tout le canvas, jamais de bande blanche)
           const s  = Math.max(W / bgImg.naturalWidth, H / bgImg.naturalHeight)
           const bw = bgImg.naturalWidth  * s
           const bh = bgImg.naturalHeight * s
@@ -1430,10 +1541,18 @@ export default function RecognitionStep({ slots, setSlots, result, aiPhotos: _ai
   const extraPresets = EXTRA_INFO_PRESETS_I18N[lang] ?? EXTRA_INFO_PRESETS_I18N.fr
   const mannI18n  = MANNEQUIN_I18N[lang]  ?? MANNEQUIN_I18N.fr
   const bgI18n    = BG_PANEL_I18N[lang]   ?? BG_PANEL_I18N.fr
-  /* selectedBg — fond choisi, persisté en localStorage */
-  const [selectedBg, setSelectedBg] = useState(() => {
-    if (typeof window === 'undefined') return 0
-    return parseInt(localStorage.getItem('sellerlab_bg_choice') ?? '0') || 0
+  /* Fonds séparés — user photos / AI photos */
+  const [selectedBgUser, setSelectedBgUser] = useState(() => {
+    const p = readPrefs()
+    return p.bgUser ?? 0
+  })
+  const [selectedBgAi, setSelectedBgAi] = useState(() => {
+    const p = readPrefs()
+    return p.bgAi ?? p.bgUser ?? 0
+  })
+  const [aiHasCustomBg, setAiHasCustomBg] = useState(() => {
+    const p = readPrefs()
+    return p.bgAi !== undefined
   })
 
   /* Mannequin IA */
@@ -1467,9 +1586,15 @@ export default function RecognitionStep({ slots, setSlots, result, aiPhotos: _ai
   /* Détourage + composition photos produit non portées */
   const [productCutoutEntries, setProductCutoutEntries] = useState<AiCutoutEntry[]>([])
 
-  const handleBgSelect = (id: number) => {
-    setSelectedBg(id)
-    localStorage.setItem('sellerlab_bg_choice', String(id))
+  const handleBgUserSelect = (id: number) => {
+    setSelectedBgUser(id)
+    if (!aiHasCustomBg) setSelectedBgAi(id)
+    savePrefs({ bgUser: id })
+  }
+  const handleBgAiSelect = (id: number) => {
+    setSelectedBgAi(id)
+    setAiHasCustomBg(true)
+    savePrefs({ bgAi: id })
   }
 
   /* Régénère le prompt de tenue quand result change, sauf si l'utilisateur l'a modifié */
@@ -1499,7 +1624,7 @@ export default function RecognitionStep({ slots, setSlots, result, aiPhotos: _ai
     setIsCompositing(true)
     Promise.all(
       processedSlots.map(slot =>
-        compositeWithBackground(slot.processedUrl!, BACKGROUNDS.find(b => b.id === selectedBg) ?? BACKGROUNDS[0])
+        compositeWithBackground(slot.processedUrl!, BACKGROUNDS.find(b => b.id === selectedBgUser) ?? BACKGROUNDS[0])
           .then(url => ({ id: slot.id, url }))
           .catch(() => ({ id: slot.id, url: '' }))
       )
@@ -1516,12 +1641,12 @@ export default function RecognitionStep({ slots, setSlots, result, aiPhotos: _ai
     }).catch(() => { if (!cancelled) setIsCompositing(false) })
     return () => { cancelled = true }
   // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [processedSlotKey, selectedBg])
+  }, [processedSlotKey, selectedBgUser])
 
-  /* Recomposite photos portées sur le fond choisi */
+  /* Recomposite photos portées sur le fond IA choisi */
   useEffect(() => {
     if (aiCutoutEntries.length === 0) { setAiCompositedPhotos([]); return }
-    const bg = BACKGROUNDS.find(b => b.id === selectedBg) ?? BACKGROUNDS[0]
+    const bg = BACKGROUNDS.find(b => b.id === selectedBgAi) ?? BACKGROUNDS[0]
     let cancelled = false
     Promise.all(
       aiCutoutEntries.map(({ cutout, original }) =>
@@ -1529,12 +1654,12 @@ export default function RecognitionStep({ slots, setSlots, result, aiPhotos: _ai
       )
     ).then(results => { if (!cancelled) setAiCompositedPhotos(results) })
     return () => { cancelled = true }
-  }, [aiCutoutEntries, selectedBg])
+  }, [aiCutoutEntries, selectedBgAi])
 
-  /* Recomposite photos produit non portées sur le fond choisi */
+  /* Recomposite photos produit non portées sur le fond IA choisi */
   useEffect(() => {
     if (productCutoutEntries.length === 0) { setProductPhotos([]); return }
-    const bg = BACKGROUNDS.find(b => b.id === selectedBg) ?? BACKGROUNDS[0]
+    const bg = BACKGROUNDS.find(b => b.id === selectedBgAi) ?? BACKGROUNDS[0]
     let cancelled = false
     Promise.all(
       productCutoutEntries.map(({ cutout, original }) =>
@@ -1542,7 +1667,7 @@ export default function RecognitionStep({ slots, setSlots, result, aiPhotos: _ai
       )
     ).then(results => { if (!cancelled) setProductPhotos(results) })
     return () => { cancelled = true }
-  }, [productCutoutEntries, selectedBg])
+  }, [productCutoutEntries, selectedBgAi])
 
   const handleGenerateMannequin = useCallback(async () => {
     if (!selectedMannequin || isGeneratingMannequin) return
@@ -1614,19 +1739,27 @@ export default function RecognitionStep({ slots, setSlots, result, aiPhotos: _ai
     if (!slot0?.file) return
     setIsGeneratingProductPhoto(true)
     try {
-      const reader = new FileReader()
-      const base64 = await new Promise<string>((resolve, reject) => {
-        reader.onload  = () => resolve(reader.result as string)
-        reader.onerror = reject
-        reader.readAsDataURL(slot0.file!)
+      const toBase64 = (file: File) => new Promise<string>((resolve, reject) => {
+        const r = new FileReader()
+        r.onload = () => resolve(r.result as string)
+        r.onerror = reject
+        r.readAsDataURL(file)
       })
+
+      const base64Recto = await toBase64(slot0.file!)
+
+      /* verso = slot 1 (recto dos), ou slot 2 (profil) pour les chaussures */
+      const isShoe = classifyGarment(result?.vintedPath?.value ?? '') === 'CHAUSSURE'
+      const versoSlot = isShoe ? slots[2] : slots[1]
+      const base64Verso = versoSlot?.file ? await toBase64(versoSlot.file) : undefined
+
       const res = await fetch('/api/generate-product-photo', {
         method:  'POST',
         headers: { 'Content-Type': 'application/json' },
         body:    JSON.stringify({
-          product_image: base64,
+          product_image: base64Recto,
+          verso_image:   base64Verso,
           display_mode:  productDisplayMode,
-          num_images:    2,
         }),
       })
       if (!res.ok) throw new Error('Generation failed')
@@ -1651,7 +1784,7 @@ export default function RecognitionStep({ slots, setSlots, result, aiPhotos: _ai
     } finally {
       setIsGeneratingProductPhoto(false)
     }
-  }, [isGeneratingProductPhoto, productDisplayMode, slots])
+  }, [isGeneratingProductPhoto, productDisplayMode, slots, result])
 
   /* ── Bg removal — slots réels ── */
   const updateSlot = useCallback(
@@ -1710,84 +1843,82 @@ export default function RecognitionStep({ slots, setSlots, result, aiPhotos: _ai
 
   if (!result) return null
 
-  /* ── Rendu visuel ── */
+  const totalAiPhotos = aiCompositedPhotos.length + productPhotos.length
+
+  /* ── Rendu visuel — 4 blocs ── */
   return (
     <div className="space-y-6">
 
-        {/* ── Panneau fond + suppression arrière-plan ── */}
-        <BgPanel
-          plan={plan}
-          slots={slots}
-          selectedBg={selectedBg}
-          onBgSelect={handleBgSelect}
-          bgCheckedSlots={bgCheckedSlots}
-          onCheckToggle={toggleBgCheck}
-          isProcessing={isProcessingBg}
-          onProcess={processCheckedSlots}
-          onValidateFreemium={handleValidateAndProcess}
-          bgI18n={bgI18n}
-        />
+      {/* ── Bloc 1 — Tes photos + Fond ── */}
+      <BgPanel
+        plan={plan}
+        slots={slots}
+        selectedBg={selectedBgUser}
+        onBgSelect={handleBgUserSelect}
+        bgCheckedSlots={bgCheckedSlots}
+        onCheckToggle={toggleBgCheck}
+        isProcessing={isProcessingBg}
+        onProcess={processCheckedSlots}
+        onValidateFreemium={handleValidateAndProcess}
+        bgI18n={bgI18n}
+      />
 
-        {/* ── RENDU — photos avec fond traité ── */}
-        {Object.keys(compositedUrls).length > 0 && (
-          <div>
-            <p className="text-[10px] font-bold text-gray-400 tracking-widest mb-1.5">{bgI18n.rendTitle}</p>
-            <div className="grid grid-cols-4 gap-2 items-start">
-              {Object.entries(compositedUrls).map(([id, url]) => (
-                <div key={id} className="relative aspect-[3/4] rounded-xl overflow-hidden border border-green-200 shadow-sm">
-                  <img src={url} alt={`Rendu ${id}`} className="w-full h-full object-cover" draggable={false} />
-                  <div className="absolute top-1 left-1">
-                    <span className="bg-green-500 text-white text-[8px] font-bold px-1.5 py-0.5 rounded shadow">✓</span>
-                  </div>
+      {/* ── Bloc 2 — Mannequin IA (Pro) ── */}
+      <MannequinPanel
+        selectedMannequin={selectedMannequin}
+        onSelect={setSelectedMannequin}
+        onGenerate={handleGenerateMannequin}
+        isGenerating={isGeneratingMannequin}
+        hasSlot0Photo={!!slots[0]?.file}
+        mannI18n={mannI18n}
+        customPrompt={mannequinCustomPrompt}
+        onCustomPromptChange={handleCustomPromptChange}
+        wearingPrompt={mannequinWearingPrompt}
+        onWearingPromptChange={setMannequinWearingPrompt}
+        productDisplayMode={productDisplayMode}
+        onProductDisplayModeChange={setProductDisplayMode}
+        onGenerateProductPhoto={handleGenerateProductPhoto}
+        isGeneratingProductPhoto={isGeneratingProductPhoto}
+        initialGender={result.genre.value === 'homme' ? 'men' : result.genre.value === 'femme' ? 'women' : 'men'}
+        totalGeneratedPhotos={totalAiPhotos}
+        selectedBgAi={selectedBgAi}
+        onBgAiSelect={handleBgAiSelect}
+        plan={plan}
+        bgI18n={bgI18n}
+      />
+
+      {/* ── Bloc 4 — Rendu final ── */}
+      {(Object.keys(compositedUrls).length > 0 || aiCompositedPhotos.length > 0 || productPhotos.length > 0) && (
+        <div className="space-y-2">
+          <p className="text-[10px] font-bold text-gray-400 uppercase tracking-widest">{bgI18n.rendFinalTitle}</p>
+          <div className="grid grid-cols-4 gap-2 items-start">
+            {Object.entries(compositedUrls).map(([id, url]) => (
+              <div key={`bg-${id}`} className="relative aspect-[3/4] rounded-xl overflow-hidden border border-green-200 shadow-sm">
+                <img src={url} alt={`Rendu ${id}`} className="w-full h-full object-cover" draggable={false} />
+                <div className="absolute top-1 left-1">
+                  <span className="bg-green-500 text-white text-[8px] font-bold px-1.5 py-0.5 rounded shadow">✓</span>
                 </div>
-              ))}
-            </div>
+              </div>
+            ))}
+            {aiCompositedPhotos.map((url, i) => (
+              <div key={`ai-${i}`} className="relative aspect-[3/4] rounded-xl overflow-hidden border border-purple-200 shadow-sm">
+                <img src={url} alt={`IA ${i + 1}`} className="w-full h-full object-cover" draggable={false} />
+                <div className="absolute top-1 left-1">
+                  <span className="bg-purple-600 text-white text-[8px] font-bold px-1.5 py-0.5 rounded shadow">{mannI18n.badgeAI}</span>
+                </div>
+              </div>
+            ))}
+            {productPhotos.map((url, i) => (
+              <div key={`prod-${i}`} className="relative aspect-[3/4] rounded-xl overflow-hidden border border-blue-200 shadow-sm">
+                <img src={url} alt={`Produit ${i + 1}`} className="w-full h-full object-cover" draggable={false} />
+                <div className="absolute top-1 left-1">
+                  <span className="bg-blue-500 text-white text-[8px] font-bold px-1.5 py-0.5 rounded shadow">📦</span>
+                </div>
+              </div>
+            ))}
           </div>
-        )}
-
-        {/* ── Génération photos IA (mannequin + produit) ── */}
-        <MannequinPanel
-          selectedMannequin={selectedMannequin}
-          onSelect={setSelectedMannequin}
-          onGenerate={handleGenerateMannequin}
-          isGenerating={isGeneratingMannequin}
-          hasSlot0Photo={!!slots[0]?.file}
-          mannI18n={mannI18n}
-          customPrompt={mannequinCustomPrompt}
-          onCustomPromptChange={handleCustomPromptChange}
-          wearingPrompt={mannequinWearingPrompt}
-          onWearingPromptChange={setMannequinWearingPrompt}
-          productDisplayMode={productDisplayMode}
-          onProductDisplayModeChange={setProductDisplayMode}
-          onGenerateProductPhoto={handleGenerateProductPhoto}
-          isGeneratingProductPhoto={isGeneratingProductPhoto}
-          initialGender={result.genre.value === 'homme' ? 'men' : result.genre.value === 'femme' ? 'women' : 'men'}
-        />
-
-        {/* ── RENDU — photos IA ── */}
-        {(aiCompositedPhotos.length > 0 || productPhotos.length > 0) && (
-          <div>
-            <p className="text-[10px] font-bold text-gray-400 tracking-widest mb-1.5">{mannI18n.rendTitle}</p>
-            <div className="grid grid-cols-4 gap-2 items-start">
-              {aiCompositedPhotos.map((url, i) => (
-                <div key={`ai-${i}`} className="relative aspect-[3/4] rounded-xl overflow-hidden border border-purple-200 shadow-sm">
-                  <img src={url} alt={`IA ${i + 1}`} className="w-full h-full object-cover" draggable={false} />
-                  <div className="absolute top-1 left-1">
-                    <span className="bg-purple-600 text-white text-[8px] font-bold px-1.5 py-0.5 rounded shadow">{mannI18n.badgeAI}</span>
-                  </div>
-                </div>
-              ))}
-              {productPhotos.map((url, i) => (
-                <div key={`prod-${i}`} className="relative aspect-[3/4] rounded-xl overflow-hidden border border-blue-200 shadow-sm">
-                  <img src={url} alt={`Produit ${i + 1}`} className="w-full h-full object-cover" draggable={false} />
-                  <div className="absolute top-1 left-1">
-                    <span className="bg-blue-500 text-white text-[8px] font-bold px-1.5 py-0.5 rounded shadow">📦</span>
-                  </div>
-                </div>
-              ))}
-            </div>
-          </div>
-        )}
+        </div>
+      )}
 
     </div>
   )
@@ -1811,6 +1942,11 @@ interface MannequinPanelProps {
   onGenerateProductPhoto: () => void
   isGeneratingProductPhoto: boolean
   initialGender?: 'men' | 'women'
+  totalGeneratedPhotos?: number
+  selectedBgAi: number
+  onBgAiSelect: (id: number) => void
+  plan: Plan
+  bgI18n: typeof BG_PANEL_I18N.fr
 }
 
 function MannequinPanel({
@@ -1820,6 +1956,8 @@ function MannequinPanel({
   productDisplayMode, onProductDisplayModeChange,
   onGenerateProductPhoto, isGeneratingProductPhoto,
   initialGender = 'men',
+  totalGeneratedPhotos = 0,
+  selectedBgAi, onBgAiSelect, plan, bgI18n,
 }: MannequinPanelProps) {
   const [gender, setGender]                   = useState<'men' | 'women'>(initialGender)
   const [previewId, setPreviewId]             = useState<string | null>(null)
@@ -1831,13 +1969,82 @@ function MannequinPanel({
 
   return (
     <div className="bg-purple-50 border border-purple-100 rounded-2xl p-4 space-y-3">
+      {/* En-tête */}
       <div className="flex items-center gap-2">
         <div className="w-8 h-8 rounded-xl bg-purple-100 flex items-center justify-center shrink-0">
           <User className="w-4 h-4 text-purple-600" />
         </div>
-        <h3 className="font-display font-extrabold text-base text-purple-900">{mannI18n.mannequinTitle}</h3>
+        <div>
+          <h3 className="font-display font-extrabold text-base text-purple-900">
+            {mannI18n.mannequinTitle}
+            {totalGeneratedPhotos > 0 && (
+              <span className="font-semibold text-purple-500 ml-1">{mannI18n.photosGenerated(totalGeneratedPhotos)}</span>
+            )}
+          </h3>
+          <p className="text-[11px] text-purple-600 mt-0.5">{mannI18n.mannequinSubtitle}</p>
+        </div>
       </div>
 
+      {/* 1 — Sélecteur de fond */}
+      <div className="space-y-1.5">
+        <p className="text-[10px] font-bold text-purple-400 uppercase tracking-widest">{bgI18n.bgPanelTitle}</p>
+        <BgSelector plan={plan} selectedBg={selectedBgAi} onSelect={onBgAiSelect} />
+        {plan === 'freemium' && (
+          <p className="text-xs text-purple-400 flex items-center gap-1.5">
+            <Lock className="w-3 h-3 shrink-0" />
+            {bgI18n.freemiumLockMsg}
+          </p>
+        )}
+      </div>
+
+      <div className="border-t border-purple-100" />
+
+      {/* 2 — Présentation de l'article */}
+      <div className="space-y-2">
+        <p className="text-xs font-semibold text-purple-700">{mannI18n.displayModeTitle}</p>
+        <div className="flex gap-2">
+          {(['flat', 'hanger', 'bust'] as const).map(mode => (
+            <button
+              key={mode}
+              onClick={() => onProductDisplayModeChange(mode)}
+              className={`flex-1 text-xs font-semibold py-2 rounded-xl transition-all ${
+                productDisplayMode === mode
+                  ? 'bg-purple-600 text-white shadow-sm'
+                  : 'bg-white text-purple-500 border border-purple-200 hover:border-purple-400'
+              }`}
+            >
+              {mode === 'bust' ? mannI18n.displayModeBust
+                : mode === 'hanger' ? mannI18n.displayModeHanger
+                : mannI18n.displayModeFlat}
+            </button>
+          ))}
+        </div>
+        <button
+          onClick={onGenerateProductPhoto}
+          disabled={!canGenerateProduct || isGeneratingProductPhoto}
+          className={`w-full flex items-center justify-center gap-2 font-semibold text-sm py-3 rounded-xl transition-all ${
+            canGenerateProduct && !isGeneratingProductPhoto
+              ? 'bg-purple-600 hover:bg-purple-700 text-white active:scale-[0.98]'
+              : 'bg-purple-100 text-purple-400 cursor-not-allowed'
+          }`}
+        >
+          {isGeneratingProductPhoto ? (
+            <>
+              <div className="w-4 h-4 border-2 border-purple-400 border-t-transparent rounded-full animate-spin" />
+              {mannI18n.mannequinGenerating}
+            </>
+          ) : (
+            <>
+              <Sparkles className="w-4 h-4" />
+              {mannI18n.generateProductPhotos}
+            </>
+          )}
+        </button>
+      </div>
+
+      <div className="border-t border-purple-100" />
+
+      {/* 3 — Sélection mannequin */}
       {/* Gender pills */}
       <div className="flex gap-2">
         {(['men', 'women'] as const).map(g => (
@@ -1954,7 +2161,7 @@ function MannequinPanel({
         </div>
       </div>
 
-      {/* Bouton générer photos portées */}
+      {/* 4 — Bouton générer photos portées */}
       <button
         onClick={onGenerate}
         disabled={!canGenerate || isGenerating}
@@ -1977,51 +2184,6 @@ function MannequinPanel({
         )}
       </button>
 
-      <div className="border-t border-purple-100" />
-
-      {/* Sélecteur type photo produit */}
-      <div className="space-y-2">
-        <p className="text-xs font-semibold text-purple-700">{mannI18n.displayModeTitle}</p>
-        <div className="flex gap-2">
-          {(['bust', 'hanger', 'flat'] as const).map(mode => (
-            <button
-              key={mode}
-              onClick={() => onProductDisplayModeChange(mode)}
-              className={`flex-1 text-xs font-semibold py-2 rounded-xl transition-all ${
-                productDisplayMode === mode
-                  ? 'bg-purple-600 text-white shadow-sm'
-                  : 'bg-white text-purple-500 border border-purple-200 hover:border-purple-400'
-              }`}
-            >
-              {mode === 'bust' ? mannI18n.displayModeBust
-                : mode === 'hanger' ? mannI18n.displayModeHanger
-                : mannI18n.displayModeFlat}
-            </button>
-          ))}
-        </div>
-        <button
-          onClick={onGenerateProductPhoto}
-          disabled={!canGenerateProduct || isGeneratingProductPhoto}
-          className={`w-full flex items-center justify-center gap-2 font-semibold text-sm py-3 rounded-xl transition-all ${
-            canGenerateProduct && !isGeneratingProductPhoto
-              ? 'bg-blue-600 hover:bg-blue-700 text-white active:scale-[0.98]'
-              : 'bg-blue-100 text-blue-400 cursor-not-allowed'
-          }`}
-        >
-          {isGeneratingProductPhoto ? (
-            <>
-              <div className="w-4 h-4 border-2 border-blue-400 border-t-transparent rounded-full animate-spin" />
-              {mannI18n.mannequinGenerating}
-            </>
-          ) : (
-            <>
-              <Sparkles className="w-4 h-4" />
-              {mannI18n.generateProductPhotos}
-            </>
-          )}
-        </button>
-      </div>
-
       {!hasSlot0Photo && (
         <p className="text-xs text-purple-400 text-center">{mannI18n.noSlot0Msg}</p>
       )}
@@ -2033,6 +2195,51 @@ function MannequinPanel({
 }
 
 /* ─── BgPanel — sélection fond + suppression arrière-plan ────────────────── */
+
+/* ─── BgSelector — carrousel de swatches réutilisable ───────────────────── */
+
+function BgSelector({ plan, selectedBg, onSelect }: {
+  plan: Plan
+  selectedBg: number
+  onSelect: (id: number) => void
+}) {
+  return (
+    <div className="flex gap-2 overflow-x-auto snap-x snap-mandatory py-1 -mx-0.5 px-0.5">
+      {BACKGROUNDS.map(bg => {
+        const isLocked = plan === 'freemium' && bg.id !== 0
+        return (
+          <button
+            key={bg.id}
+            onClick={() => { if (!isLocked) onSelect(bg.id) }}
+            disabled={isLocked}
+            className={`relative snap-start shrink-0 w-20 h-20 rounded-xl overflow-hidden transition-all ${
+              isLocked ? 'cursor-not-allowed' : 'cursor-pointer'
+            } ${
+              selectedBg === bg.id && !isLocked
+                ? 'ring-2 ring-indigo-500 ring-offset-2 scale-[1.06] shadow-md shadow-indigo-200'
+                : isLocked ? 'ring-1 ring-gray-200 opacity-60'
+                : 'ring-1 ring-gray-200 hover:ring-indigo-300'
+            }`}
+          >
+            {bg.type === 'color'
+              ? <div className="w-full h-full" style={{ backgroundColor: bg.color }} />
+              : <img src={bg.src} alt={bg.label} className="w-full h-full object-cover" draggable={false} />}
+            {selectedBg === bg.id && !isLocked && (
+              <div className="absolute inset-0 flex items-center justify-center bg-indigo-600/20">
+                <Check className="w-4 h-4 text-white drop-shadow-md" />
+              </div>
+            )}
+            {isLocked && (
+              <div className="absolute inset-0 flex items-center justify-center bg-black/25">
+                <Lock className="w-3 h-3 text-white/90" />
+              </div>
+            )}
+          </button>
+        )
+      })}
+    </div>
+  )
+}
 
 interface BgPanelProps {
   plan: Plan
@@ -2053,46 +2260,49 @@ function BgPanel({
   onValidateFreemium, bgI18n,
 }: BgPanelProps) {
   const [showPreview, setShowPreview] = useState(false)
-  const currentBg = BACKGROUNDS[selectedBg] ?? BACKGROUNDS[0]
+  const currentBg = BACKGROUNDS.find(b => b.id === selectedBg) ?? BACKGROUNDS[0]
   const filledSlots = slots.filter(s => s.file !== null)
 
   return (
     <div className="bg-blue-50 border border-blue-100 rounded-2xl p-4 space-y-3">
+      <p className="text-[10px] font-bold text-blue-400 uppercase tracking-widest">{bgI18n.yourPhotosTitle}</p>
+
+      {/* Photos du user avec cases à cocher */}
+      {filledSlots.length > 0 && (
+        <div className="flex flex-wrap gap-2">
+          {filledSlots.map(slot => (
+            <button
+              key={slot.id}
+              onClick={() => onCheckToggle(slot.id)}
+              className={`relative w-20 h-20 rounded-xl overflow-hidden border-2 transition-all ${
+                bgCheckedSlots.has(slot.id) ? 'border-indigo-500 shadow-md' : 'border-gray-200 hover:border-indigo-300'
+              }`}
+            >
+              {slot.preview && (
+                <img src={slot.preview} alt={`slot ${slot.id}`} className="w-full h-full object-contain bg-gray-50" draggable={false} />
+              )}
+              {bgCheckedSlots.has(slot.id) && (
+                <div className="absolute inset-0 bg-indigo-600/30 flex items-center justify-center">
+                  <Check className="w-4 h-4 text-white" />
+                </div>
+              )}
+              {slot.processedUrl && (
+                <div className="absolute top-0.5 right-0.5 w-2 h-2 rounded-full bg-green-500" />
+              )}
+            </button>
+          ))}
+        </div>
+      )}
+
+      <div className="h-px bg-blue-100" />
       <p className="text-[10px] font-bold text-blue-400 uppercase tracking-widest">{bgI18n.bgPanelTitle}</p>
 
       {/* Carrousel snap-x horizontal */}
-      <div className="flex gap-2 overflow-x-auto pb-1 snap-x snap-mandatory">
-        {BACKGROUNDS.map(bg => {
-          const isLocked = plan === 'freemium' && bg.id !== 0
-          return (
-            <button
-              key={bg.id}
-              onClick={() => { if (!isLocked) { onBgSelect(bg.id); setShowPreview(true) } }}
-              disabled={isLocked}
-              className={`relative snap-start shrink-0 w-16 h-16 rounded-xl overflow-hidden transition-all
-                ${isLocked ? 'cursor-not-allowed' : 'cursor-pointer'}
-                ${selectedBg === bg.id && !isLocked
-                  ? 'ring-2 ring-indigo-500 ring-offset-2 scale-[1.06] shadow-md shadow-indigo-200'
-                  : isLocked ? 'ring-1 ring-gray-200 opacity-60'
-                  : 'ring-1 ring-gray-200 hover:ring-indigo-300'}`}
-            >
-              {bg.type === 'color'
-                ? <div className="w-full h-full" style={{ backgroundColor: bg.color }} />
-                : <img src={bg.src} alt={bg.label} className="w-full h-full object-cover" draggable={false} />}
-              {selectedBg === bg.id && !isLocked && (
-                <div className="absolute inset-0 flex items-center justify-center bg-indigo-600/20">
-                  <Check className="w-4 h-4 text-white drop-shadow-md" />
-                </div>
-              )}
-              {isLocked && (
-                <div className="absolute inset-0 flex items-center justify-center bg-black/25">
-                  <Lock className="w-3 h-3 text-white/90" />
-                </div>
-              )}
-            </button>
-          )
-        })}
-      </div>
+      <BgSelector
+        plan={plan}
+        selectedBg={selectedBg}
+        onSelect={(id) => { onBgSelect(id); setShowPreview(true) }}
+      />
 
       {/* Preview inline du fond sélectionné */}
       {showPreview && plan !== 'freemium' && (
@@ -2147,34 +2357,8 @@ function BgPanel({
           )}
         </>
       ) : (
-        /* Premium / Pro : hint + sélection multi-photos + bouton */
+        /* Premium / Pro : bouton traitement */
         <>
-          <p className="text-xs text-blue-600">{bgI18n.checkboxHint}</p>
-          {filledSlots.length > 0 && (
-            <div className="flex flex-wrap gap-1.5">
-              {filledSlots.map(slot => (
-                <button
-                  key={slot.id}
-                  onClick={() => onCheckToggle(slot.id)}
-                  className={`relative w-12 h-12 rounded-lg overflow-hidden border-2 transition-all ${
-                    bgCheckedSlots.has(slot.id) ? 'border-indigo-500 shadow-md' : 'border-gray-200 hover:border-indigo-300'
-                  }`}
-                >
-                  {slot.preview && (
-                    <img src={slot.preview} alt={`slot ${slot.id}`} className="w-full h-full object-cover" />
-                  )}
-                  {bgCheckedSlots.has(slot.id) && (
-                    <div className="absolute inset-0 bg-indigo-600/30 flex items-center justify-center">
-                      <Check className="w-4 h-4 text-white" />
-                    </div>
-                  )}
-                  {slot.processedUrl && (
-                    <div className="absolute top-0.5 right-0.5 w-2 h-2 rounded-full bg-green-500" />
-                  )}
-                </button>
-              ))}
-            </div>
-          )}
           {bgCheckedSlots.size > 0 && (
             <button
               onClick={onProcess}

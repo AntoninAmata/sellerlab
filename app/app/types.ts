@@ -2,6 +2,8 @@ export type Plan = 'freemium' | 'premium' | 'pro'
 
 export type SlotStatus = 'empty' | 'uploading' | 'processing-bg' | 'done' | 'error'
 
+export type PhotoContentType = 'recto' | 'verso' | 'label' | 'detail' | 'worn'
+
 export interface PhotoSlot {
   id: number
   file: File | null
@@ -11,13 +13,14 @@ export interface PhotoSlot {
   status: SlotStatus
   error?: string
   isAiGenerated?: boolean
+  contentType?: PhotoContentType
 }
 
 /* ─── Étape 2 — Reconnaissance automatique ─────────────────────────────── */
 
 export interface ExtraInfo {
   prixAchatNeuf?: number
-  missingInfos:   { label: string; value: string }[]
+  missingInfos:   { label: string; labelEN?: string; value: string }[]
   dimensions:     { nom: string; nomEN: string; valeur: string }[]
 }
 

@@ -85,10 +85,13 @@ RÈGLES CATÉGORIE :
 
 SYSTÈMES DE TAILLE :
 1. Repère la sous-catégorie dans la taxonomie et note son [sizeSystem] (valeur entre crochets)
-2. Regarde si l'étiquette sur la photo montre des valeurs d'un système supplémentaire (ex: "M / 42" → letters ET eu_femme)
-3. Retourne un tableau : le système de la taxonomie en premier, puis tout système supplémentaire visible sur l'étiquette
-4. Taille exacte : retourne la valeur lue sur l'étiquette telle quelle (ex: "42", "M", "38/40")
-   - Chaussures : TOUJOURS le numéro EU (ex: 42), jamais une lettre
+2. RÈGLE PRINCIPALE — vêtements standards (hors chaussures/enfants/taille unique) : TOUJOURS inclure "letters" en premier + le système taxonomie (ex: homme → ["letters","eu_homme"], femme → ["letters","eu_femme"])
+3. Regarde si l'étiquette montre un système supplémentaire (ex: "M / 42" → letters ET eu_femme)
+4. Cas particuliers :
+   - Chaussures → ["pointures"] uniquement ; taille = numéro EU (ex: "42"), jamais une lettre
+   - Enfants → ["enfant_age"] ou ["enfant_cm"] selon la sous-catégorie
+   - Taille unique → ["one_size"]
+5. Taille exacte : retourne la valeur lue sur l'étiquette telle quelle (ex: "42", "M", "38/40")
 
 RÈGLE DE CONFIANCE POUR LA TAILLE :
 - Taille lisible sur une étiquette dans les photos → confidence "high" OBLIGATOIRE, peu importe le système (numérique 48/46/42, lettres S/M/L, jeans 28/30/32, pointures EU/US/UK, tailles italiennes/françaises/etc.)
@@ -154,6 +157,21 @@ LANGUE POUR LES DÉFAUTS : La valeur du champ "defauts" doit être rédigée en 
       result.tailleSysteme = { value: [result.tailleSysteme.value as unknown as string], confidence: result.tailleSysteme.confidence }
     } else if (result.tailleSysteme.value.length === 0) {
       result.tailleSysteme = { value: ['letters'], confidence: 'low' }
+    }
+
+    /* ── Enrichit les systèmes : letters + one_size partout sauf chaussures/enfants ── */
+    {
+      const systems = result.tailleSysteme.value
+      const isShoes    = systems.includes('pointures')
+      const isKids     = systems.includes('enfant_age') || systems.includes('enfant_cm')
+      const isNone     = systems.includes('none')
+      const isOneOnly  = systems.length === 1 && systems[0] === 'one_size'
+      if (!isShoes && !isKids && !isNone && !isOneOnly) {
+        const enriched = [...systems]
+        if (!enriched.includes('letters'))  enriched.unshift('letters')
+        if (!enriched.includes('one_size')) enriched.push('one_size')
+        result.tailleSysteme = { value: enriched, confidence: result.tailleSysteme.confidence }
+      }
     }
 
     return NextResponse.json(result)

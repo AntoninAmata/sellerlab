@@ -151,9 +151,9 @@ export async function POST(req: NextRequest) {
 
     const nativeLang = LANG_NAMES[lang] ?? 'français'
 
-    const prompt = `Tu es un expert en copywriting pour Vinted. Rédige une annonce optimisée pour vendre rapidement.
+    const prompt = `Tu es un expert en copywriting pour Vinted. Rédige une annonce optimisée, honnête et lisible.
 
-Contexte article (NE PAS copier ces champs en brut dans la description — les intégrer naturellement dans les bullets emoji) :
+DONNÉES ARTICLE (ne jamais recopier ces champs en brut dans la description — à intégrer naturellement) :
 - Marque : ${marque || 'Inconnue'}
 - Genre : ${genre}
 - Catégorie : ${vintedPath}
@@ -163,51 +163,59 @@ Contexte article (NE PAS copier ces champs en brut dans la description — les i
 - Matières : ${matieres.join(', ') || 'Non précisées'}
 - Style : ${style || 'Non précisé'}
 - Motif : ${motif || 'Non précisé'}
-${defauts ? `- Défauts : ${defauts}` : ''}
-${hasExtraInfo ? `\nInformations à reprendre TELLES QUELLES dans la description (bullets dédiés ci-dessous) :\n${extraArticleBlock}` : ''}
+${defauts ? `- Défaut confirmé : ${defauts}\n` : ''}\
+${hasExtraInfo ? `\nInfos complémentaires à reprendre telles quelles :\n${extraArticleBlock}\n` : ''}\
 
-FORMAT OBLIGATOIRE pour la description (emojis + bullet points aérés) :
-✅ [État de l'article${defauts ? ' — mentionner les défauts honnêtement mais succinctement' : ''}]
-👕 [Description : type, coupe, couleur, style${style && style !== 'Non précisé' ? ` — terminer par une courte note d'occasion : "Idéal pour un look ${style}"` : ''}]
-🧵 [Composition : matières principales — OMETTRE ENTIÈREMENT cette ligne si la composition est inconnue]
-📏 [Taille : avec équivalences si disponibles — utiliser celles fournies ci-dessus]
-${hasPrixNeuf ? `💰 [Prix neuf : reprendre exactement le montant fourni (${extraInfo?.prixAchatNeuf}€)]\n` : ''}${hasGeneralInfos ? '📋 Infos complémentaires : [reprendre EXACTEMENT chaque info de la liste ci-dessus — une par ligne, format "Label : Valeur" ; traduire les labels dans la langue de chaque description]\n' : ''}${hasDimensions ? '📐 Dimensions : [reprendre EXACTEMENT les mesures fournies ci-dessus en cm]\n' : ''}[🍂 Parfait pour l'automne/hiver OU ☀️ Idéal pour l'été — ajouter UNIQUEMENT si la saison est clairement pertinente selon le type d'article et les matières ; omettre sinon]
-📦 Envoi soigné et rapide
-💬 N'hésitez pas à me contacter si vous avez la moindre question !
+────────────────────────────────────────────
+TITRE — obligations
+• Format : Marque + Type + Couleur + Taille + État (ordre naturel en ${nativeLang})
+• 50-60 caractères idéalement, maximum 60
+• Marque OBLIGATOIRE si connue (sans elle l'annonce est invisible dans les recherches filtrées)
+• INTERDITS : tout-en-majuscules, emojis, slogans ("MEGA PROMO", "VOIR PRIX"), ponctuation excessive
+• Exemple (FR) : "Pull Arket Homme Marron Taille S Très bon état"
 
-RÈGLES STRICTES :
-- Titre : maximum 60 caractères, OBLIGATOIREMENT en ${nativeLang} (${lang.toUpperCase()}), format : Marque + Type d'article + Matière + Couleur + Taille — adapter sans laisser de trous si certains éléments sont inconnus
-- JAMAIS de liste brute des champs contexte (Marque, Genre, Catégorie, État, Couleurs, Matières, Style, Motif) dans la description — ces infos sont intégrées naturellement dans les bullets emoji
-- JAMAIS d'information incertaine dans la description
-- Bullet points aérés, lisibles, 1 ligne par bullet
-- ${defauts ? 'Ne pas répéter les défauts dans la ligne 👕 si déjà dans ✅' : 'Ne mentionner aucun défaut'}
-- Pas de frais vendeur (à charge de l'acheteur sur Vinted)
-- 📦 et 💬 sont obligatoires dans les DEUX descriptions (traduire dans chaque langue)
-- seoTagsInDescription : 4-6 mots-clés DÉJÀ présents naturellement dans la description native
-- seoTagsExtra : 3-5 mots-clés supplémentaires utiles pour Vinted SEO, pas dans la description
-- infosManquantes : liste des champs non disponibles qui seraient utiles (ex: ["composition", "longueur épaule"])
-- hashtagsFR : 6-8 hashtags en ${nativeLang} UNIQUEMENT — CamelCase obligatoire. Inclure synonymes natifs ET termes universels (marques, mots identiques FR/EN). Une seule ligne sans retour à la ligne. Ex: "#BlazerKenzo #LinGris #Homme #VesteEnLin #Casual #Kenzo"
-- hashtagsEN : 6-8 hashtags en anglais UNIQUEMENT — CamelCase obligatoire. Inclure synonymes anglais ET termes universels (marques, mots identiques FR/EN). Une seule ligne sans retour à la ligne. Ex: "#KenzoBlazer #LinenGrey #Men #LinenJacket #Casual #Kenzo"
-- descriptionFR : description OBLIGATOIREMENT en ${nativeLang} (langue ${lang.toUpperCase()}) avec tous les bullets requis
-- descriptionEN : description OBLIGATOIREMENT en anglais (English) — même si la langue native est le français, descriptionEN doit être entièrement en anglais
-- Toujours générer les deux descriptions
+────────────────────────────────────────────
+DESCRIPTION — format obligatoire dans cet ordre EXACT :
 
-RÈGLE ABSOLUE DE LANGUE :
-- titre = rédigé en ${nativeLang} (${lang.toUpperCase()}) — PAS en français sauf si lang=fr
-- descriptionFR = rédigée en ${nativeLang} (langue ${lang.toUpperCase()}) — PAS en français sauf si lang=fr
-- descriptionEN = rédigée en anglais (English) — TOUJOURS, sans exception
+[Phrase d'accroche : une seule phrase naturelle, ton vendeur, intègre marque + type d'article + état + taille]
+✅ [État de l'article${defauts ? ` — mentionner le défaut honnêtement et succinctement : "${defauts}"` : ' — aucun défaut à mentionner'}]
+👕 [Description : type d'article, coupe/couleur${style && style !== 'Non précisé' ? ` — déduire 1-2 usages/occasions du style "${style}" combiné au type d'article (conseil vendeur, jamais un fait inventé) ; ajouter 1-2 synonymes du type pour le SEO naturel` : ' — si style non clairement identifié, ne pas forcer d\'usage'}]
+🧵 [Composition : matières principales — OMETTRE ENTIÈREMENT cette ligne si les matières sont inconnues]
+📏 [Taille avec équivalences${tailleEquiv ? ` : ${tailleEquiv}` : ' si disponibles'}]
+${hasPrixNeuf ? `💰 Prix neuf : ${extraInfo?.prixAchatNeuf}€\n` : ''}\
+${hasGeneralInfos ? `📋 Infos complémentaires : [reprendre EXACTEMENT chaque info — format "Label : Valeur" ; traduire les labels dans la langue de la description]\n` : ''}\
+${hasDimensions ? `📐 Dimensions : [reprendre EXACTEMENT les mesures fournies en cm]\n` : ''}\
+📦 [Envoi soigné et rapide]
+[Phrase de clôture vendeuse — naturelle en ${nativeLang}, pas de traduction mot à mot, style : invitation chaleureuse à poser des questions]
 
-Réponds UNIQUEMENT avec ce JSON (sans markdown, sans texte avant ou après) :
+Longueur description : 80-150 mots STRICTEMENT (compter les mots, viser 100-120)
+
+────────────────────────────────────────────
+RÈGLES ABSOLUES :
+- titre → en ${nativeLang} (${lang.toUpperCase()}) — PAS en français si lang≠fr
+- descriptionFR → en ${nativeLang} (${lang.toUpperCase()}) — JAMAIS en français si lang≠fr
+- descriptionEN → en anglais (English) — TOUJOURS sans exception
+- JAMAIS de liste brute des champs (marque, genre, catégorie, état, couleur, matière)
+- JAMAIS d'info incertaine, inventée ou non fournie (matière, mesure, provenance)
+- JAMAIS "voir photos" ni copier-coller générique
+- ${defauts ? 'Défaut UNIQUEMENT dans le bloc ✅ — pas dans 👕 ni ailleurs' : 'Aucun défaut mentionné nulle part'}
+- seoTagsInDescription : 4-6 mots-clés déjà présents naturellement dans la description native
+- seoTagsExtra : 3-5 mots-clés précis utiles pour Vinted SEO (pas #mode, pas #fashion génériques)
+- infosManquantes : liste des champs non fournis qui seraient utiles (ex: ["composition", "longueur"])
+- hashtagsFR : 6-8 hashtags en ${nativeLang} CamelCase sur une seule ligne (synonymes natifs + termes universels)
+- hashtagsEN : 6-8 hashtags en anglais CamelCase sur une seule ligne (synonymes anglais + termes universels)
+
+Réponds UNIQUEMENT avec ce JSON (sans markdown, sans texte avant ni après) :
 {
-  "titre": "string — max 60 caractères, OBLIGATOIREMENT en ${nativeLang} (${lang.toUpperCase()}), format Marque + Type + Matière + Couleur + Taille",
-  "descriptionFR": "string — OBLIGATOIREMENT en ${nativeLang} (${lang.toUpperCase()}) avec tous les bullets",
-  "descriptionEN": "string — OBLIGATOIREMENT en anglais (English) avec tous les bullets",
+  "titre": "string — max 60 car, ${nativeLang}, Marque + Type + Couleur + Taille + État",
+  "descriptionFR": "string — en ${nativeLang}, hook + emojis + clôture, 80-150 mots",
+  "descriptionEN": "string — en anglais, même structure, 80-150 mots",
   "seoTagsInDescription": ["tag1", "tag2"],
   "seoTagsExtra": ["tag1", "tag2"],
   "infosManquantes": ["champ1"],
-  "tailleEquivalences": "string — laisser vide, sera rempli automatiquement",
-  "hashtagsFR": "string — 6-8 hashtags en ${nativeLang} CamelCase sur une ligne",
-  "hashtagsEN": "string — 6-8 hashtags en anglais CamelCase sur une ligne"
+  "tailleEquivalences": "",
+  "hashtagsFR": "string — hashtags ${nativeLang} CamelCase sur une ligne",
+  "hashtagsEN": "string — hashtags anglais CamelCase sur une ligne"
 }`
 
     const response = await client.messages.create({

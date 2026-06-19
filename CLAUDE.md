@@ -113,7 +113,7 @@ SaaS pour vendeurs Vinted (et autres plateformes à terme).
 ---
 
 ### Étape 1 — Article ✅ Construite
-Upload photos + classification IA + reconnaissance automatique
+Upload libre (galerie + drag-and-drop) + classification IA + reconnaissance automatique + formulaire corrigeable
 
 #### Import URL Vinted ✅ (plan Pro uniquement)
 - Zone "Importer depuis Vinted" en haut, alternative à l'upload manuel
@@ -126,20 +126,26 @@ Upload photos + classification IA + reconnaissance automatique
 - NE récupère PAS titre/description/prix/catégorie — uniquement les photos
 
 #### Slots (15 au total) — Structure définitive
+- Slot 0 : Recto — OBLIGATOIRE
+- Slot 1 : Verso / dos
+- Slot 2 : Autre vue non portée
+- Slots 3-5 : Étiquettes (marque / taille / composition) — affichées en menu unifié « Étiquette » dans l'UI, distinction conservée en coulisses pour la classification IA
+- Slot 6 : Autre détail
+- Slot 7 : Défaut
+- Slot 8 : Emballage
+- Slots 9-14 : Photos portées (1-4 recommandées, 5-6 optionnelles)
 
-**Section 1 — PHOTOS NON PORTÉES** — 9 slots
-- Slot 0 : Photo recto (cintre / à plat) — OBLIGATOIRE — suppression fond gratuite
-- Slot 1 : Photo verso (cintre / à plat) — Recommandé
-- Slot 2 : Autre vue non portée — Recommandé
-- Slot 3 : Étiquette marque — Recommandé
-- Slot 4 : Étiquette taille — Recommandé
-- Slot 5 : Étiquette composition — Recommandé
-- Slot 6 : Autre détail — Optionnel
-- Slot 7 : Défaut — Optionnel
-- Slot 8 : Emballage — Optionnel
+#### Checklist photos (affichée dans l'UI)
+3 états visuels par ligne :
+- Gris = en attente d'upload
+- Vert = contenu couvert par au moins un slot uploadé
+- Rouge = manquant mais recommandé
+Chaque ligne affiche le « pourquoi » (ex: "L'IA s'en sert pour lire la composition exacte du tissu")
 
-**Section 2 — PHOTOS PORTÉES** — 6 slots
-- Slots 9-14 : Vue portée 1 à 6 — Recommandé (1-4) / Optionnel (5-6)
+#### Photo principale
+- Rôle distinct du contenu : n'importe quel slot peut devenir photo principale
+- Badge « ★ Photo principale » en pill indigo sur la vignette (dans l'image, pas sous)
+- Par défaut = slot 0 (recto)
 
 #### Classification IA
 - UN SEUL appel Claude Haiku pour toutes les photos simultanément
@@ -152,14 +158,35 @@ Le prompt reçoit `locale` pour répondre dans la langue de l'interface.
 
 Champs détectés : Marque, Segment de marque (interne), Genre, Catégorie + sous-catégorie (vintedPath), Taille, État, Couleur (max 2), Matière, Style, Motif, Défauts visibles
 
-**Informations complémentaires :**
+#### Formulaire — comportement strict
+- Champs obligatoires bloquants : Genre, Catégorie (≥3 niveaux), Marque, Taille (si applicable), État, Couleur(s)
+- Badge « Modifié » sur tout champ édité manuellement (confidence → 'manual')
+- Jamais confidence « Élevée » sur un champ vide
+- Option « Sans marque » disponible (valeur spéciale, non bloquante)
+- Défaut détecté → carte « Confirmer / Écarter » bloquante avant de passer à l'étape suivante
+- Pop-up garde-fou (verso/étiquettes manquants) fermable au clic extérieur ou Échap
+
+#### Système de tailles — deriveSizeSystems
+- Lettres (XS/S/M/L/XL…) + « Taille unique » : tous les vêtements sauf chaussures
+- EU homme/femme : disponibles selon le genre détecté
+- Jean : système W (W28, W30…)
+- Chaussures : EU + UK + US
+
+#### Infos complémentaires (dans l'étape Article)
 - Bloc 1 — Infos générales : pays de fabrication, doublure, numéro référence, type cuir, entretien, Autre + Prix neuf
 - Bloc 2 — Dimensions : poitrine, longueur, épaules, taille, hanches, entrejambe, pointure, largeur, hauteur, profondeur + mesure personnalisée
+- Aucun traitement de fond à cette étape
 
 ---
 
 ### Étape 2 — Visuels ✅ Construite
-Traitement photos : détourage fond + fonds + mannequin IA + photos produit
+Traitement photos : détourage fond + fonds + Studio photo IA (mannequin + produit)
+
+Deux blocs distincts :
+- **Mes photos** : fond personnel (sélecteur intégré, previews à la taille des mannequins)
+- **Studio photo IA** (ex-Mannequin IA) : fond IA (sélecteur intégré séparé) + Présentation + mannequins
+
+Les deux fonds sont mémorisés séparément via `lib/user-prefs.ts` (localStorage aujourd'hui, Supabase plus tard). Si le fond IA n'a pas été personnalisé, il hérite du fond personnel. Changement de fond = recomposition gratuite côté client à tout moment.
 
 #### Suppression de fond
 - @imgly/background-removal (WebAssembly côté client) — GRATUIT, privé
@@ -194,11 +221,24 @@ Traitement photos : détourage fond + fonds + mannequin IA + photos produit
 - Les photos traitées ne vont JAMAIS dans les slots originaux
 - State séparé : `aiCutoutEntries`, `productCutoutEntries`, `aiPhotos`
 
+#### Studio photo IA — organisation du panneau
+Ordre strict dans le panneau :
+1. Sélecteur de fond IA (previews w-20 h-20, même taille que les vignettes mannequin)
+2. « Présentation de l'article » : À plat / Cintre / Buste → bouton Générer (violet)
+3. Sélection mannequin (genre pills → grille → pose → prompt personnalisé)
+4. Bouton Générer (photo portée, violet — même couleur que photo produit)
+
+#### Mémoire préférences — lib/user-prefs.ts
+- Interface : `readPrefs()` / `savePrefs(patch)` — localStorage aujourd'hui, Supabase profiles.preferences plus tard
+- `bgUser` : index fond choisi pour les photos personnelles
+- `bgAi` : index fond choisi pour le Studio IA (hérite de bgUser si non défini)
+- `mannequin` : id du mannequin sélectionné
+
 #### Mannequin IA — FASHN.ai tryon-max (plan Pro)
 - API : `app/api/generate-mannequin/route.ts`
 - Endpoint FASHN : **tryon-max** (2 crédits/photo, qualité maximale)
 - Mannequins : **15 hommes + 15 femmes** — man-01 à man-15 / woman-01 à woman-15
-- Fichiers : `/public/mannequins/final/{id}.png` — 3 poses disponibles : face, side, back
+- Fichiers : `/public/mannequins/final/` — 3 poses par mannequin : `{id}.png` (face), `{id}-side.png` (3/4), `{id}-back.png` (dos)
 - Descriptions : `lib/mannequin-descriptions.ts`
 - Bouton sélection : "Choisir ce mannequin" (confirmation avant génération)
 - Paramètres FASHN : `model_image` (base64 PNG pose choisie), `garment_image` (slot 0 base64), `outfit_prompt` (tenue traduite EN), `resolution: "1k"`, NO background_reference
@@ -227,9 +267,9 @@ Traitement photos : détourage fond + fonds + mannequin IA + photos produit
 - `productCutoutEntries` recomposités sur le fond choisi sans re-appel FASHN
 
 #### Coût FASHN par annonce (plan Pro)
-- 2 photos mannequin (tryon-max) : 4 crédits
-- 2 photos produit (product-to-model fast) : 2 crédits
-- Total estimé : ~6-8 crédits/annonce
+- 3 photos mannequin portées (tryon-max, 1 appel/pose) : 6 crédits
+- 2 photos produit non portées (product-to-model fast) : 2 crédits
+- Total estimé : ~8 crédits/annonce
 
 ---
 
@@ -237,26 +277,45 @@ Traitement photos : détourage fond + fonds + mannequin IA + photos produit
 
 RÈGLE ABSOLUE : jamais d'information inventée. NE JAMAIS mentionner "Vinted Pro".
 
-Structure (ordre exact) :
-1. Mots-clés SEO — hashtags CamelCase bilingues
-2. Titre (max 60 caractères) — dans la langue de l'interface
-3. Choix de langue : Langue native / Anglais / Les deux (défaut)
-4. Description éditable avec 2 blocs d'infos additionnelles :
-   - 📋 Informations complémentaires (pays, doublure, etc.)
+Structure (ordre exact dans l'UI) :
+1. Infos complémentaires — validation/ajout des champs 📋 (pays, doublure…) et 📐 (dimensions)
+2. Mots-clés SEO — hashtags CamelCase bilingues
+3. Titre (max 60 caractères) : Marque + Type + Couleur + Taille + État, dans la langue de l'interface
+4. Choix de langue : Langue native / Anglais / Les deux (défaut)
+5. Description éditable avec blocs emoji structurés :
+   - 📋 Informations complémentaires
    - 📐 Dimensions
+   - 💰 Prix neuf (partagé avec l'étape Prix)
    - NE PAS inclure marque/genre/catégorie/état/couleur/matière en liste brute
+
+#### Règles de génération (prompt Claude Sonnet)
+- Titre : Marque + Type + Couleur + Taille + État, max 60 caractères
+- Description : 80-150 mots, accroche humaine + blocs emojis, usages déduits du style (jamais inventés), défaut confirmé intégré naturellement, jamais d'info inventée
+
+#### Injection locale des infos (zéro appel API sur validation)
+- `upsertEmojiLine()` : trouve/remplace/insère la ligne du bon bloc emoji (📋/📐/💰) sans toucher au reste
+- Injection dans les 7 langues : description native avec labels dans la langue UI, description EN toujours en anglais
+- `DIM_PRESETS_FR` comme clés canoniques → traduction à l'affichage via `DIM_PRESETS_DISPLAY[lang]`
+- `BLOCK_HEADERS` : 7 langues × {infos, dims, prix} pour les en-têtes de blocs
+- Pas de bouton « Tout copier »
 
 ---
 
-### Étape 4 — Prix ✅ Construite
+### Étape 4 — Prix ✅ Construite (calcul stabilisé 2026-06-19)
 
-#### Segment de marque (déterminé par l'IA, exemples non exhaustifs)
-- `standard` : Zara, H&M, Mango...
-- `luxe_accessible` : Kenzo, Sandro, Maje, The Kooples...
-- `luxe_premium` : Gucci, Saint Laurent, Prada, Dior, Hermès...
-- Fallback → standard
+#### Architecture — séparation extraction / calcul
+1. **Claude Sonnet + web_search** → extrait uniquement les données brutes (prixNeufMarque, médiane, min/max, nbAnnonces, delaiVente). Aucune formule dans le prompt.
+2. **`lib/pricing.ts` → `computePrice()`** → calcul TypeScript 100% déterministe. Mêmes données = toujours même prix.
+3. **Claude Haiku (temperature=0)** → raisonnement textuel uniquement (2-3 phrases). Jamais formules/coefficients exposés au user.
 
-#### Décote par état et segment
+Le recalcul rapide (bouton "Recalculer avec ces informations") utilise les données marché existantes + `computePrice()` + Haiku — sans web search.
+
+#### Segment de marque
+- Vient de `recognition.brand_segment` (étape Article) — Claude ne le redétermine plus
+- Fallback → `'standard'`
+- `standard` : Zara, H&M, Mango… | `luxe_accessible` : Kenzo, Sandro, Maje… | `luxe_premium` : Gucci, Saint Laurent, Dior, Hermès…
+
+#### Décote par état × segment (`DECOTE_TABLE` dans `lib/pricing.ts`)
 | État | Standard | Luxe accessible | Luxe premium |
 |------|----------|----------------|-------------|
 | Neuf avec étiquette | 55% | 65% | 75% |
@@ -265,24 +324,35 @@ Structure (ordre exact) :
 | Bon état | 25% | 35% | 45% |
 | Satisfaisant | 15% | 20% | 30% |
 
-#### Pondération marché/décote
-| Situation | Pondération |
-|-----------|------------|
-| Prix neuf + ≥5 annonces | 60% marché / 40% décote |
-| Prix neuf + 1-4 annonces | 40% marché / 60% décote |
-| Prix neuf + 0 annonces | 100% décote |
-| Pas de prix neuf + annonces | 90% marché / 10% décote |
-| Rien trouvé | Demander au user |
+#### Pondération progressive (remplace les seuils binaires)
+`weightMarket = min(0.90, 0.30 + (n − 1) / 15)` — n = nbAnnonces
+
+| n annonces | Poids marché | Poids décote |
+|-----------|-------------|-------------|
+| 0 | 0% | 100% |
+| 1 | 30% | 70% |
+| 5 | ~57% | ~43% |
+| 10+ | 90% | 10% |
+
+Si pas de prix neuf mais médiane disponible → 90% médiane / 10% décote.
 
 #### Bornes de sécurité
-- Prix final entre décote -20% et décote +30%
+- `prixSuggere` ∈ `[prixDecote × 0.80 ; prixDecote × 1.30]`
+- Toujours actives dès qu'un prix neuf est disponible (déclaré ou trouvé)
+- `normalizeEtat()` assure la correspondance même en cas de variation de casse
+
+#### Gel du prix
+- Calculé une seule fois à l'arrivée sur l'étape
+- Recalcul uniquement sur action explicite ("Recalculer")
+- Retour sur l'étape → aucun recalcul si `pricingResult !== null`
 
 #### Interface prix
+- Bannière confiance + ligne source ("X annonces analysées") + ligne synthèse ("Estimé à partir du prix neuf et des ventes récentes")
 - Prix suggéré = vraie valeur marché (SANS marge négociation)
-- Slider avec conseil : "💡 Astuce Vinted : affichez 15-20% au-dessus de votre prix plancher. 70% des acheteurs négocient."
-- Prix réel estimé après négociation avec l'acheteur = prix affiché - 15%
-- "Nous vous recommandons de ne pas accepter d'offre en dessous de XX€" = moyenne (bas fourchette + prix suggéré -25%)
-- "Acheté chez" et "Article rare / édition limitée" impactent le calcul
+- Slider + conseil négociation (15-20% au-dessus du plancher) + prix plancher
+- Prix réel estimé = prix affiché × 0.85 (négociation)
+- Raisonnement tronqué à 2 lignes, bouton "Voir plus" si > 120 caractères
+- Jamais exposer formules/coefficients/pondérations au user
 
 ---
 
@@ -320,8 +390,8 @@ PAS de bouton "Tout copier"
 
 #### Architecture bookmarklet — fonctions JS dans `app/public/bookmarklet.js`
 - `sv(el, v)` — setValue React-safe (contourne React #418 via Object.getOwnPropertyDescriptor)
-- `sc(path, cb)` — navigue le dropdown Catégorie jusqu'à 4 niveaux via `input[name="category"]`
-  - Reçoit le chemin de navigation FR exact (ex: `"Femmes > Vêtements > Jeans > Jeans skinny"`)
+- `sc(path, cb)` — navigue le dropdown Catégorie jusqu'à 5 niveaux via `input[name="category"]`
+  - Reçoit le chemin de navigation FR exact (ex: `"Femmes > Vêtements > Manteaux et vestes > Manteaux"`)
   - DOIT s'exécuter EN PREMIER : Vinted n'affiche Marque/Taille/État/Couleur/Matériau qu'après sélection catégorie
 - `fb(brand, cb)` — dropdown Marque via `input[name="brand"]` + `input[name="brand-search-input"]`
   - Null-check obligatoire : `input[name="brand"]` absent pour catégories non-vêtements (Électronique, Maison)
@@ -330,7 +400,7 @@ PAS de bouton "Tout copier"
 - Ordre de remplissage : titre → description → prix → catégorie (sc) → marque (fb) → taille (fs) → état → couleur 1 → couleur 2 → matériau
 
 #### Chemins de catégorie et langue
-- Le champ `categorie` dans `RecognitionResult` contient le chemin de navigation FR exact depuis `lib/vinted-navigation-taxonomy.ts`
+- Le champ `vintedPath` dans `RecognitionResult` contient le chemin de navigation FR exact depuis `lib/vinted-navigation-taxonomy.ts`
 - Format : `"N1 > N2 > N3"` ou `"N1 > N2 > N3 > N4"` selon profondeur
 - Le prompt de reconnaissance (`app/api/recognize/route.ts`) reçoit `locale` et génère le chemin dans la langue de l'interface
 - Le bookmarklet s'exécute sur la version Vinted de la langue choisie par l'utilisateur (vinted.fr, vinted.es, etc.)
@@ -341,7 +411,7 @@ PAS de bouton "Tout copier"
 ## Mannequin IA — Référence complète
 
 Fichier descriptions : `lib/mannequin-descriptions.ts`
-Fichiers images : `/public/mannequins/final/{id}.png` — 3 poses par mannequin (face, side, back)
+Fichiers images : `/public/mannequins/final/` — 3 poses par mannequin : `{id}.png` (face), `{id}-side.png` (3/4), `{id}-back.png` (dos)
 
 **15 hommes + 15 femmes :**
 - Hommes : man-01 à man-15
@@ -394,8 +464,7 @@ Chemins exacts de l'interface Vinted FR, format `"N1 > N2 > N3 [> N4 [> N5]]"`.
 - `getNavRef()` → chaîne newline-séparée pour injection dans le prompt de reconnaissance
 - `getNavRefFiltered(prefix)` → filtre par préfixe (usage futur)
 - **Pas de traductions** : le prompt de reconnaissance reçoit `locale` et génère directement le chemin dans la langue Vinted correspondante
-- Le champ `categorie` de `RecognitionResult` = chemin exact copié depuis cette liste (en FR pour vinted.fr, traduit pour les autres versions)
-- Le champ `sousCategorie` = dernier segment du chemin (rétrocompatibilité avec les dropdowns de l'étape 2)
+- Le champ `vintedPath` de `RecognitionResult` = chemin exact copié depuis cette liste (en FR pour vinted.fr, traduit pour les autres versions)
 
 ---
 
@@ -436,7 +505,6 @@ Chemins exacts de l'interface Vinted FR, format `"N1 > N2 > N3 [> N4 [> N5]]"`.
 ---
 
 ## V2
-- Régénérer 40 photos mannequins (face + 3/4) avec pantalon ample + imperfections
 - Mode retouche background removal (outil pinceau/gomme)
 - Amélioration suppression de fond (rembg MIT)
 - Graphique probabilité vente / prix / temps
@@ -465,138 +533,32 @@ Chemins exacts de l'interface Vinted FR, format `"N1 > N2 > N3 [> N4 [> N5]]"`.
 - Pour chaque nouvelle page : meta title + description SEO obligatoires
 - Photos redimensionnées à 1024px avant envoi API
 
----
-
-## Résumé session 2026-06-12 — Bookmarklet & taxonomie
-
-### Bookmarklet Vinted ✅ (fonctionnel, plan Pro)
-Fichiers : `app/public/bookmarklet.js` (source lisible), `app/bookmarklet/page.tsx` (version minifiée servie).
-
-**Champs remplis automatiquement (dans l'ordre) :**
-titre → description → prix → catégorie (sc) → marque (fb) → taille (fs) → état → couleur 1 → couleur 2 → matériau
-
-**Fonctions JS :**
-- `sv(el, v)` — setValue React-safe (contourne React #418)
-- `sc(path, cb)` — navigue le dropdown Catégorie jusqu'à **5 niveaux** via `input[name="category"]`
-  - `af(cb)` (autoFirst) — si Vinted affiche encore des options après le dernier niveau du path, sélectionne automatiquement la 1re option visible (ferme le dropdown, débloque les champs suivants)
-  - Délai 1200ms entre chaque niveau ET avant `af` (uniformisé depuis 800ms pour fiabilité)
-- `fb(brand, cb)` — dropdown Marque via `input[name="brand"]` + champ de recherche `brand-search-input`
-- `fs(v, cb)` — taille via `[role="checkbox"][aria-label]` + fallback "Taille unique" dans les 7 langues Vinted + null-check si champ absent
-- `fd(name, v, cb)` — dropdown générique (état, couleur, matériau) via `input[name]`
-
-**Architecture :** token UUID stocké en Map mémoire serveur (15 min), API `GET /api/bookmarklet-data?token=`, bookmarklet injecté via `javascript:` URL avec `encodeURIComponent`.
-
-### Taxonomie de navigation Vinted — `lib/vinted-navigation-taxonomy.ts`
-Format flat `NAV_PATHS`: `"N1 > N2 > N3 [> N4 [> N5]]"` — source unique pour dropdowns cascades ET prompt de reconnaissance.
-
-**Couverture complète Femmes/Hommes (N4 et N5 ajoutés cette session) :**
-- N4 ajouté : Maternité (13 entrées dont 3 N5), Vêtements de sport F+H, Bottes F+H, Chaussures de sport F+H, Chapeaux F+H, Bijoux F+H, Sous-vêtements et chaussettes H, Pyjamas H, Sacs et sacoches H
-- N5 ajouté : Manteaux (7F/6H), Vestes (11F/12H), Sweats (6F), Accessoires de sports (5F/5H), Sous-vêtements maternité (3F)
-- Total : ~256 chemins N3, ~72 chemins N4, ~48 chemins N5
-
-**Exports :**
-- `NAV_PATHS` — liste complète (pour `getNavRef()` injecté dans le prompt)
-- `VINTED_TAXONOMY_LEVEL5_FR` — constante Record des N5 connus (pour référence rapide)
-- `parseVintedPath(path)` → `{ n1, n2, n3, n4, n5 }`
-- `getN1List()`, `getN2List(n1)`, `getN3List(n1,n2)`, `getN4List(n1,n2,n3)`, `getN5List(n1,n2,n3,n4)`
-
-### Nettoyage `lib/vinted-taxonomy.ts`
-Supprimé : interfaces `SubCategory`/`Category`, const `CATEGORIES` (~500 lignes), `CATEGORY_LABELS`, `SUBCATEGORY_LABELS`.
-Conservé : `SIZES`, `COLORS`, `MATERIALS`, `CONDITIONS`, `STYLES`, `PATTERNS`, `tx()`, tous les `*_LABELS`.
-
-### Étape 2 — Reconnaissance (RecognitionStep.tsx)
-- Champ `vintedPath` remplace `categorie` + `sousCategorie`
-- Dropdowns en cascade N1→N2→N3→N4→N5 (N5 affiché si `n5Options.length > 0`)
-- Badge de confiance correctement transmis (plus de faux "Modifié")
-- Avertissement ambre si N3 terminal sans N4/N5 dans la taxonomie ("Vérifiez la sous-catégorie sur Vinted après remplissage"), traduit dans les 7 langues
 
 ---
 
-## Résumé session 2026-06-17 — Visuels, mannequin IA & style auto-adapté
+## À faire — Prochaines sessions
 
-### Réorganisation du flux /app
-- Étape 1 : **Article** = upload + classification IA + reconnaissance (anciens étapes 1+2 fusionnés)
-- Étape 2 : **Visuels** = tout le traitement photo (détourage + fonds + mannequin IA + photos produit)
-- Frise finale : Article → Visuels → Annonce → Prix → Publication (dans les 7 langues)
+### Étape Visuels
+1. **Fond individuel par photo** — permettre un fond différent pour chaque slot (actuellement un fond commun par bloc). Architecture : `bgPerSlot: Record<number, number>` dans le state, mini-sélecteur au survol de chaque vignette.
+2. **2ème photo produit = dos/profil** — modifier `handleGenerateProductPhoto` pour envoyer un prompt différent sur le 2ème appel (dos de l'article, ou profil si chaussure).
+3. **Liseré bleu résiduel FASHN** — artifact tryon-max sur certaines photos. Ajouter dans le prompt : "seamless integration, no color fringe, no blue halo, clean edges"
+4. **Tester le cycle complet FASHN** — crédits rechargés : tester tryon-max (mannequin) + product-to-model (produit) de bout en bout sur un vrai article.
+5. **Email FASHN envoyé** — ajuster les réglages selon leur réponse.
 
-### FASHN — passage à tryon-max
-- Photos portées : **tryon-max** (2 crédits/photo, qualité maximale)
-- Photos produit non portées : **product-to-model fast** (1 crédit/photo)
-- 3 modes produit : buste / cintre / plat
-- Résolution : `1k` partout
-- `background_reference` retiré — composition côté client uniquement
+### Étape Prix
+6. **Calibration du calcul** — tester sur des articles réels (prix de vente / invendus connus). Hypothèse à vérifier : biais haussier sur le luxe (la médiane des annonces Vinted affichées surestime le prix effectivement vendu ; décote luxe_premium "Très bon état" à 55% peut-être trop haute).
+7. **Ajustements plateforme/rareté** — mis de côté faute de données réelles. À reprendre avec des ventes observées.
 
-### Mannequins IA
-- **15 hommes + 15 femmes** : man-01 à man-15 / woman-01 à woman-15
-- **3 poses** par mannequin : face, side, back — fichiers `/public/mannequins/final/{id}.png`
-- Bouton de confirmation "Choisir ce mannequin" avant génération
+### Contenu
+8. **Blog** — article "titre + description Vinted qui vendent" (appliquer les règles de l'étape Annonce).
 
-### Rendu 3:4 universel (compositeWithBackground)
-- Format fixe : JPEG portrait 1080×1440 px
-- Fond : cover (Math.max), cutout : contain 85% centré (Math.min)
-- Changement de fond = recomposition locale gratuite (aucun appel FASHN)
-- Même pipeline pour : slots réels, photos mannequin, photos produit
+### Avant mise en ligne (bloquants)
 
-### 31 fonds
-- `bg-white.jpg` + `bg-01.jpg` à `bg-22.jpg` + **`bg-23.jpg` à `bg-30.jpg`** (8 intérieurs scandinaves)
+9. **Stockage mannequins** — `public/mannequins/` est gitignore (494 Mo). Migrer avant déploiement :
+   - **Option A — Supabase Storage (recommandée)** : uploader les PNG sur un bucket public, modifier `generate-mannequin/route.ts` pour `fetch` l'URL Supabase au lieu de `readFileSync`
+   - **Option B — Git LFS** : `git lfs track "app/public/mannequins/**/*.png"` + push
+   - Status actuel : en local ✅ / GitHub ❌ (gitignoré) / Vercel ❌
 
-### Style auto-adapté (generateOutfitPrompt)
-- `classifyGarment(vintedPath)` → type (HAUT/BAS/PIECE_ENTIERE/VESTE/CHAUSSURE/ACCESSOIRE) via regex N2/N3
-- `normalizeStyle(style.value)` → clé style (casual/chic/sportif/vintage/streetwear/rock/business/boheme/minimaliste/default)
-- `OUTFIT_PROMPTS` : 7 langues × 6 types × 10 styles — coupes 2026 (straight-leg/wide-leg, zéro slim/skinny)
-- `promptIsAutoRef` + `handleCustomPromptChange` : la génération auto s'arrête dès que l'utilisateur modifie le champ
-- Traduction via `/api/translate-prompt` (claude-haiku-4-5) avant envoi FASHN — fallback = texte original
-
-### Routes API ajoutées
-- `/api/translate-prompt` — claude-haiku-4-5, texte → anglais, court-circuit si source_lang='en'
-
----
-
-## Prochaine session — À faire
-
-### Chantier traitement photos (priorité)
-
-1. **Tester le cycle complet** — une fois les crédits FASHN rechargés, tester la génération mannequin (tryon-max) et photos produit (product-to-model) de bout en bout sur un vrai article
-
-2. **2ème photo produit = dos/profil** — actuellement les 2 photos produit non portées sont générées avec le même prompt (face). La 2ème devrait être le dos de l'article (ou profil si chaussure). Modifier `handleGenerateProductPhoto` pour envoyer un prompt différent sur le 2ème appel.
-
-3. **Gestion des photos/infos manquantes** — demander les photos obligatoires (face, dos, étiquettes) si absentes au moment du passage à l'étape 2, et demander les clarifications manquantes (taille non reconnue, couleur incertaine, etc.) avant génération
-
-4. **Simplifier l'UX du panneau Visuels** — mieux distinguer "suppression de fond" (gratuit/@imgly) et "génération IA FASHN" (Pro), permettre le choix de fond par photo individuelle, indiquer clairement "3 photos portées + 2 non portées" dans les libellés
-
-5. **Améliorer la classification** — photo de dos mal classée en "étiquette marque". Affiner le prompt de classification Claude Haiku pour mieux distinguer dos d'article vs étiquette
-
-6. **Liseré bleu résiduel** — artifact FASHN tryon-max sur certaines photos (halo bleu autour du vêtement). Rendre le prompt plus explicite : "seamless integration, no color fringe, no blue halo, clean edges"
-
-7. **Nettoyer le code mort dans RecognitionStep** — supprimer les fonctions/imports inutilisés : `ConfidenceBadge` dupliqué, `Field`, hook `useRecognition`, imports taxonomy non utilisés. Réduire la taille du fichier.
-
-8. **Décider : infos complémentaires → étape Annonce** — les champs dimensions/infos (pays, doublure, etc.) sont actuellement en étape Visuels. Les déplacer vers l'étape Annonce serait plus logique (regrouper tout ce qui sert à la description). À décider avant de coder.
-
-### Autres priorités
-
-9. **Stabilisation calcul de prix** — tester sur des vrais articles, affiner les pondérations marché/décote
-10. **Supabase Auth** — inscription/connexion, gestion des quotas freemium
-11. **Stripe paiements** — checkout Premium + Pro
-12. **Déploiement Vercel** — voir section ⚠️ ci-dessous (mannequins à migrer d'abord)
-
----
-
-## ⚠️ À faire avant déploiement Vercel — Mannequins IA
-
-`public/mannequins/` est dans le `.gitignore` (494 Mo de PNG impossibles à pousser sur GitHub tel quel).
-Les fichiers existent en local et tout fonctionne, mais ils **ne seront pas sur Vercel automatiquement**.
-
-**Deux options au moment du déploiement :**
-
-**Option A — Supabase Storage (recommandée)**
-- Uploader les 45 PNG (× 3 poses) sur un bucket Supabase Storage public
-- Modifier `app/api/generate-mannequin/route.ts` : remplacer `readFileSync` par un `fetch` vers l'URL Supabase
-- Avantage : pas de limite de taille, images CDN-servis
-
-**Option B — Git LFS**
-- `git lfs install` + `git lfs track "app/public/mannequins/**/*.png"`
-- Commit + push avec LFS activé
-- Avantage : transparent dans le code, pas de changement de routes
-- Inconvénient : coût GitHub LFS Storage au-delà de 1 Go gratuit
-
-**Status actuel :** en local ✅ / GitHub ❌ (gitignoré) / Vercel ❌ (absent du repo)
+10. **Supabase Auth** — inscription/connexion, gestion des quotas freemium par plan.
+11. **Stripe** — checkout Premium + Pro.
+12. **Déploiement Vercel** — après les 3 points ci-dessus.

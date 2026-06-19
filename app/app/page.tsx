@@ -1,8 +1,8 @@
 'use client'
 
-import { useState, useEffect, useRef } from 'react'
+import { useState, useEffect, useRef, useCallback } from 'react'
 import Link from 'next/link'
-import { Camera, ScanLine, Tag, FileText, Send, ArrowLeft, ChevronRight } from 'lucide-react'
+import { Camera, ScanLine, Tag, FileText, Send, ArrowLeft, ChevronRight, AlertTriangle } from 'lucide-react'
 import PhotoUploadStep from './components/PhotoUploadStep'
 import RecognitionStep from './components/RecognitionStep'
 import PricingStep from './components/PricingStep'
@@ -32,6 +32,10 @@ const PAGE_I18N: Record<Lang, {
   next: string
   finish: string
   addMainPhoto: string
+  warnTitle: string
+  warnBody: string
+  warnStay: string
+  warnContinue: string
 }> = {
   fr: {
     steps: [
@@ -47,6 +51,10 @@ const PAGE_I18N: Record<Lang, {
     next:         'Continuer',
     finish:       'Terminer',
     addMainPhoto: 'Ajoutez au moins la photo principale pour continuer',
+    warnTitle: 'Photos recommandées manquantes',
+    warnBody: 'Sans photo verso ni étiquettes, l\'IA sera moins précise sur la taille et la composition, et le traitement des visuels (photo produit de dos, vue portée) sera limité. Vous pouvez les ajouter maintenant ou continuer.',
+    warnStay: 'Ajouter les photos',
+    warnContinue: 'Continuer quand même',
   },
   en: {
     steps: [
@@ -62,6 +70,10 @@ const PAGE_I18N: Record<Lang, {
     next:         'Continue',
     finish:       'Finish',
     addMainPhoto: 'Add at least the main photo to continue',
+    warnTitle: 'Recommended photos missing',
+    warnBody: 'Without a back photo or labels, AI will be less accurate about size and materials, and visual processing (back product photo, worn view) will be limited. You can add them now or continue.',
+    warnStay: 'Add photos',
+    warnContinue: 'Continue anyway',
   },
   es: {
     steps: [
@@ -77,6 +89,10 @@ const PAGE_I18N: Record<Lang, {
     next:         'Continuar',
     finish:       'Finalizar',
     addMainPhoto: 'Añade al menos la foto principal para continuar',
+    warnTitle: 'Faltan fotos recomendadas',
+    warnBody: 'Sin foto trasera ni etiquetas, la IA será menos precisa en talla y composición, y el tratamiento de los visuales (foto de producto por detrás, vista vestida) estará limitado. Puedes añadirlas ahora o continuar.',
+    warnStay: 'Añadir fotos',
+    warnContinue: 'Continuar de todos modos',
   },
   de: {
     steps: [
@@ -92,6 +108,10 @@ const PAGE_I18N: Record<Lang, {
     next:         'Weiter',
     finish:       'Fertig',
     addMainPhoto: 'Füge mindestens das Hauptfoto hinzu, um fortzufahren',
+    warnTitle: 'Empfohlene Fotos fehlen',
+    warnBody: 'Ohne Rückseite oder Etiketten ist die KI weniger genau bei Größe und Material, und die Bildbearbeitung (Produktfoto von hinten, Anziehfoto) ist eingeschränkt. Du kannst sie jetzt hinzufügen oder fortfahren.',
+    warnStay: 'Fotos hinzufügen',
+    warnContinue: 'Trotzdem fortfahren',
   },
   it: {
     steps: [
@@ -107,6 +127,10 @@ const PAGE_I18N: Record<Lang, {
     next:         'Continua',
     finish:       'Fine',
     addMainPhoto: 'Aggiungi almeno la foto principale per continuare',
+    warnTitle: 'Foto consigliate mancanti',
+    warnBody: 'Senza foto retro o etichette, l\'IA sarà meno precisa su taglia e composizione, e il trattamento visuale (foto prodotto di schiena, vista indossata) sarà limitato. Puoi aggiungerle ora o continuare.',
+    warnStay: 'Aggiungi foto',
+    warnContinue: 'Continua comunque',
   },
   nl: {
     steps: [
@@ -122,6 +146,10 @@ const PAGE_I18N: Record<Lang, {
     next:         'Volgende',
     finish:       'Afronden',
     addMainPhoto: "Voeg minimaal de hoofdfoto toe om door te gaan",
+    warnTitle: "Aanbevolen foto's ontbreken",
+    warnBody: "Zonder achterkantfoto of labels is AI minder nauwkeurig voor maat en materiaal, en de beeldverwerking (productfoto van achter, gedragen weergave) is beperkt. Je kunt ze nu toevoegen of doorgaan.",
+    warnStay: "Foto's toevoegen",
+    warnContinue: 'Toch doorgaan',
   },
   pl: {
     steps: [
@@ -137,6 +165,10 @@ const PAGE_I18N: Record<Lang, {
     next:         'Dalej',
     finish:       'Zakończ',
     addMainPhoto: 'Dodaj co najmniej główne zdjęcie, aby kontynuować',
+    warnTitle: 'Brakuje zalecanych zdjęć',
+    warnBody: 'Bez zdjęcia tyłu i etykiet AI będzie mniej dokładna co do rozmiaru i składu, a przetwarzanie wizualne (zdjęcie produktu od tyłu, widok w ubraniu) będzie ograniczone. Możesz je dodać teraz lub kontynuować.',
+    warnStay: 'Dodaj zdjęcia',
+    warnContinue: 'Kontynuuj mimo to',
   },
 }
 
@@ -189,8 +221,29 @@ export default function AppPage() {
   const [recognitionResult, setRecognitionResult] = useState<RecognitionResult | null>(null)
   const [pricingResult, setPricingResult] = useState<PriceResult | null>(null)
   const [annonceResult, setAnnonceResult] = useState<GenerateResult | null>(null)
+  const [showSoftWarning, setShowSoftWarning] = useState(false)
 
-  /* Reset de la génération quand l'utilisateur ajoute des infos complémentaires à l'étape 2 */
+  useEffect(() => {
+    if (!showSoftWarning) return
+    const onKey = (e: KeyboardEvent) => { if (e.key === 'Escape') setShowSoftWarning(false) }
+    window.addEventListener('keydown', onKey)
+    return () => window.removeEventListener('keydown', onKey)
+  }, [showSoftWarning])
+
+  /* setExtraInfo — partial setter pour AnnonceStep */
+  const setExtraInfo = useCallback((patch: Partial<import('./types').ExtraInfo>) => {
+    setRecognitionResult(prev => prev ? {
+      ...prev,
+      extraInfo: {
+        missingInfos: [],
+        dimensions: [],
+        ...prev.extraInfo,
+        ...patch,
+      },
+    } : null)
+  }, [])
+
+  /* Reset annonce quand extraInfo change à l'étape Annonce */
   const prevMissingCountRef = useRef(0)
   useEffect(() => {
     const newCount = recognitionResult?.extraInfo?.missingInfos?.length ?? 0
@@ -207,7 +260,19 @@ export default function AppPage() {
 
   /* ── Condition pour avancer selon l'étape active ── */
   function canContinue(): boolean {
-    if (step === 1) return mainPhotoReady && recognitionResult !== null
+    if (step === 1) {
+      if (!mainPhotoReady || !recognitionResult) return false
+      const r = recognitionResult
+      if (!r.genre.value) return false
+      if (!r.vintedPath.value || r.vintedPath.value.split(' > ').length < 3) return false
+      if (!r.marque.value) return false
+      if (!r.etat.value) return false
+      if (r.couleurs.value.length === 0) return false
+      const tailleSystem = r.tailleSysteme.value[0] as string | undefined
+      if (tailleSystem !== 'none' && !r.taille.value) return false
+      if (r.defauts.value && r.defauts.confidence !== 'manual') return false
+      return true
+    }
     if (step === 2) return true
     if (step === 3) return annonceResult !== null
     if (step === 4) return pricingResult !== null
@@ -315,6 +380,7 @@ export default function AppPage() {
             recognition={recognitionResult}
             result={annonceResult}
             setResult={setAnnonceResult}
+            setExtraInfo={setExtraInfo}
           />
         )}
 
@@ -358,7 +424,17 @@ export default function AppPage() {
 
           {step < STEPS.length && (
             <button
-              onClick={() => setStep((s) => Math.min(STEPS.length, s + 1))}
+              onClick={() => {
+                if (step === 1 && canContinue()) {
+                  const versoMissing = slots[1].file === null
+                  const labelsMissing = [3, 4, 5].every(i => slots[i].file === null)
+                  if (versoMissing || labelsMissing) {
+                    setShowSoftWarning(true)
+                    return
+                  }
+                }
+                setStep((s) => Math.min(STEPS.length, s + 1))
+              }}
               disabled={!canContinue()}
               className="btn-shimmer flex items-center gap-2 bg-indigo-600 text-white font-semibold px-6 py-2.5 rounded-full hover:bg-indigo-700 disabled:opacity-40 disabled:pointer-events-none active:scale-95 transition-all text-sm shadow-md shadow-indigo-200/60"
             >
@@ -378,6 +454,40 @@ export default function AppPage() {
           )}
         </div>
       </div>
+
+      {/* ── Soft warning dialog — verso / étiquettes manquants ── */}
+      {showSoftWarning && (
+        <div
+          className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/40 backdrop-blur-sm"
+          onClick={() => setShowSoftWarning(false)}
+        >
+          <div className="bg-white rounded-2xl shadow-xl max-w-sm w-full p-6 space-y-4" onClick={(e) => e.stopPropagation()}>
+            <div className="flex items-start gap-3">
+              <div className="w-10 h-10 rounded-xl bg-orange-50 flex items-center justify-center shrink-0">
+                <AlertTriangle className="w-5 h-5 text-orange-500" />
+              </div>
+              <div>
+                <p className="font-display font-extrabold text-base text-gray-900">{t.warnTitle}</p>
+                <p className="text-sm text-gray-500 mt-1">{t.warnBody}</p>
+              </div>
+            </div>
+            <div className="flex flex-col gap-2 pt-1">
+              <button
+                onClick={() => setShowSoftWarning(false)}
+                className="w-full flex items-center justify-center gap-2 bg-indigo-600 hover:bg-indigo-700 text-white font-semibold text-sm px-5 py-2.5 rounded-xl transition-colors"
+              >
+                {t.warnStay}
+              </button>
+              <button
+                onClick={() => { setShowSoftWarning(false); setStep((s) => Math.min(STEPS.length, s + 1)) }}
+                className="w-full text-sm font-semibold text-gray-500 hover:text-gray-700 py-2 transition-colors"
+              >
+                {t.warnContinue}
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   )
 }
