@@ -86,30 +86,31 @@ ${prixAchatNeuf ? `- Prix d'achat neuf déclaré : ${prixAchatNeuf}€` : ''}
 ━━━ ÉTAPE 1 — PRIX NEUF ━━━
 ${prixAchatNeuf
   ? `→ PASSER : prix neuf déjà fourni par l'utilisateur (${prixAchatNeuf}€). Retourne prixNeufMarque: null.`
-  : `Cherche le prix neuf plein tarif d'un article équivalent de la marque.
+  : `Cherche le prix neuf plein tarif d'articles équivalents de la marque, avec la méthode suivante.
 
-IMPORTANT : L'article est souvent d'une ancienne collection, plus disponible en neuf.
-Ne cherche PAS le modèle exact (souvent introuvable) mais un article équivalent :
-→ Identifier : type d'article + matière principale + positionnement de gamme
-  (ex : "blouson Givenchy polyester ligne principale", "sac Gucci cuir collection courante")
-→ Chercher : articles de même marque, même catégorie, matière et gamme — pas un autre type de produit
+SOURCES (ordre strict) :
+1. Site officiel de la marque UNIQUEMENT
+2. Seulement si le site officiel ne présente aucun article de cette catégorie (collection trop ancienne) : autoriser Mytheresa, Farfetch ou Zalando — prix neuf uniquement
+3. IGNORER TOUJOURS : Vinted, Vestiaire Collective, eBay, et tout site de revente ou d'occasion
 
-SOURCES (dans cet ordre de priorité) :
-1. Site officiel de la marque en priorité absolue
-2. Si introuvable sur le site officiel (collection passée) : Mytheresa, Farfetch, Zalando — prix neuf uniquement
-3. IGNORER toujours : Vinted, Vestiaire Collective, eBay, et tout site de revente/occasion
+CRITÈRES DE COMPARABILITÉ (toutes ces conditions obligatoires) :
+✓ Même marque
+✓ Même genre (${genre})
+✓ Même catégorie (${vintedPath})
+✓ Même matière principale (${matieres.join(', ') || 'Non précisée'}) — IMPÉRATIF : ne jamais comparer des matières différentes (ex : cuir ≠ polyester)
+${style ? `✓ Même style si possible (${style})` : ''}
 
 PRIX À RETENIR :
-✓ Prix plein tarif uniquement (prix de référence initial, sans réduction)
-✗ Exclure : soldes, promotions, prix barrés, prix de revente/occasion
-✗ Exclure : modèles d'une autre catégorie ou matière principale différente
+✓ Prix plein tarif uniquement (prix de référence affiché sans réduction)
+✗ Exclure impérativement : soldes, promotions, prix barrés, codes promo, prix outlet
 
-RÉSULTAT :
-- Si plusieurs prix plein tarif concordants → médiane de ces valeurs (entier)
-- Si un seul prix fiable → ce prix
-- Si aucune source fiable → null (ne pas inventer de fourchette hasardeuse)
-- Format : chiffre seul sans "€" (ex: "95") ou "min-max" sans espaces (ex: "120-160")
-- Indiquer la source dans sourcePrixNeuf`}
+MÉTHODE DE CALCUL :
+1. LISTE les prix plein tarif des articles comparables trouvés, dans l'ordre croissant, ex: [890, 950, 1050, 1150, 1300]
+2. Si 4 articles ou plus : retirer le moins cher ET le plus cher, puis calculer la médiane du reste
+   Si 1 à 3 articles : garder tous les prix et calculer la médiane directement
+   Si 0 article comparable trouvé → prixNeufMarque: null (ne pas inventer de valeur)
+3. Retourner la médiane calculée comme chiffre entier précis (pas une fourchette)
+4. Indiquer l'URL ou le nom de la source principale dans sourcePrixNeuf`}
 
 ━━━ ÉTAPE 2 — COLLECTE DES ANNONCES VINTED ━━━
 Cherche des annonces d'articles comparables sur Vinted.
