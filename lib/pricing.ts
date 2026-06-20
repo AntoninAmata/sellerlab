@@ -26,6 +26,13 @@ export function normalizeEtat(etat: string): string {
   return ETAT_ALIASES[etat.toLowerCase().trim()] ?? etat
 }
 
+/* Arrondi par tranches — lisse les petits écarts entre deux extractions proches */
+export function roundToTier(amount: number): number {
+  if (amount < 100) return Math.round(amount / 10) * 10
+  if (amount <= 500) return Math.round(amount / 50) * 50
+  return Math.round(amount / 100) * 100
+}
+
 /* ─── Types ──────────────────────────────────────────────────────────────── */
 
 export interface ComputePriceInput {
@@ -65,6 +72,7 @@ export function computePrice(input: ComputePriceInput): ComputePriceOutput {
       if (!isNaN(parsed) && parsed > 0) prixNeuf = parsed
     }
   }
+  if (prixNeuf !== null) prixNeuf = roundToTier(prixNeuf)
 
   /* B. Prix de référence par décote */
   const normEtat    = normalizeEtat(etat)
@@ -78,7 +86,7 @@ export function computePrice(input: ComputePriceInput): ComputePriceOutput {
    *    n ∈ [1 ; 10[   → weightMarket = 0,30 + (n − 1) / 15  (30 % → 90 %)
    *    n ≥ 10         → 90 % marché / 10 % décote
    */
-  const median = marche.prixMedianVinted
+  const median = marche.prixMedianVinted !== null ? roundToTier(marche.prixMedianVinted) : null
   const n      = marche.nbAnnonces ?? 0
 
   let prixSuggere: number
