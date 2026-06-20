@@ -8,7 +8,7 @@ import {
 import type { RecognitionResult, PriceResult, PricePrecisions } from '../types'
 import { useLang } from '@/app/providers'
 import type { Lang } from '@/lib/i18n'
-import { DECOTE_TABLE, normalizeEtat } from '@/lib/pricing'
+import { DECOTE_TABLE, normalizeEtat, computePrice } from '@/lib/pricing'
 
 /* ─── Traductions UI — 7 langues ─────────────────────────────────────────── */
 
@@ -19,7 +19,7 @@ const UI: Record<Lang, {
   highConf: string; medConf: string; lowConf: string
   suggestedPrice: string; marketAnalysis: string
   retailPrice: string; medianVinted: string; range: string
-  listings: string; estimatedDelay: string
+  listings: string
   adjustPrice: string; suggested: string
   fewDays: string; oneTwo: string; oneMonth: string
   tip: string; tipBold: string
@@ -41,7 +41,7 @@ const UI: Record<Lang, {
     header: 'Prix recommandé', headerSub: 'Basé sur des recherches web en temps réel.', recalculate: 'Recalculer',
     highConf: 'Données fiables — confiance élevée', medConf: 'Données partielles — confiance moyenne', lowConf: 'Données insuffisantes — confiance faible',
     suggestedPrice: 'Prix de vente suggéré', marketAnalysis: 'Analyse marché',
-    retailPrice: 'Prix neuf', medianVinted: 'Médiane Vinted', range: 'Fourchette', listings: 'Annonces', estimatedDelay: 'Délai estimé :',
+    retailPrice: 'Prix neuf', medianVinted: 'Médiane Vinted', range: 'Fourchette', listings: 'Annonces',
     adjustPrice: 'Ajuster le prix', suggested: 'suggéré',
     fewDays: 'Quelques jours', oneTwo: '1–2 semaines', oneMonth: '1 mois+',
     tip: 'Astuce Vinted : affichez 15–20% au-dessus de votre prix plancher.', tipBold: '70% des acheteurs négocient.',
@@ -67,7 +67,7 @@ const UI: Record<Lang, {
     header: 'Recommended price', headerSub: 'Based on real-time web searches.', recalculate: 'Recalculate',
     highConf: 'Reliable data — high confidence', medConf: 'Partial data — medium confidence', lowConf: 'Insufficient data — low confidence',
     suggestedPrice: 'Suggested selling price', marketAnalysis: 'Market analysis',
-    retailPrice: 'Retail price', medianVinted: 'Vinted median', range: 'Range', listings: 'Listings', estimatedDelay: 'Estimated time:',
+    retailPrice: 'Retail price', medianVinted: 'Vinted median', range: 'Range', listings: 'Listings',
     adjustPrice: 'Adjust price', suggested: 'suggested',
     fewDays: 'A few days', oneTwo: '1–2 weeks', oneMonth: '1 month+',
     tip: 'Vinted tip: list 15–20% above your minimum price.', tipBold: '70% of buyers negotiate.',
@@ -93,7 +93,7 @@ const UI: Record<Lang, {
     header: 'Precio recomendado', headerSub: 'Basado en búsquedas web en tiempo real.', recalculate: 'Recalcular',
     highConf: 'Datos fiables — confianza alta', medConf: 'Datos parciales — confianza media', lowConf: 'Datos insuficientes — confianza baja',
     suggestedPrice: 'Precio de venta sugerido', marketAnalysis: 'Análisis de mercado',
-    retailPrice: 'Precio nuevo', medianVinted: 'Mediana Vinted', range: 'Horquilla', listings: 'Anuncios', estimatedDelay: 'Plazo estimado:',
+    retailPrice: 'Precio nuevo', medianVinted: 'Mediana Vinted', range: 'Horquilla', listings: 'Anuncios',
     adjustPrice: 'Ajustar precio', suggested: 'sugerido',
     fewDays: 'Unos días', oneTwo: '1–2 semanas', oneMonth: '1 mes+',
     tip: 'Consejo Vinted: publica 15–20% por encima de tu precio mínimo.', tipBold: 'El 70% de los compradores negocian.',
@@ -119,7 +119,7 @@ const UI: Record<Lang, {
     header: 'Empfohlener Preis', headerSub: 'Basiert auf Echtzeit-Websuchen.', recalculate: 'Neu berechnen',
     highConf: 'Zuverlässige Daten — hohe Konfidenz', medConf: 'Teilweise Daten — mittlere Konfidenz', lowConf: 'Unzureichende Daten — niedrige Konfidenz',
     suggestedPrice: 'Vorgeschlagener Verkaufspreis', marketAnalysis: 'Marktanalyse',
-    retailPrice: 'Neupreis', medianVinted: 'Vinted-Median', range: 'Preisspanne', listings: 'Anzeigen', estimatedDelay: 'Geschätzte Dauer:',
+    retailPrice: 'Neupreis', medianVinted: 'Vinted-Median', range: 'Preisspanne', listings: 'Anzeigen',
     adjustPrice: 'Preis anpassen', suggested: 'vorgeschlagen',
     fewDays: 'Wenige Tage', oneTwo: '1–2 Wochen', oneMonth: '1 Monat+',
     tip: 'Vinted-Tipp: 15–20% über Ihrem Mindestpreis anbieten.', tipBold: '70% der Käufer verhandeln.',
@@ -145,7 +145,7 @@ const UI: Record<Lang, {
     header: 'Prezzo consigliato', headerSub: 'Basato su ricerche web in tempo reale.', recalculate: 'Ricalcola',
     highConf: 'Dati affidabili — fiducia alta', medConf: 'Dati parziali — fiducia media', lowConf: 'Dati insufficienti — fiducia bassa',
     suggestedPrice: 'Prezzo di vendita suggerito', marketAnalysis: 'Analisi di mercato',
-    retailPrice: 'Prezzo nuovo', medianVinted: 'Mediana Vinted', range: 'Fascia', listings: 'Annunci', estimatedDelay: 'Tempo stimato:',
+    retailPrice: 'Prezzo nuovo', medianVinted: 'Mediana Vinted', range: 'Fascia', listings: 'Annunci',
     adjustPrice: 'Regola prezzo', suggested: 'suggerito',
     fewDays: 'Pochi giorni', oneTwo: '1–2 settimane', oneMonth: '1 mese+',
     tip: 'Consiglio Vinted: pubblica 15–20% sopra il tuo prezzo minimo.', tipBold: "Il 70% degli acquirenti negozia.",
@@ -171,7 +171,7 @@ const UI: Record<Lang, {
     header: 'Aanbevolen prijs', headerSub: 'Gebaseerd op realtime webzoekopdrachten.', recalculate: 'Opnieuw berekenen',
     highConf: 'Betrouwbare data — hoge betrouwbaarheid', medConf: 'Gedeeltelijke data — gemiddelde betrouwbaarheid', lowConf: 'Onvoldoende data — lage betrouwbaarheid',
     suggestedPrice: 'Voorgestelde verkoopprijs', marketAnalysis: 'Marktanalyse',
-    retailPrice: 'Nieuwprijs', medianVinted: 'Vinted mediaan', range: 'Prijsrange', listings: 'Advertenties', estimatedDelay: 'Geschatte tijd:',
+    retailPrice: 'Nieuwprijs', medianVinted: 'Vinted mediaan', range: 'Prijsrange', listings: 'Advertenties',
     adjustPrice: 'Prijs aanpassen', suggested: 'voorgesteld',
     fewDays: 'Enkele dagen', oneTwo: '1–2 weken', oneMonth: '1 maand+',
     tip: 'Vinted tip: stel 15–20% boven je minimumprijs in.', tipBold: '70% van de kopers onderhandelt.',
@@ -197,7 +197,7 @@ const UI: Record<Lang, {
     header: 'Zalecana cena', headerSub: 'Na podstawie wyszukiwań w sieci w czasie rzeczywistym.', recalculate: 'Przelicz',
     highConf: 'Wiarygodne dane — wysoka pewność', medConf: 'Częściowe dane — średnia pewność', lowConf: 'Niewystarczające dane — niska pewność',
     suggestedPrice: 'Sugerowana cena sprzedaży', marketAnalysis: 'Analiza rynku',
-    retailPrice: 'Cena nowa', medianVinted: 'Mediana Vinted', range: 'Zakres', listings: 'Ogłoszenia', estimatedDelay: 'Szacowany czas:',
+    retailPrice: 'Cena nowa', medianVinted: 'Mediana Vinted', range: 'Zakres', listings: 'Ogłoszenia',
     adjustPrice: 'Dostosuj cenę', suggested: 'sugerowana',
     fewDays: 'Kilka dni', oneTwo: '1–2 tygodnie', oneMonth: '1 miesiąc+',
     tip: 'Wskazówka Vinted: wystawiaj 15–20% powyżej ceny minimalnej.', tipBold: '70% kupujących negocjuje.',
@@ -414,16 +414,30 @@ export default function PricingStep({ recognition, result, setResult }: Props) {
 
   if (!result) return null
 
-  const marche = result.marche
+  const marche    = result.marche
+  const etatLabel = recognition.etat.value
+  const segment   = recognition.brand_segment ?? 'standard'
+  const decoteRatio = DECOTE_TABLE[normalizeEtat(etatLabel)]?.[segment] ?? null
+
+  const prixAchatNum = prixAchat ? parseFloat(prixAchat) : null
+
+  /* Recalcul local immédiat quand l'utilisateur saisit son prix d'achat neuf — sans web search */
+  const localComputed = (prixAchatNum !== null && prixAchatNum > 0)
+    ? computePrice({ marche, etat: etatLabel, segment, prixAchatNeuf: prixAchatNum })
+    : null
+  const displayedPrixSuggere = (localComputed && localComputed.prixSuggere > 0)
+    ? localComputed.prixSuggere
+    : result.prixSuggere
+
   /* Bornes du slider : min = 20% prix suggéré, max = 200% */
-  const sliderMin = Math.max(1, Math.round(result.prixSuggere * 0.2))
-  const sliderMax = Math.round(result.prixSuggere * 2)
-  const currentVal = sliderVal ?? result.prixSuggere
+  const sliderMin = Math.max(1, Math.round(displayedPrixSuggere * 0.2))
+  const sliderMax = Math.round(displayedPrixSuggere * 2)
+  const currentVal = sliderVal ?? displayedPrixSuggere
 
   /* Prix plancher recommandé : moyenne entre bas de fourchette marché et -25% du suggéré */
   const prixPlancher = marche.prixMinVinted !== null
-    ? Math.round((marche.prixMinVinted + Math.round(result.prixSuggere * 0.75)) / 2)
-    : Math.round(result.prixSuggere * 0.75)
+    ? Math.round((marche.prixMinVinted + Math.round(displayedPrixSuggere * 0.75)) / 2)
+    : Math.round(displayedPrixSuggere * 0.75)
 
   /* Ligne de synthèse — décrit les données utilisées pour le calcul */
   function getSynthLine(): string {
@@ -437,13 +451,8 @@ export default function PricingStep({ recognition, result, setResult }: Props) {
   }
 
   /* Calcul marge revendeur */
-  const prixAchatNum = prixAchat ? parseFloat(prixAchat) : null
   const marge = prixAchatNum !== null ? currentVal - prixAchatNum : null
 
-  /* Décote estimée selon état et segment réel de l'article */
-  const etatLabel   = recognition.etat.value
-  const segment     = recognition.brand_segment ?? 'standard'
-  const decoteRatio = DECOTE_TABLE[normalizeEtat(etatLabel)]?.[segment] ?? null
   const valeurEstimee = prixAchatNum !== null && decoteRatio !== null
     ? Math.round(prixAchatNum * decoteRatio)
     : null
@@ -497,7 +506,7 @@ export default function PricingStep({ recognition, result, setResult }: Props) {
             <div className="flex-1 min-w-0">
               <p className="text-[10px] font-bold text-gray-400 uppercase tracking-widest mb-1">{t.suggestedPrice}</p>
               <div className="flex items-baseline gap-1.5 mb-3">
-                <span className="font-display font-extrabold text-5xl text-gray-900 leading-none">{result.prixSuggere}</span>
+                <span className="font-display font-extrabold text-5xl text-gray-900 leading-none">{displayedPrixSuggere}</span>
                 <span className="text-2xl font-bold text-gray-300">€</span>
               </div>
               <div className="flex items-start gap-2 p-3.5 bg-gray-50 rounded-xl">
@@ -527,12 +536,6 @@ export default function PricingStep({ recognition, result, setResult }: Props) {
                 <MiniMetric label={t.range} value={marche.prixMinVinted !== null && marche.prixMaxVinted !== null ? `${marche.prixMinVinted}–${marche.prixMaxVinted}€` : null} />
                 <MiniMetric label={t.listings} value={marche.nbAnnonces !== null ? String(marche.nbAnnonces) : null} />
               </div>
-              {marche.delaiVente && (
-                <div className="flex items-center gap-1.5 text-[10px] text-gray-500 mt-1">
-                  <span>{t.estimatedDelay}</span>
-                  <span className="font-bold text-indigo-600">{marche.delaiVente}</span>
-                </div>
-              )}
             </div>
           </div>
         </div>
@@ -574,7 +577,7 @@ export default function PricingStep({ recognition, result, setResult }: Props) {
             {/* Légende min/suggéré/max */}
             <div className="flex justify-between text-[10px] text-gray-400 font-semibold">
               <span className="text-green-600">{sliderMin}€</span>
-              <span className="text-orange-500">{result.prixSuggere}€ {t.suggested}</span>
+              <span className="text-orange-500">{displayedPrixSuggere}€ {t.suggested}</span>
               <span className="text-red-500">{sliderMax}€</span>
             </div>
 
@@ -607,7 +610,7 @@ export default function PricingStep({ recognition, result, setResult }: Props) {
               </div>
               <div className="flex items-center justify-between px-3 py-2.5 bg-gray-50 border-t border-gray-100">
                 <span className="text-gray-500 font-medium">{t.delay}</span>
-                <span className="font-bold text-indigo-600">{getDelai(currentVal, result.prixSuggere)}</span>
+                <span className="font-bold text-indigo-600">{getDelai(currentVal, displayedPrixSuggere)}</span>
               </div>
             </div>
           </div>

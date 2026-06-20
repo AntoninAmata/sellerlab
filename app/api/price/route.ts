@@ -70,9 +70,7 @@ async function extractMarketData(body: PriceRequest): Promise<PriceResult['march
     prixAchatNeuf,
   } = body
 
-  const prompt = `Tu es un expert en pricing sur Vinted. Pour l'article décrit, effectue les recherches suivantes :
-1. Prix neuf actuel sur le site officiel de la marque (ou grands revendeurs si pas de boutique officielle)${prixAchatNeuf ? '\n   → INUTILE : le prix d\'achat neuf est déjà fourni par l\'utilisateur' : ''}
-2. Prix de vente récents sur Vinted, Vestiaire Collective et Leboncoin
+  const prompt = `Tu es un expert en pricing sur Vinted. Pour l'article décrit, suis exactement ces 3 étapes dans l'ordre.
 
 Article :
 - Marque : ${marque || 'Non précisée'}
@@ -83,14 +81,64 @@ Article :
 - Couleurs : ${couleurs.join(', ') || 'Non précisées'}
 - Matières : ${matieres.join(', ') || 'Non précisées'}
 - Style : ${style || 'Non précisé'}
-${prixAchatNeuf ? `- Prix d'achat neuf déclaré par l'utilisateur : ${prixAchatNeuf}€` : ''}
+${prixAchatNeuf ? `- Prix d'achat neuf déclaré : ${prixAchatNeuf}€` : ''}
 
-RÈGLES D'EXTRACTION :
-- prixNeufMarque : chiffres seuls sans "€", ex: "300" ou "250-350"${prixAchatNeuf ? ' → null (prix déjà fourni)' : ' → null si vraiment introuvable'}
-- nbAnnonces : nombre RÉEL d'annonces consultées (compter précisément, pas une estimation)
-- prixMedianVinted : médiane des prix observés (outliers exclus) ; null si 0 annonce
-- prixMinVinted / prixMaxVinted : fourchette hors outliers ; null si 0 annonce
-- delaiVente : estimation selon le niveau de prix et la rotation du marché
+━━━ ÉTAPE 1 — PRIX NEUF ━━━
+${prixAchatNeuf
+  ? `→ PASSER : prix neuf déjà fourni par l'utilisateur (${prixAchatNeuf}€). Retourne prixNeufMarque: null.`
+  : `Cherche le prix neuf plein tarif d'un article équivalent de la marque.
+
+IMPORTANT : L'article est souvent d'une ancienne collection, plus disponible en neuf.
+Ne cherche PAS le modèle exact (souvent introuvable) mais un article équivalent :
+→ Identifier : type d'article + matière principale + positionnement de gamme
+  (ex : "blouson Givenchy polyester ligne principale", "sac Gucci cuir collection courante")
+→ Chercher : articles de même marque, même catégorie, matière et gamme — pas un autre type de produit
+
+SOURCES (dans cet ordre de priorité) :
+1. Site officiel de la marque en priorité absolue
+2. Si introuvable sur le site officiel (collection passée) : Mytheresa, Farfetch, Zalando — prix neuf uniquement
+3. IGNORER toujours : Vinted, Vestiaire Collective, eBay, et tout site de revente/occasion
+
+PRIX À RETENIR :
+✓ Prix plein tarif uniquement (prix de référence initial, sans réduction)
+✗ Exclure : soldes, promotions, prix barrés, prix de revente/occasion
+✗ Exclure : modèles d'une autre catégorie ou matière principale différente
+
+RÉSULTAT :
+- Si plusieurs prix plein tarif concordants → médiane de ces valeurs (entier)
+- Si un seul prix fiable → ce prix
+- Si aucune source fiable → null (ne pas inventer de fourchette hasardeuse)
+- Format : chiffre seul sans "€" (ex: "95") ou "min-max" sans espaces (ex: "120-160")
+- Indiquer la source dans sourcePrixNeuf`}
+
+━━━ ÉTAPE 2 — COLLECTE DES ANNONCES VINTED ━━━
+Cherche des annonces d'articles comparables sur Vinted.
+
+CRITÈRES DE COMPARABILITÉ (toutes ces conditions) :
+✓ Même marque exacte
+✓ Même type d'article (même catégorie)
+✓ État identique OU à ±1 cran (ex: pour "Bon état", accepter aussi "Très bon état" et "Satisfaisant")
+✓ Taille identique OU ±1 taille
+
+ANNONCES À EXCLURE IMPÉRATIVEMENT :
+✗ Lots ou packs multi-articles
+✗ Prix dérisoire suggérant une contrefaçon (< 20% du prix attendu pour cette marque)
+✗ Prix hors-marché (> 3× le prix le plus fréquent observé)
+✗ Annonces avec défauts non comparables à l'article décrit
+
+━━━ ÉTAPE 3 — CALCUL DE LA MÉDIANE ━━━
+Après avoir collecté les annonces comparables :
+
+1. LISTE les prix retenus dans l'ordre croissant, ex: [28, 32, 38, 45, 52]
+2. CALCULE la médiane :
+   - 0 prix → prixMedianVinted: null
+   - 1 prix → prixMedianVinted = ce prix
+   - Nombre impair → valeur centrale
+   - Nombre pair → moyenne des 2 valeurs centrales, arrondi à l'entier
+3. prixMinVinted = plus petit prix de la liste finale
+4. prixMaxVinted = plus grand prix de la liste finale
+5. nbAnnonces = nombre EXACT de prix dans la liste (pas une estimation)
+6. delaiVente = estimation du délai de vente en langage naturel selon le marché observé (ex: "1 à 2 semaines", "quelques jours", "1 mois ou plus")
 
 Réponds UNIQUEMENT avec ce JSON (sans markdown) :
 {
@@ -108,6 +156,7 @@ Réponds UNIQUEMENT avec ce JSON (sans markdown) :
   let lastResponse = await client.messages.create({
     model: 'claude-sonnet-4-6',
     max_tokens: 1024,
+    temperature: 0,
     tools: [{ type: 'web_search_20250305' as 'web_search_20250305', name: 'web_search' }],
     messages: initialMessages,
   })
@@ -134,6 +183,7 @@ Réponds UNIQUEMENT avec ce JSON (sans markdown) :
     lastResponse = await client.messages.create({
       model: 'claude-sonnet-4-6',
       max_tokens: 1024,
+      temperature: 0,
       tools: [{ type: 'web_search_20250305' as 'web_search_20250305', name: 'web_search' }],
       messages,
     })
@@ -188,6 +238,7 @@ Article :
 - État : ${body.etat}
 - Prix recommandé : ${prixSuggere}€
 - Données marché : ${marcheDesc}
+${marche.delaiVente ? `- Délai de vente estimé : ${marche.delaiVente}` : ''}
 ${body.plateforme ? `- Acheté chez : ${body.plateforme}` : ''}
 ${body.rarete && body.rarete !== 'Non' ? `- Particularité : ${body.rarete}` : ''}
 
@@ -195,6 +246,7 @@ Consignes :
 - Mentionne le positionnement de la marque en langage naturel
 - Si des données de vente sont disponibles, évoque la fourchette de prix observée
 - L'état de l'article comme facteur explicatif
+- Si un délai de vente est disponible, intègre-le naturellement dans une phrase (ex: "à ce prix, comptez environ X semaines")
 - Ton simple, chaleureux et rassurant
 INTERDIT : formules, pourcentages, coefficients, termes techniques (standard/luxe_accessible/luxe_premium), les mots "pondération" ou "décote"
 LANGUE : ${nativeLang}
