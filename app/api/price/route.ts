@@ -1,7 +1,7 @@
 import Anthropic from '@anthropic-ai/sdk'
 import { NextRequest, NextResponse } from 'next/server'
 import type { PriceResult } from '@/app/app/types'
-import { computePrice } from '@/lib/pricing'
+import { computePrice, getBrandSegment } from '@/lib/pricing'
 
 const client = new Anthropic()
 
@@ -295,7 +295,7 @@ export async function POST(req: NextRequest) {
       locale,
     } = body
 
-    const segment = inputBrandSegment ?? 'standard'
+    const segment = getBrandSegment(body.marque) ?? inputBrandSegment ?? 'standard'
 
     /* 1. Données marché — web search ou existantes */
     let marche: PriceResult['marche']

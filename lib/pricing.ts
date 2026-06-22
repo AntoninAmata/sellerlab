@@ -33,6 +33,52 @@ export function roundToTier(amount: number): number {
   return Math.round(amount / 100) * 100
 }
 
+/* ─── Table de référence des segments de marque ──────────────────────────── */
+
+const BRAND_SEGMENTS_TABLE: Record<'luxe_premium' | 'luxe_accessible' | 'standard', string[]> = {
+  luxe_premium: [
+    'Gucci', 'Saint Laurent', 'Yves Saint Laurent', 'YSL',
+    'Prada', 'Dior', 'Christian Dior', 'Givenchy', 'Balenciaga',
+    'Bottega Veneta', 'Celine', 'Céline', 'Hermès', 'Hermes',
+    'Louis Vuitton', 'Fendi', 'Valentino', 'Burberry', 'Moncler',
+    'Versace', 'Loewe', 'Loro Piana', 'Brunello Cucinelli',
+    'Alexander McQueen', 'Stella McCartney', 'Balmain', 'Lanvin',
+    'Chanel', 'Tom Ford', 'Jacquemus', 'Off-White', 'Stone Island',
+  ],
+  luxe_accessible: [
+    'Sandro', 'Maje', 'The Kooples', 'Kenzo',
+    'A.P.C.', 'APC', 'Isabel Marant', 'Acne Studios',
+    'Zadig & Voltaire', 'Zadig&Voltaire', 'Ba&sh', 'Ba & sh',
+    'Claudie Pierlot', 'Iro', 'IRO', 'Paul Smith',
+    'Ami', 'Ami Paris', 'Maison Kitsuné', 'Kitsuné',
+    'Ganni', 'Nanushka', 'Toteme', 'Totême', 'Officine Générale',
+    'Hugo Boss', 'Boss', 'Ted Baker', 'Reiss', 'AllSaints',
+    'Ralph Lauren', 'Polo Ralph Lauren', 'Lacoste',
+    'Tommy Hilfiger', 'Calvin Klein',
+  ],
+  standard: [
+    'Zara', 'H&M', 'Mango', 'Uniqlo', 'COS',
+    'Bershka', 'Pull&Bear', 'Massimo Dutti', 'Stradivarius',
+    'Monki', 'Weekday', 'Arket', '& Other Stories',
+    'Primark', 'New Look', 'Next', 'River Island',
+    'ASOS', 'Shein', 'Levi\'s', 'Gap', 'Esprit',
+    'Nike', 'Adidas', 'Puma', 'Reebok', 'New Balance',
+    'Converse', 'Vans', 'Fila', 'Champion',
+    'Vero Moda', 'Only', 'Jack & Jones', 'Selected',
+  ],
+}
+
+export function getBrandSegment(
+  marque: string,
+): 'standard' | 'luxe_accessible' | 'luxe_premium' | null {
+  if (!marque) return null
+  const normalized = marque.toLowerCase().trim()
+  for (const segment of ['luxe_premium', 'luxe_accessible', 'standard'] as const) {
+    if (BRAND_SEGMENTS_TABLE[segment].some(b => b.toLowerCase() === normalized)) return segment
+  }
+  return null
+}
+
 /* ─── Types ──────────────────────────────────────────────────────────────── */
 
 export interface ComputePriceInput {

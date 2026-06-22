@@ -8,7 +8,7 @@ import {
 import type { RecognitionResult, PriceResult, PricePrecisions } from '../types'
 import { useLang } from '@/app/providers'
 import type { Lang } from '@/lib/i18n'
-import { DECOTE_TABLE, normalizeEtat, computePrice, roundToTier } from '@/lib/pricing'
+import { DECOTE_TABLE, normalizeEtat, computePrice, roundToTier, getBrandSegment } from '@/lib/pricing'
 
 /* ─── Traductions UI — 7 langues ─────────────────────────────────────────── */
 
@@ -416,7 +416,7 @@ export default function PricingStep({ recognition, result, setResult }: Props) {
 
   const marche    = result.marche
   const etatLabel = recognition.etat.value
-  const segment   = recognition.brand_segment ?? 'standard'
+  const segment   = getBrandSegment(recognition.marque.value) ?? recognition.brand_segment ?? 'standard'
   const decoteRatio = DECOTE_TABLE[normalizeEtat(etatLabel)]?.[segment] ?? null
 
   const prixAchatNum = prixAchat ? parseFloat(prixAchat) : null
