@@ -86,25 +86,28 @@ ${prixAchatNeuf ? `- Prix d'achat neuf déclaré : ${prixAchatNeuf}€` : ''}
 ━━━ ÉTAPE 1 — PRIX NEUF ━━━
 ${prixAchatNeuf
   ? `→ PASSER : prix neuf déjà fourni par l'utilisateur (${prixAchatNeuf}€). Retourne prixNeufMarque: null.`
-  : `Cherche le prix neuf plein tarif de la marque ${marque || 'indiquée'} sur son site officiel.
+  : `Cherche le prix neuf plein tarif EN EUROS (€) de la marque ${marque || 'indiquée'} pour le type d'article "${vintedPath}".
 
-SOURCE : site officiel de la marque uniquement.
-IGNORER : tous les revendeurs, Vinted, Vestiaire Collective, eBay, tout site d'occasion.
+MÉTHODE DE RECHERCHE :
+→ Effectue une recherche de type : site:[domaine officiel de la marque] [type d'article]
+  (ex : site:givenchy.com blouson, site:sandro-paris.com veste, site:zara.com pantalon)
+→ Utilise le domaine officiel français ou européen (.com/fr, .fr, ou équivalent EUR de la marque).
+→ Récupère les prix directement depuis les extraits de résultats (snippets) et métadonnées — le prix y figure souvent même si la page le charge dynamiquement.
 
-FILTRE : même type d'article que "${vintedPath}" (ex : blouson ≠ veste ≠ manteau ≠ chemise — respecter la catégorie précise).
-Ne pas filtrer par matière ni style (critère peu fiable en recherche web).
+FILTRE : même type d'article précis que "${vintedPath}" (blouson ≠ veste ≠ manteau ≠ chemise — respecter la catégorie).
 
 PRIX À RETENIR :
-✓ Prix plein tarif uniquement (prix affiché sans réduction)
+✓ Prix en euros (€) uniquement — plein tarif, sans réduction
 ✗ Exclure : soldes, promotions, prix barrés, codes promo, prix outlet
+✗ Prix USD : NE PAS convertir. Si seuls des prix USD sont trouvés, chercher davantage le prix EUR ; si introuvable → null
 
-MÉTHODE :
-1. LISTE les prix plein tarif trouvés dans l'ordre croissant, ex: [890, 950, 1050, 1150, 1300]
+MÉTHODE DE CALCUL :
+1. LISTE les prix EUR plein tarif trouvés dans l'ordre croissant, ex: [890, 950, 1050, 1150, 1300]
 2. Si 4 articles ou plus : retirer le moins cher ET le plus cher, puis calculer la médiane du reste
    Si 1 à 3 articles : garder tous les prix et calculer la médiane directement
 3. Retourner la médiane calculée comme chiffre entier (pas une fourchette)
 4. Indiquer l'URL de la source dans sourcePrixNeuf
-→ null si aucun article du même type trouvé sur le site officiel`}
+→ null si aucun prix EUR fiable trouvé (le calcul utilisera la médiane Vinted seule)`}
 
 ━━━ ÉTAPE 2 — COLLECTE DES ANNONCES VINTED ━━━
 Cherche des annonces d'articles comparables sur Vinted.
@@ -135,9 +138,9 @@ Après avoir collecté les annonces comparables :
 5. nbAnnonces = nombre EXACT de prix dans la liste (pas une estimation)
 6. delaiVente = estimation du délai de vente en langage naturel selon le marché observé (ex: "1 à 2 semaines", "quelques jours", "1 mois ou plus")
 
-⚠️ FORMAT DE RÉPONSE STRICT :
-- Utilise les outils de recherche autant que nécessaire (ton raisonnement reste interne).
-- Ta réponse finale doit être UNIQUEMENT l'objet JSON suivant — aucun texte avant, aucun texte après, aucune phrase d'introduction, aucune balise Markdown, pas de \`\`\`json.
+⚠️ FORMAT DE RÉPONSE — IMPÉRATIF :
+- Utilise les outils web_search pour tes recherches. Ne rédige PAS ton raisonnement ni tes analyses dans ta réponse — ils restent internes.
+- Ta réponse finale doit être UNIQUEMENT l'objet JSON ci-dessous : aucun texte avant, aucun texte après, aucune balise Markdown, pas de \`\`\`json, aucune explication.
 - Le premier caractère de ta réponse doit être { et le dernier doit être }.
 
 {
