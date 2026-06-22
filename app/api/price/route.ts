@@ -147,7 +147,11 @@ Après avoir collecté les annonces comparables :
 5. nbAnnonces = nombre EXACT de prix dans la liste (pas une estimation)
 6. delaiVente = estimation du délai de vente en langage naturel selon le marché observé (ex: "1 à 2 semaines", "quelques jours", "1 mois ou plus")
 
-Réponds UNIQUEMENT avec ce JSON (sans markdown) :
+⚠️ FORMAT DE RÉPONSE STRICT :
+- Utilise les outils de recherche autant que nécessaire (ton raisonnement reste interne).
+- Ta réponse finale doit être UNIQUEMENT l'objet JSON suivant — aucun texte avant, aucun texte après, aucune phrase d'introduction, aucune balise Markdown, pas de \`\`\`json.
+- Le premier caractère de ta réponse doit être { et le dernier doit être }.
+
 {
   "prixNeufMarque": string | null,
   "sourcePrixNeuf": string | null,
@@ -162,7 +166,7 @@ Réponds UNIQUEMENT avec ce JSON (sans markdown) :
 
   let lastResponse = await client.messages.create({
     model: 'claude-sonnet-4-6',
-    max_tokens: 1024,
+    max_tokens: 2048,
     temperature: 0,
     tools: [{ type: 'web_search_20250305' as 'web_search_20250305', name: 'web_search' }],
     messages: initialMessages,
@@ -201,10 +205,18 @@ Réponds UNIQUEMENT avec ce JSON (sans markdown) :
     .map((b) => b.text)
     .join('')
 
-  const jsonMatch = text.match(/\{[\s\S]*\}/)
-  if (!jsonMatch) throw new Error('Réponse IA invalide (extraction marché)')
-
-  return JSON.parse(jsonMatch[0]) as PriceResult['marche']
+  const start = text.indexOf('{')
+  const end   = text.lastIndexOf('}')
+  if (start === -1 || end === -1 || end <= start) {
+    console.error('[price] Réponse brute Claude (pas de JSON):', JSON.stringify(text))
+    throw new Error('Réponse IA invalide (extraction marché)')
+  }
+  try {
+    return JSON.parse(text.slice(start, end + 1)) as PriceResult['marche']
+  } catch (parseErr) {
+    console.error('[price] Réponse brute Claude (JSON invalide):', JSON.stringify(text))
+    throw new Error('Réponse IA invalide (extraction marché)')
+  }
 }
 
 /* ─── Génération du raisonnement — Claude Haiku, temperature 0 ───────────── */
