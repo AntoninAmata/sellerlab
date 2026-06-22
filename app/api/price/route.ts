@@ -86,37 +86,25 @@ ${prixAchatNeuf ? `- Prix d'achat neuf déclaré : ${prixAchatNeuf}€` : ''}
 ━━━ ÉTAPE 1 — PRIX NEUF ━━━
 ${prixAchatNeuf
   ? `→ PASSER : prix neuf déjà fourni par l'utilisateur (${prixAchatNeuf}€). Retourne prixNeufMarque: null.`
-  : `Cherche le prix neuf plein tarif d'articles équivalents de la marque, en 3 étapes progressives.
+  : `Cherche le prix neuf plein tarif de la marque ${marque || 'indiquée'} sur son site officiel.
 
-CRITÈRES DE COMPARABILITÉ (obligatoires à chaque étape) :
-✓ Même marque exacte
-✓ Même genre (${genre})
-✓ Même catégorie (${vintedPath})
-✓ Même matière principale (${matieres.join(', ') || 'Non précisée'}) — IMPÉRATIF : ne jamais comparer des matières différentes (ex : cuir ≠ polyester)
-${style ? `✓ Même style si possible (${style})` : ''}
+SOURCE : site officiel de la marque uniquement.
+IGNORER : tous les revendeurs, Vinted, Vestiaire Collective, eBay, tout site d'occasion.
+
+FILTRE : même type d'article que "${vintedPath}" (ex : blouson ≠ veste ≠ manteau ≠ chemise — respecter la catégorie précise).
+Ne pas filtrer par matière ni style (critère peu fiable en recherche web).
 
 PRIX À RETENIR :
-✓ Prix plein tarif uniquement (prix de référence affiché sans réduction)
-✗ Exclure : soldes, promotions, prix barrés, codes promo, prix outlet, prix d'occasion
+✓ Prix plein tarif uniquement (prix affiché sans réduction)
+✗ Exclure : soldes, promotions, prix barrés, codes promo, prix outlet
 
-━ Étape A — Site officiel de la marque (priorité absolue)
-Cherche sur le site officiel des articles correspondant aux critères ci-dessus.
-
-━ Étape B — Élargissement sur le site officiel (si Étape A = 0 résultat)
-Élargis sur le même site officiel : même catégorie + même matière principale, sans contrainte de style.
-
-━ Étape C — Grand revendeur neuf de référence (si Étape B = 0 résultat)
-Cherche sur Mytheresa, Farfetch ou Zalando — prix neuf uniquement, jamais d'occasion.
-IGNORER TOUJOURS : Vinted, Vestiaire Collective, eBay, et tout site de revente.
-
-→ null seulement si aucune des 3 étapes n'a donné de résultat fiable (ne pas inventer de valeur).
-
-MÉTHODE DE CALCUL (après collecte) :
+MÉTHODE :
 1. LISTE les prix plein tarif trouvés dans l'ordre croissant, ex: [890, 950, 1050, 1150, 1300]
 2. Si 4 articles ou plus : retirer le moins cher ET le plus cher, puis calculer la médiane du reste
    Si 1 à 3 articles : garder tous les prix et calculer la médiane directement
-3. Retourner la médiane calculée comme chiffre entier précis (pas une fourchette)
-4. Indiquer l'URL ou le nom de la source dans sourcePrixNeuf`}
+3. Retourner la médiane calculée comme chiffre entier (pas une fourchette)
+4. Indiquer l'URL de la source dans sourcePrixNeuf
+→ null si aucun article du même type trouvé sur le site officiel`}
 
 ━━━ ÉTAPE 2 — COLLECTE DES ANNONCES VINTED ━━━
 Cherche des annonces d'articles comparables sur Vinted.

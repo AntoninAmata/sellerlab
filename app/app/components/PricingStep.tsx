@@ -8,7 +8,7 @@ import {
 import type { RecognitionResult, PriceResult, PricePrecisions } from '../types'
 import { useLang } from '@/app/providers'
 import type { Lang } from '@/lib/i18n'
-import { DECOTE_TABLE, normalizeEtat, computePrice } from '@/lib/pricing'
+import { DECOTE_TABLE, normalizeEtat, computePrice, roundToTier } from '@/lib/pricing'
 
 /* ─── Traductions UI — 7 langues ─────────────────────────────────────────── */
 
@@ -439,6 +439,19 @@ export default function PricingStep({ recognition, result, setResult }: Props) {
     ? Math.round((marche.prixMinVinted + Math.round(displayedPrixSuggere * 0.75)) / 2)
     : Math.round(displayedPrixSuggere * 0.75)
 
+  /* Affichage du prix neuf : parse la chaîne brute, applique l'arrondi, ajoute € une seule fois */
+  function displayRetailPrice(raw: string | null): string | null {
+    if (raw === null) return null
+    const cleaned = raw.replace(/[€\s]/g, '')
+    if (cleaned.includes('-')) {
+      const parts = cleaned.split('-').map(s => parseFloat(s.trim()))
+      if (parts.length === 2 && !isNaN(parts[0]) && !isNaN(parts[1]))
+        return `${roundToTier(Math.round((parts[0] + parts[1]) / 2))}€`
+    }
+    const parsed = parseFloat(cleaned)
+    return (!isNaN(parsed) && parsed > 0) ? `${roundToTier(parsed)}€` : null
+  }
+
   /* Ligne de synthèse — décrit les données utilisées pour le calcul */
   function getSynthLine(): string {
     const hasRetailPrice = marche.prixNeufMarque !== null || prixAchat !== ''
@@ -531,7 +544,7 @@ export default function PricingStep({ recognition, result, setResult }: Props) {
             <div className="w-full sm:w-52 shrink-0 space-y-2">
               <p className="text-[10px] font-bold text-gray-400 uppercase tracking-widest">{t.marketAnalysis}</p>
               <div className="grid grid-cols-2 gap-2">
-                <MiniMetric label={t.retailPrice} value={marche.prixNeufMarque !== null ? `${marche.prixNeufMarque}€` : null} />
+                <MiniMetric label={t.retailPrice} value={displayRetailPrice(marche.prixNeufMarque)} />
                 <MiniMetric label={t.medianVinted} value={marche.prixMedianVinted !== null ? `${marche.prixMedianVinted}€` : null} />
                 <MiniMetric label={t.range} value={marche.prixMinVinted !== null && marche.prixMaxVinted !== null ? `${marche.prixMinVinted}–${marche.prixMaxVinted}€` : null} />
                 <MiniMetric label={t.listings} value={marche.nbAnnonces !== null ? String(marche.nbAnnonces) : null} />
