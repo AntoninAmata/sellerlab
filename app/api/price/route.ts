@@ -89,10 +89,13 @@ ${prixAchatNeuf
   : `Cherche le prix neuf plein tarif EN EUROS (€) de la marque ${marque || 'indiquée'} pour le type d'article "${vintedPath}".
 
 MÉTHODE DE RECHERCHE :
-→ Effectue une recherche de type : site:[domaine officiel de la marque] [type d'article]
-  (ex : site:givenchy.com blouson, site:sandro-paris.com veste, site:zara.com pantalon)
-→ Utilise le domaine officiel français ou européen (.com/fr, .fr, ou équivalent EUR de la marque).
-→ Récupère les prix directement depuis les extraits de résultats (snippets) et métadonnées — le prix y figure souvent même si la page le charge dynamiquement.
+→ Effectue une recherche de type : site:[domaine officiel de la marque] [type d'article] price EUR
+  (ex : site:givenchy.com blouson price EUR, site:sandro-paris.com veste price EUR)
+→ Cible la version internationale/européenne du site officiel qui affiche des prix en euros (€).
+  Les grands sites de luxe (Givenchy, Balenciaga, etc.) ont souvent une sélection de devise EUR
+  accessible via /eu/, /en-eu/, /fr-fr/ ou un sélecteur de pays Europe sur leur .com.
+→ Récupère les prix en € directement depuis les extraits de résultats (snippets) et métadonnées —
+  le prix y figure souvent même si la page le charge dynamiquement.
 
 FILTRE : même type d'article précis que "${vintedPath}" (blouson ≠ veste ≠ manteau ≠ chemise — respecter la catégorie).
 
