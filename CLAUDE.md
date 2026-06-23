@@ -301,58 +301,75 @@ Structure (ordre exact dans l'UI) :
 
 ---
 
-### Étape 4 — Prix ✅ Construite (calcul stabilisé 2026-06-19)
+### Étape 4 — Prix ✅ Construite (refonte complète 2026-06-23)
 
 #### Architecture — séparation extraction / calcul
-1. **Claude Sonnet + web_search** → extrait uniquement les données brutes (prixNeufMarque, médiane, min/max, nbAnnonces, delaiVente). Aucune formule dans le prompt.
-2. **`lib/pricing.ts` → `computePrice()`** → calcul TypeScript 100% déterministe. Mêmes données = toujours même prix.
-3. **Claude Haiku (temperature=0)** → raisonnement textuel uniquement (2-3 phrases). Jamais formules/coefficients exposés au user.
+1. **Claude Sonnet + web_search (multi-sources)** → extrait la liste brute des prix d'annonces comparables (`prixAnnonces[]`, nbAnnonces, delaiVente). Aucune formule dans le prompt.
+2. **Filtrage IQR + médiane côté code** (`filterIQR()` + `computeMedian()` dans `app/api/price/route.ts`) → médiane déterministe à partir de la liste brute.
+3. **`lib/pricing.ts` → `computePrice()`** → calcul TypeScript 100% déterministe. Mêmes données = toujours même prix.
+4. **Claude Haiku (temperature=0)** → raisonnement textuel uniquement (2-3 phrases). Jamais formules/coefficients/noms de segment exposés au user.
 
-Le recalcul rapide (bouton "Recalculer avec ces informations") utilise les données marché existantes + `computePrice()` + Haiku — sans web search.
+Le recalcul rapide (accordion "Plus de précisions") utilise les données marché existantes + `computePrice()` + Haiku — sans web search.
 
-#### Segment de marque
-- Vient de `recognition.brand_segment` (étape Article) — Claude ne le redétermine plus
-- Fallback → `'standard'`
-- `standard` : Zara, H&M, Mango… | `luxe_accessible` : Kenzo, Sandro, Maje… | `luxe_premium` : Gucci, Saint Laurent, Dior, Hermès…
+#### Référentiel prix — `lib/referentiel_prix_final.json`
+- 8 segments × 94 catégories de prix neufs de référence
+- Utilisé quand l'utilisateur n'a pas saisi son prix d'achat
+- Catégories non-mode (sport/collection/rangement) → `null` → médiane Vinted seule ou champ libre
 
-#### Décote par état × segment (`DECOTE_TABLE` dans `lib/pricing.ts`)
-| État | Standard | Luxe accessible | Luxe premium |
-|------|----------|----------------|-------------|
-| Neuf avec étiquette | 55% | 65% | 75% |
-| Neuf sans étiquette | 45% | 55% | 65% |
-| Très bon état | 35% | 45% | 55% |
-| Bon état | 25% | 35% | 45% |
-| Satisfaisant | 15% | 20% | 30% |
+#### 8 segments de marque (`BrandSegment` dans `lib/pricing.ts`)
+`fast_fashion` | `standard` | `premium_accessible` | `premium_createur` | `luxe_contemporain` | `luxe_etabli` | `luxe_iconique` | `ultra_luxe`
 
-#### Pondération progressive (remplace les seuils binaires)
-`weightMarket = min(0.90, 0.30 + (n − 1) / 15)` — n = nbAnnonces
+**Distinction critique :**
+- `luxe_iconique` = **Hermès + Chanel uniquement** → décote douce (garde valeur)
+- `luxe_etabli` = Gucci, Prada, Dior, Givenchy, LV… → décote forte (déprécie vite)
 
-| n annonces | Poids marché | Poids décote |
+#### Classification marques — pipeline hybride
+1. Table déterministe `BRAND_SEGMENTS_TABLE` (lib/pricing.ts) — priorité absolue
+2. Fallback : `brand_segment` envoyé par Claude depuis l'étape Article (recognize)
+3. Fallback ultime : `'standard'`
+4. `brandIsUnknown` flag : marque absente de la table ET segment non fiable → si 0 annonce Vinted → `noData: true`
+
+#### Mapping catégories — `CATEGORY_MAP` (lib/pricing.ts)
+- 757 entrées : chemin taxonomie Vinted → libellé référentiel (94 catégories)
+- Genre-sensible (Femmes/Hommes) pour certaines catégories
+- Catégorie non mappée → prix neuf de référence `null` → médiane Vinted seule
+
+#### Deux grilles de décote (`lib/pricing.ts`)
+- **Vêtements** : décote forte sur tous les segments (y.c. luxe_etabli)
+- **Accessoires** : décote douce réservée aux sacs luxe_iconique et ultra_luxe — tous les autres segments gardent une décote forte
+- `neuf_decote = prix_neuf_ref × décote[segment][état] × multiplicateur_matière`
+- L'état est appliqué **une seule fois** ; le multiplicateur matière est ignoré si prix saisi par l'utilisateur
+
+#### Pondération progressive (`computePrice`)
+`poids_vinted = min(0.97, 0.75 + (n − 1) × 0.04)` — n = nbAnnonces après IQR
+
+| n annonces | Poids Vinted | Poids décote |
 |-----------|-------------|-------------|
 | 0 | 0% | 100% |
-| 1 | 30% | 70% |
-| 5 | ~57% | ~43% |
-| 10+ | 90% | 10% |
+| 1 | 75% | 25% |
+| 5 | ~91% | ~9% |
+| 7+ | 97% | 3% |
 
-Si pas de prix neuf mais médiane disponible → 90% médiane / 10% décote.
+- 0 annonce + prix neuf connu → 100% décote (neuf_decote seul)
+- Pas de prix neuf mais médiane disponible → 100% médiane
+- Borne inférieure : `prixSuggere ≥ 0.40 × médiane` (évite les prix trop bas)
+- Borne supérieure : `prixSuggere ≤ neuf_decote` (jamais au-dessus de la valeur estimée)
 
-#### Bornes de sécurité
-- `prixSuggere` ∈ `[prixDecote × 0.80 ; prixDecote × 1.30]`
-- Toujours actives dès qu'un prix neuf est disponible (déclaré ou trouvé)
-- `normalizeEtat()` assure la correspondance même en cas de variation de casse
+#### noData
+`noData: true` quand aucune source disponible : ni `prixAchatNeuf` user, ni référentiel (catégorie non mappée ou marque inconnue), ni médiane Vinted.
+→ UI affiche alerte ambre + champ libre prix de vente. Raisonnement Haiku non généré.
 
-#### Gel du prix
-- Calculé une seule fois à l'arrivée sur l'étape
-- Recalcul uniquement sur action explicite ("Recalculer")
-- Retour sur l'étape → aucun recalcul si `pricingResult !== null`
+#### Médiane Vinted — stabilité
+- Recherche multi-sources : **Vinted + Vestiaire Collective + Leboncoin** (pas de `allowed_domains`)
+- Règle anti-aberrants dans le prompt : `> 3× le prix le plus fréquent` → exclus par Claude à la sélection
+- Filtrage IQR côté code (double sécurité) puis médiane déterministe
+- temperature=0 sur tous les appels de recherche
 
 #### Interface prix
-- Bannière confiance + ligne source ("X annonces analysées") + ligne synthèse ("Estimé à partir du prix neuf et des ventes récentes")
-- Prix suggéré = vraie valeur marché (SANS marge négociation)
-- Slider + conseil négociation (15-20% au-dessus du plancher) + prix plancher
-- Prix réel estimé = prix affiché × 0.85 (négociation)
-- Raisonnement tronqué à 2 lignes, bouton "Voir plus" si > 120 caractères
-- Jamais exposer formules/coefficients/pondérations au user
+- **BLOC 1** : bannière confiance + ligne source + prix suggéré (gros) + raisonnement + grille ANALYSE MARCHÉ (médiane, fourchette, annonces, valeur neuf estimée) + champ "Prix d'achat neuf" avec bouton **Appliquer**
+- **BLOC 2** : slider prix / champ libre (si noData) + tableau récap négociation + accordion "Plus de précisions" (plateforme, rareté, bouton Recalculer) + toggle revendeur (marge nette)
+- Bouton **Appliquer** : recalcul local (`computePrice`) sans web search, reset slider au nouveau prix suggéré → synchronisation garantie entre gros chiffre et slider
+- Jamais exposer formules/coefficients/pondérations/noms de segment techniques au user
 
 ---
 
@@ -545,9 +562,12 @@ Chemins exacts de l'interface Vinted FR, format `"N1 > N2 > N3 [> N4 [> N5]]"`.
 4. **Tester le cycle complet FASHN** — crédits rechargés : tester tryon-max (mannequin) + product-to-model (produit) de bout en bout sur un vrai article.
 5. **Email FASHN envoyé** — ajuster les réglages selon leur réponse.
 
-### Étape Prix
-6. **Calibration du calcul** — tester sur des articles réels (prix de vente / invendus connus). Hypothèse à vérifier : biais haussier sur le luxe (la médiane des annonces Vinted affichées surestime le prix effectivement vendu ; décote luxe_premium "Très bon état" à 55% peut-être trop haute).
-7. **Ajustements plateforme/rareté** — mis de côté faute de données réelles. À reprendre avec des ventes observées.
+### Étape Prix — Calibration (priorité après mise en ligne bêta)
+6. **Calibration avec articles réels** — tester sur des articles dont le prix de vente réel est connu (vendu ou refus d'offre observé). Vérifier le biais haussier par segment : le prix suggéré est-il trop haut sur le standard/fast-fashion ? Trop bas sur le luxe_iconique ? Affiner les décotes et la pondération avec des données terrain.
+7. **Cas "0 annonce" sur le luxe** — quand seul le référentiel est utilisé (neuf-décoté seul), vérifier le réalisme des prix obtenus. La décote peut être trop forte ou trop douce selon la catégorie.
+8. **Resserrer le filtre Vinted selon état/défaut** — ex : article avec trou visible → ne comparer qu'aux annonces de même état ou état inférieur. Actuellement le filtre ±1 cran peut inclure des articles en meilleur état.
+9. **Haiku sur les marques standard/fast-fashion** — surveiller que le raisonnement ne survend pas (ex : "très appréciée", "belle pièce" sur Zara/H&M). Le `segLabel` "marque grand public" peut amener des formulations trop laudatives — tempérer le prompt si observé au test.
+10. **Catégories sport non-mode** — actuellement mappées sur `null` (médiane seule ou noData). Si volume significatif observé en bêta, créer des clés référentiel dédiées.
 
 ### Contenu
 8. **Blog** — article "titre + description Vinted qui vendent" (appliquer les règles de l'étape Annonce).
