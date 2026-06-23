@@ -1,3 +1,5 @@
+import type { BrandSegment } from '@/lib/pricing'
+
 export type Plan = 'freemium' | 'premium' | 'pro'
 
 export type SlotStatus = 'empty' | 'uploading' | 'processing-bg' | 'done' | 'error'
@@ -47,7 +49,7 @@ export interface RecognitionResult {
   tailleSysteme: RecognitionField<string[]>
   extraInfo?:    ExtraInfo
   /* Champ interne — NE PAS afficher dans l'UI étape 2 */
-  brand_segment?: 'standard' | 'luxe_accessible' | 'luxe_premium'
+  brand_segment?: BrandSegment
 }
 
 /* ─── Étape 3 — Génération de l'annonce ────────────────────────────────── */
@@ -73,13 +75,15 @@ export interface PriceResult {
   prixSuggere: number
   confidence:  'high' | 'medium' | 'low'
   raisonnement: string
+  /* true = pas assez de données — afficher champ libre dans l'UI */
+  noData?:      boolean
+  /* Prix neuf de référence utilisé pour le calcul (référentiel ou prix saisi) */
+  prixNeuf?:    number | null
   /* Champ interne — NE PAS afficher dans l'UI */
-  brand_segment?: 'standard' | 'luxe_accessible' | 'luxe_premium'
+  brand_segment?: BrandSegment
 
   /* BLOC 2 — données marché (null si non trouvé) */
   marche: {
-    prixNeufMarque:    string | null   // chiffres seuls, ex: "300" ou "250-350"
-    sourcePrixNeuf:    string | null
     prixMedianVinted:  number | null
     prixMinVinted:     number | null
     prixMaxVinted:     number | null

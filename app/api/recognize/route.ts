@@ -2,6 +2,8 @@ import Anthropic from '@anthropic-ai/sdk'
 import { NextRequest, NextResponse } from 'next/server'
 import { COLORS, MATERIALS, CONDITIONS, STYLES, PATTERNS } from '@/lib/vinted-taxonomy'
 import { getNavRef } from '@/lib/vinted-navigation-taxonomy'
+import { getBrandSegment, ALL_SEGMENTS } from '@/lib/pricing'
+import type { BrandSegment } from '@/lib/pricing'
 import type { RecognitionResult } from '@/app/app/types'
 
 const client = new Anthropic()
@@ -98,6 +100,18 @@ RÈGLE DE CONFIANCE POUR LA TAILLE :
 - Ne jamais mettre "medium" ou "low" si une valeur de taille est clairement visible sur une étiquette
 - "medium" ou "low" uniquement si aucune étiquette n'est visible et que la taille doit être estimée à l'œil depuis la silhouette
 
+SEGMENT DE MARQUE :
+Classe la marque identifiée dans exactement UN des 8 segments ci-dessous. Retourne la CLÉ TECHNIQUE exacte (jamais un libellé traduit) :
+- "ultra_luxe"        : horlogerie/joaillerie de prestige absolu ou haute couture inaccessible, prix €3 000–100 000+ (ex : Hermès, Chanel, Cartier, Rolex)
+- "luxe_iconique"     : luxe qui conserve exceptionnellement sa valeur à la revente — quasi uniquement Hermès et Chanel, prix très élevé et stable (ex : Hermès, Chanel)
+- "luxe_etabli"       : grande maison de luxe mondiale et prestigieuse, mais qui se déprécie fortement à l'occasion, prix neuf €800–5 000 (ex : Gucci, Prada, Dior, Givenchy, Saint Laurent, Louis Vuitton)
+- "luxe_contemporain" : luxe émergent, streetwear haut de gamme ou nouvelle garde, prix €300–1 500 (ex : Jacquemus, Ami, Acne Studios, Off-White)
+- "premium_createur"  : créateur parisien ou designer reconnu à prix accessible, prix €150–800 (ex : Sandro, Maje, A.P.C., Isabel Marant, Kenzo)
+- "premium_accessible": marque lifestyle/sport premium sans signature créateur, prix €60–300 (ex : Hugo Boss, Ralph Lauren, Lacoste, Tommy Hilfiger)
+- "standard"          : marque grand public bien connue, prix €15–150 (ex : Zara, H&M, Nike, Adidas, Levi's)
+- "fast_fashion"      : ultra-accessible ou production de masse bas de gamme, prix < €30 (ex : Shein, Primark, Bershka, Boohoo)
+Si la marque est inconnue, locale, absente ou générique → retourne "standard".
+
 Réponds UNIQUEMENT avec ce JSON (sans markdown, sans texte avant ou après) :
 {
   "marque": { "value": "string — marque lisible sur étiquette ou logo visible, sinon vide", "confidence": "high|medium|low" },
@@ -110,7 +124,8 @@ Réponds UNIQUEMENT avec ce JSON (sans markdown, sans texte avant ou après) :
   "matieres": { "value": ["matière1"], "confidence": "high|medium|low" },
   "style": { "value": "string — parmi les styles autorisés", "confidence": "high|medium|low" },
   "motif": { "value": "string — parmi les motifs autorisés", "confidence": "high|medium|low" },
-  "defauts": { "value": "string — défauts visibles décrits précisément, sinon vide", "confidence": "high|medium|low" }
+  "defauts": { "value": "string — défauts visibles décrits précisément, sinon vide", "confidence": "high|medium|low" },
+  "brand_segment": "fast_fashion|standard|premium_accessible|premium_createur|luxe_contemporain|luxe_etabli|luxe_iconique|ultra_luxe"
 }
 
 LANGUE POUR LES DÉFAUTS : La valeur du champ "defauts" doit être rédigée en ${LANG_NAMES[locale ?? 'fr'] ?? 'français'}. Les champs etat, couleurs, matieres, style, motif doivent utiliser les valeurs françaises exactes de la liste ci-dessus. Le champ "vintedPath" doit utiliser un chemin français exact de la liste de chemins de navigation fournie.`
@@ -138,6 +153,15 @@ LANGUE POUR LES DÉFAUTS : La valeur du champ "defauts" doit être rédigée en 
     }
 
     const result: RecognitionResult = JSON.parse(jsonMatch[0])
+
+    /* ── Résolution brand_segment : table déterministe > Claude > fallback ── */
+    {
+      const fromTable = getBrandSegment(result.marque?.value ?? '')
+      const fromClaude = ALL_SEGMENTS.includes(result.brand_segment as BrandSegment)
+        ? (result.brand_segment as BrandSegment)
+        : null
+      result.brand_segment = fromTable ?? fromClaude ?? 'standard'
+    }
 
     /* ── Normalise vintedPath : renomme categorie → vintedPath si l'IA renvoie l'ancien nom ── */
     if (!result.vintedPath && (result as unknown as Record<string, unknown>).categorie) {

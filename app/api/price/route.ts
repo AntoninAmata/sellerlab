@@ -1,9 +1,33 @@
 import Anthropic from '@anthropic-ai/sdk'
 import { NextRequest, NextResponse } from 'next/server'
 import type { PriceResult } from '@/app/app/types'
-import { computePrice, getBrandSegment } from '@/lib/pricing'
+import { computePrice, getBrandSegment, type BrandSegment } from '@/lib/pricing'
 
 const client = new Anthropic()
+
+/* ─── Helpers — calcul déterministe de la médiane ───────────────────────── */
+
+/** Filtre les valeurs aberrantes par méthode IQR (Tukey). Si < 4 prix : pas de filtrage. */
+function filterIQR(prices: number[]): number[] {
+  if (prices.length < 4) return prices
+  const s = [...prices].sort((a, b) => a - b)
+  const q1  = s[Math.floor(s.length * 0.25)]
+  const q3  = s[Math.floor(s.length * 0.75)]
+  const iqr = q3 - q1
+  const lo  = q1 - 1.5 * iqr
+  const hi  = q3 + 1.5 * iqr
+  return s.filter(p => p >= lo && p <= hi)
+}
+
+/** Médiane déterministe sur une liste triée ou non. Retourne null si vide. */
+function computeMedian(prices: number[]): number | null {
+  if (prices.length === 0) return null
+  const s   = [...prices].sort((a, b) => a - b)
+  const mid = Math.floor(s.length / 2)
+  return s.length % 2 === 1
+    ? s[mid]
+    : Math.round((s[mid - 1] + s[mid]) / 2)
+}
 
 const LANG_NAMES: Record<string, string> = {
   fr: 'français', en: 'anglais', es: 'espagnol',
@@ -22,7 +46,7 @@ export interface PriceRequest {
   prixAchatNeuf?: number
   plateforme?: string
   rarete?: string
-  brand_segment?: 'standard' | 'luxe_accessible' | 'luxe_premium'
+  brand_segment?: BrandSegment
   skipWebSearch?: boolean
   existingMarche?: PriceResult['marche']
   locale?: string
@@ -70,7 +94,7 @@ async function extractMarketData(body: PriceRequest): Promise<PriceResult['march
     prixAchatNeuf,
   } = body
 
-  const prompt = `Tu es un expert en pricing sur Vinted. Pour l'article décrit, suis exactement ces 3 étapes dans l'ordre.
+  const prompt = `Tu es un expert en pricing sur le marché de la mode de seconde main. Pour l'article décrit, collecte les annonces comparables et renvoie les prix retenus.
 
 Article :
 - Marque : ${marque || 'Non précisée'}
@@ -83,37 +107,8 @@ Article :
 - Style : ${style || 'Non précisé'}
 ${prixAchatNeuf ? `- Prix d'achat neuf déclaré : ${prixAchatNeuf}€` : ''}
 
-━━━ ÉTAPE 1 — PRIX NEUF ━━━
-${prixAchatNeuf
-  ? `→ PASSER : prix neuf déjà fourni par l'utilisateur (${prixAchatNeuf}€). Retourne prixNeufMarque: null.`
-  : `Cherche le prix neuf plein tarif EN EUROS (€) de la marque ${marque || 'indiquée'} pour le type d'article "${vintedPath}".
-
-MÉTHODE DE RECHERCHE :
-→ Effectue une recherche de type : site:[domaine officiel de la marque] [type d'article] price EUR
-  (ex : site:givenchy.com blouson price EUR, site:sandro-paris.com veste price EUR)
-→ Cible la version internationale/européenne du site officiel qui affiche des prix en euros (€).
-  Les grands sites de luxe (Givenchy, Balenciaga, etc.) ont souvent une sélection de devise EUR
-  accessible via /eu/, /en-eu/, /fr-fr/ ou un sélecteur de pays Europe sur leur .com.
-→ Récupère les prix en € directement depuis les extraits de résultats (snippets) et métadonnées —
-  le prix y figure souvent même si la page le charge dynamiquement.
-
-FILTRE : même type d'article précis que "${vintedPath}" (blouson ≠ veste ≠ manteau ≠ chemise — respecter la catégorie).
-
-PRIX À RETENIR :
-✓ Prix en euros (€) uniquement — plein tarif, sans réduction
-✗ Exclure : soldes, promotions, prix barrés, codes promo, prix outlet
-✗ Prix USD : NE PAS convertir. Si seuls des prix USD sont trouvés, chercher davantage le prix EUR ; si introuvable → null
-
-MÉTHODE DE CALCUL :
-1. LISTE les prix EUR plein tarif trouvés dans l'ordre croissant, ex: [890, 950, 1050, 1150, 1300]
-2. Si 4 articles ou plus : retirer le moins cher ET le plus cher, puis calculer la médiane du reste
-   Si 1 à 3 articles : garder tous les prix et calculer la médiane directement
-3. Retourner la médiane calculée comme chiffre entier (pas une fourchette)
-4. Indiquer l'URL de la source dans sourcePrixNeuf
-→ null si aucun prix EUR fiable trouvé (le calcul utilisera la médiane Vinted seule)`}
-
-━━━ ÉTAPE 2 — COLLECTE DES ANNONCES VINTED ━━━
-Cherche des annonces d'articles comparables sur Vinted.
+━━━ COLLECTE DES ANNONCES ━━━
+Cherche des annonces d'articles comparables sur Vinted, Vestiaire Collective et Leboncoin.
 
 CRITÈRES DE COMPARABILITÉ (toutes ces conditions) :
 ✓ Même marque exacte
@@ -127,32 +122,18 @@ ANNONCES À EXCLURE IMPÉRATIVEMENT :
 ✗ Prix hors-marché (> 3× le prix le plus fréquent observé)
 ✗ Annonces avec défauts non comparables à l'article décrit
 
-━━━ ÉTAPE 3 — CALCUL DE LA MÉDIANE ━━━
-Après avoir collecté les annonces comparables :
-
-1. LISTE les prix retenus dans l'ordre croissant, ex: [28, 32, 38, 45, 52]
-2. CALCULE la médiane :
-   - 0 prix → prixMedianVinted: null
-   - 1 prix → prixMedianVinted = ce prix
-   - Nombre impair → valeur centrale
-   - Nombre pair → moyenne des 2 valeurs centrales, arrondi à l'entier
-3. prixMinVinted = plus petit prix de la liste finale
-4. prixMaxVinted = plus grand prix de la liste finale
-5. nbAnnonces = nombre EXACT de prix dans la liste (pas une estimation)
-6. delaiVente = estimation du délai de vente en langage naturel selon le marché observé (ex: "1 à 2 semaines", "quelques jours", "1 mois ou plus")
+Ne liste dans prixAnnonces QUE les prix que tu as retenus après ce filtrage (masse centrale des prix observés).
+nbAnnonces = nombre EXACT de prix dans ta liste prixAnnonces.
+delaiVente = estimation du délai de vente en langage naturel selon le marché observé (ex: "1 à 2 semaines", "quelques jours", "1 mois ou plus"), ou null si impossible à estimer.
 
 ⚠️ FORMAT DE RÉPONSE — IMPÉRATIF :
-- Utilise les outils web_search pour tes recherches. Ne rédige PAS ton raisonnement ni tes analyses dans ta réponse — ils restent internes.
+- Utilise les outils web_search pour tes recherches.
 - Ta réponse finale doit être UNIQUEMENT l'objet JSON ci-dessous : aucun texte avant, aucun texte après, aucune balise Markdown, pas de \`\`\`json, aucune explication.
 - Le premier caractère de ta réponse doit être { et le dernier doit être }.
 
 {
-  "prixNeufMarque": string | null,
-  "sourcePrixNeuf": string | null,
-  "prixMedianVinted": number | null,
-  "prixMinVinted": number | null,
-  "prixMaxVinted": number | null,
-  "nbAnnonces": number | null,
+  "prixAnnonces": number[],
+  "nbAnnonces": number,
   "delaiVente": string | null
 }`
 
@@ -199,19 +180,31 @@ Après avoir collecté les annonces comparables :
     .map((b) => b.text)
     .join('')
 
-  console.log('[PRIX NEUF DEBUG]', text)
-
   const start = text.indexOf('{')
   const end   = text.lastIndexOf('}')
   if (start === -1 || end === -1 || end <= start) {
     console.error('[price] Réponse brute Claude (pas de JSON):', JSON.stringify(text))
     throw new Error('Réponse IA invalide (extraction marché)')
   }
+
+  let raw: { prixAnnonces: number[]; nbAnnonces: number; delaiVente: string | null }
   try {
-    return JSON.parse(text.slice(start, end + 1)) as PriceResult['marche']
+    raw = JSON.parse(text.slice(start, end + 1))
   } catch (parseErr) {
     console.error('[price] Réponse brute Claude (JSON invalide):', JSON.stringify(text))
     throw new Error('Réponse IA invalide (extraction marché)')
+  }
+
+  const rawPrices = Array.isArray(raw.prixAnnonces) ? raw.prixAnnonces.filter(p => typeof p === 'number' && p > 0) : []
+  const filtered  = filterIQR(rawPrices)
+  const median    = computeMedian(filtered)
+
+  return {
+    prixMedianVinted: median,
+    prixMinVinted:    filtered.length > 0 ? Math.min(...filtered) : null,
+    prixMaxVinted:    filtered.length > 0 ? Math.max(...filtered) : null,
+    nbAnnonces:       filtered.length > 0 ? filtered.length : null,
+    delaiVente:       raw.delaiVente ?? null,
   }
 }
 
@@ -220,50 +213,70 @@ Après avoir collecté les annonces comparables :
 async function generateRaisonnement(params: {
   body:         PriceRequest
   marche:       PriceResult['marche']
-  segment:      'standard' | 'luxe_accessible' | 'luxe_premium'
+  segment:      BrandSegment
   prixSuggere:  number
   confidence:   'high' | 'medium' | 'low'
+  prixNeuf:     number | null   /* null si aucune référence neuve disponible */
   locale?:      string
 }): Promise<string> {
-  const { body, marche, segment, prixSuggere, locale } = params
+  const { body, marche, segment, prixSuggere, prixNeuf, locale } = params
   const nativeLang = LANG_NAMES[locale ?? 'fr'] ?? 'français'
 
   /* Libellé segment lisible — en langue native */
-  const SEG_LABELS: Record<string, Record<string, string>> = {
-    luxe_premium:    { fr: 'une grande maison de luxe', en: 'a luxury fashion house', es: 'una gran firma de lujo', de: 'ein Luxushaus', it: 'una grande maison di lusso', nl: 'een luxemerk', pl: 'dom mody luksusowej' },
-    luxe_accessible: { fr: 'une marque premium', en: 'a premium brand', es: 'una marca premium', de: 'eine Premiummarke', it: 'un marchio premium', nl: 'een premiummerk', pl: 'marka premium' },
-    standard:        { fr: 'une marque grand public', en: 'a mainstream brand', es: 'una marca accesible', de: 'eine zugängliche Marke', it: 'un marchio accessibile', nl: 'een toegankelijk merk', pl: 'marka masowa' },
+  const SEG_LABELS: Record<BrandSegment, Record<string, string>> = {
+    ultra_luxe:          { fr: 'une maison de haute joaillerie ou de grand luxe absolu', en: 'an ultra-luxury house', es: 'una maison de lujo absoluto', de: 'ein Ultra-Luxushaus', it: 'una maison di altissimo lusso', nl: 'een ultra-luxemerk', pl: 'dom ultraluksusowy' },
+    luxe_iconique:       { fr: 'une grande maison de luxe', en: 'a luxury fashion house', es: 'una gran firma de lujo', de: 'ein Luxushaus', it: 'una grande maison di lusso', nl: 'een iconisch luxemerk', pl: 'dom mody luksusowej' },
+    luxe_etabli:         { fr: 'une marque de luxe établie', en: 'an established luxury brand', es: 'una marca de lujo consolidada', de: 'eine etablierte Luxusmarke', it: 'un marchio di lusso affermato', nl: 'een gevestigd luxemerk', pl: 'uznana marka luksusowa' },
+    luxe_contemporain:   { fr: 'une marque de luxe contemporain', en: 'a contemporary luxury brand', es: 'una marca de lujo contemporáneo', de: 'eine zeitgenössische Luxusmarke', it: 'un marchio di lusso contemporaneo', nl: 'een eigentijds luxemerk', pl: 'współczesna marka luksusowa' },
+    premium_createur:    { fr: 'une marque créateur premium', en: 'a premium designer brand', es: 'una marca de diseñador premium', de: 'eine Premium-Designermarke', it: 'un marchio designer premium', nl: 'een premium designermerk', pl: 'marka premium od projektanta' },
+    premium_accessible:  { fr: 'une marque premium accessible', en: 'an accessible premium brand', es: 'una marca premium accesible', de: 'eine zugängliche Premiummarke', it: 'un marchio premium accessibile', nl: 'een toegankelijk premiummerk', pl: 'dostępna marka premium' },
+    standard:            { fr: 'une marque grand public', en: 'a mainstream brand', es: 'una marca accesible', de: 'eine zugängliche Marke', it: 'un marchio accessibile', nl: 'een toegankelijk merk', pl: 'marka masowa' },
+    fast_fashion:        { fr: 'une marque fast fashion', en: 'a fast fashion brand', es: 'una marca de fast fashion', de: 'eine Fast-Fashion-Marke', it: 'un marchio fast fashion', nl: 'een fast fashionmerk', pl: 'marka fast fashion' },
   }
   const segLabel = SEG_LABELS[segment]?.[locale ?? 'fr'] ?? SEG_LABELS.standard.fr
 
-  /* Description des données marché disponibles */
-  let marcheDesc: string
-  if (marche.prixMedianVinted !== null && (marche.nbAnnonces ?? 0) > 0) {
-    marcheDesc = `médiane ${marche.prixMedianVinted}€ sur ${marche.nbAnnonces} annonce(s) (fourchette ${marche.prixMinVinted ?? '?'}–${marche.prixMaxVinted ?? '?'}€)`
-  } else if (marche.prixNeufMarque !== null) {
-    marcheDesc = `prix neuf ${marche.prixNeufMarque}€, aucune annonce de seconde main trouvée`
+  /* ── Source du prix neuf ── */
+  const hasUserPrice  = !!body.prixAchatNeuf
+  const hasRefPrice   = prixNeuf !== null && !hasUserPrice
+  const nbAnnonces    = marche.nbAnnonces ?? 0
+  const hasListings   = nbAnnonces > 0
+
+  /* Description de la source "neuf" — doit transparaître dans la rédaction */
+  let sourceNeuf: string
+  if (hasUserPrice) {
+    sourceNeuf = `votre prix d'achat : ${body.prixAchatNeuf}€ (fourni par le vendeur)`
+  } else if (hasRefPrice) {
+    sourceNeuf = `valeur estimée à neuf : ~${prixNeuf}€ (estimation de référence pour cette marque et catégorie)`
   } else {
-    marcheDesc = 'aucune donnée de marché disponible'
+    sourceNeuf = 'non disponible'
   }
 
-  const prompt = `Tu rédiges le commentaire prix d'une application de revente (Vinted). Deux à trois phrases simples et rassurantes pour le vendeur.
+  /* Description des données Vinted */
+  const sourceVinted = hasListings
+    ? `${nbAnnonces} annonce${nbAnnonces > 1 ? 's' : ''} Vinted comparable${nbAnnonces > 1 ? 's' : ''}, médiane à ${marche.prixMedianVinted}€ (fourchette ${marche.prixMinVinted ?? '?'}–${marche.prixMaxVinted ?? '?'}€)`
+    : 'aucune annonce comparable trouvée sur Vinted'
+
+  const prompt = `Tu rédiges le commentaire prix d'une application de revente. Deux à trois phrases simples et rassurantes pour le vendeur, qui expliquent naturellement comment ce prix a été calculé.
 
 Article :
 - Marque : ${body.marque || 'Non précisée'} (${segLabel})
 - État : ${body.etat}
 - Prix recommandé : ${prixSuggere}€
-- Données marché : ${marcheDesc}
-${marche.delaiVente ? `- Délai de vente estimé : ${marche.delaiVente}` : ''}
-${body.plateforme ? `- Acheté chez : ${body.plateforme}` : ''}
 ${body.rarete && body.rarete !== 'Non' ? `- Particularité : ${body.rarete}` : ''}
 
-Consignes :
-- Mentionne le positionnement de la marque en langage naturel
-- Si des données de vente sont disponibles, évoque la fourchette de prix observée
-- L'état de l'article comme facteur explicatif
-- Si un délai de vente est disponible, intègre-le naturellement dans une phrase (ex: "à ce prix, comptez environ X semaines")
-- Ton simple, chaleureux et rassurant
-INTERDIT : formules, pourcentages, coefficients, termes techniques (standard/luxe_accessible/luxe_premium), les mots "pondération" ou "décote"
+Sources utilisées pour ce prix :
+- Valeur à neuf : ${sourceNeuf}
+- Marché Vinted : ${sourceVinted}
+${marche.delaiVente ? `- Délai de vente estimé : ${marche.delaiVente}` : ''}
+
+Consignes de rédaction :
+- Mentionne naturellement les sources réellement disponibles (annonces Vinted et/ou valeur à neuf)
+- Si la valeur à neuf vient d'une estimation de référence → utilise "valeur estimée à neuf" (jamais "décote", "pondération", "coefficient")
+- Si le prix neuf vient du vendeur → dis "votre prix d'achat" (pas "estimation")
+- Si aucune annonce n'a été trouvée → dis-le honnêtement, ex: "aucune annonce comparable n'a pu être trouvée, ce prix est basé sur la valeur à neuf"
+- Si un délai de vente est disponible, intègre-le naturellement en dernière phrase
+- Ton simple, chaleureux, rassurant — jamais condescendant
+INTERDIT absolument : formules, pourcentages, décote, pondération, coefficients, noms techniques de segment, le mot "algorithme"
 LANGUE : ${nativeLang}
 
 Réponds avec UNIQUEMENT le texte (2–3 phrases, sans guillemets englobants, sans markdown).`
@@ -271,7 +284,7 @@ Réponds avec UNIQUEMENT le texte (2–3 phrases, sans guillemets englobants, sa
   try {
     const resp = await client.messages.create({
       model: 'claude-haiku-4-5-20251001',
-      max_tokens: 256,
+      max_tokens: 300,
       temperature: 0,
       messages: [{ role: 'user', content: prompt }],
     })
@@ -295,7 +308,10 @@ export async function POST(req: NextRequest) {
       locale,
     } = body
 
-    const segment = getBrandSegment(body.marque) ?? inputBrandSegment ?? 'standard'
+    const segmentFromTable = getBrandSegment(body.marque)
+    const segment = segmentFromTable ?? inputBrandSegment ?? 'standard'
+    /* Vrai si ni la table ni Claude n'ont classé fiablement la marque */
+    const brandIsUnknown = !segmentFromTable && (!inputBrandSegment || inputBrandSegment === 'standard')
 
     /* 1. Données marché — web search ou existantes */
     let marche: PriceResult['marche']
@@ -308,27 +324,36 @@ export async function POST(req: NextRequest) {
     /* 2. Calcul déterministe du prix */
     const computed = computePrice({
       marche,
-      etat:          body.etat,
+      etat:           body.etat,
       segment,
-      prixAchatNeuf: body.prixAchatNeuf,
+      refCat:         body.vintedPath,
+      matieres:       body.matieres,
+      prixAchatNeuf:  body.prixAchatNeuf,
+      brandIsUnknown,
     })
 
+    /* noData = 0 — ne pas forcer à 1 */
     let prixSuggere = computed.prixSuggere
-    if (prixSuggere <= 0) prixSuggere = 1
+    if (prixSuggere <= 0 && !computed.noData) prixSuggere = 1
 
-    /* 3. Raisonnement textuel (Haiku, temperature=0) */
-    const raisonnement = await generateRaisonnement({
-      body, marche, segment, prixSuggere,
-      confidence: computed.confidence,
-      locale,
-    })
+    /* 3. Raisonnement textuel (Haiku, temperature=0) — ignoré si noData */
+    const raisonnement = computed.noData
+      ? ''
+      : await generateRaisonnement({
+          body, marche, segment, prixSuggere,
+          confidence: computed.confidence,
+          prixNeuf: computed.prixNeuf,
+          locale,
+        })
 
     const result: PriceResult = {
       prixSuggere,
       confidence:    computed.confidence,
       raisonnement,
+      prixNeuf:      computed.prixNeuf ?? null,
       brand_segment: segment,
       marche,
+      ...(computed.noData ? { noData: true } : {}),
     }
 
     logPricing(body, result, computed.prixDecote, computed.prixNeuf, skipWebSearch ? 'recalcul_rapide' : 'web_search')

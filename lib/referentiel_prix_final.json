@@ -1,0 +1,1137 @@
+{
+  "segments": [
+    "fast_fashion",
+    "standard",
+    "premium_accessible",
+    "premium_createur",
+    "luxe_contemporain",
+    "luxe_etabli",
+    "luxe_iconique",
+    "ultra_luxe"
+  ],
+  "prix_reference": {
+    "Capes et ponchos": {
+      "fast_fashion": 24,
+      "standard": 82,
+      "premium_accessible": 205,
+      "premium_createur": 410,
+      "luxe_contemporain": 660,
+      "luxe_etabli": 2050,
+      "luxe_iconique": 4100,
+      "ultra_luxe": null
+    },
+    "Manteaux (Trenchs, Parkas, Cabans, Imperméables)": {
+      "fast_fashion": 32,
+      "standard": 105,
+      "premium_accessible": 260,
+      "premium_createur": 525,
+      "luxe_contemporain": 840,
+      "luxe_etabli": 2600,
+      "luxe_iconique": 5250,
+      "ultra_luxe": null
+    },
+    "Vestes sans manches": {
+      "fast_fashion": 16,
+      "standard": 55,
+      "premium_accessible": 138,
+      "premium_createur": 275,
+      "luxe_contemporain": 440,
+      "luxe_etabli": 1375,
+      "luxe_iconique": 2750,
+      "ultra_luxe": null
+    },
+    "Vestes (Perfectos, Doudounes, Denim, Polaires, Ski)": {
+      "fast_fashion": 26,
+      "standard": 85,
+      "premium_accessible": 210,
+      "premium_createur": 425,
+      "luxe_contemporain": 680,
+      "luxe_etabli": 2100,
+      "luxe_iconique": 4250,
+      "ultra_luxe": null
+    },
+    "Sweats & sweats à capuche": {
+      "fast_fashion": 12,
+      "standard": 42,
+      "premium_accessible": 106,
+      "premium_createur": 210,
+      "luxe_contemporain": 340,
+      "luxe_etabli": 1060,
+      "luxe_iconique": 2100,
+      "ultra_luxe": null
+    },
+    "Sweats (Pulls col V, col roulé, d'hiver, 3/4)": {
+      "fast_fashion": 14,
+      "standard": 48,
+      "premium_accessible": 118,
+      "premium_createur": 235,
+      "luxe_contemporain": 380,
+      "luxe_etabli": 1185,
+      "luxe_iconique": 2350,
+      "ultra_luxe": null
+    },
+    "Kimonos, Cardigans, Boléros, Pull-overs": {
+      "fast_fashion": 16,
+      "standard": 55,
+      "premium_accessible": 138,
+      "premium_createur": 275,
+      "luxe_contemporain": 440,
+      "luxe_etabli": 1375,
+      "luxe_iconique": 2750,
+      "ultra_luxe": null
+    },
+    "Blazers & Vestes habillées": {
+      "fast_fashion": 23,
+      "standard": 78,
+      "premium_accessible": 190,
+      "premium_createur": 385,
+      "luxe_contemporain": 620,
+      "luxe_etabli": 1900,
+      "luxe_iconique": 3850,
+      "ultra_luxe": null
+    },
+    "Ensembles tailleur (pantalon/jupe)": {
+      "fast_fashion": 39,
+      "standard": 130,
+      "premium_accessible": 325,
+      "premium_createur": 650,
+      "luxe_contemporain": 1040,
+      "luxe_etabli": 3250,
+      "luxe_iconique": 6500,
+      "ultra_luxe": null
+    },
+    "Robes (Mini, Midi, Longues, Casual, Été, Hiver)": {
+      "fast_fashion": 16,
+      "standard": 55,
+      "premium_accessible": 138,
+      "premium_createur": 275,
+      "luxe_contemporain": 440,
+      "luxe_etabli": 1375,
+      "luxe_iconique": 2750,
+      "ultra_luxe": null
+    },
+    "Robes d'occasion & Robes chics / Soirée": {
+      "fast_fashion": 28,
+      "standard": 95,
+      "premium_accessible": 235,
+      "premium_createur": 475,
+      "luxe_contemporain": 760,
+      "luxe_etabli": 2350,
+      "luxe_iconique": 4750,
+      "ultra_luxe": null
+    },
+    "Jupes (Mini, Midi, Longues, Asymétriques)": {
+      "fast_fashion": 12,
+      "standard": 42,
+      "premium_accessible": 106,
+      "premium_createur": 210,
+      "luxe_contemporain": 340,
+      "luxe_etabli": 1060,
+      "luxe_iconique": 2100,
+      "ultra_luxe": null
+    },
+    "Jupes-shorts": {
+      "fast_fashion": 10,
+      "standard": 35,
+      "premium_accessible": 88,
+      "premium_createur": 175,
+      "luxe_contemporain": 280,
+      "luxe_etabli": 875,
+      "luxe_iconique": 1750,
+      "ultra_luxe": null
+    },
+    "Jeans (Boyfriend, Skinny, Taille haute, Droit)": {
+      "fast_fashion": 15,
+      "standard": 50,
+      "premium_accessible": 125,
+      "premium_createur": 250,
+      "luxe_contemporain": 400,
+      "luxe_etabli": 1250,
+      "luxe_iconique": 2500,
+      "ultra_luxe": null
+    },
+    "Pantalons (Chinos, Larges, Cuir, Leggings)": {
+      "fast_fashion": 13,
+      "standard": 45,
+      "premium_accessible": 112,
+      "premium_createur": 220,
+      "luxe_contemporain": 360,
+      "luxe_etabli": 1120,
+      "luxe_iconique": 2200,
+      "ultra_luxe": null
+    },
+    "Shorts (Denim, Taille haute, Cuir, Cargo)": {
+      "fast_fashion": 10,
+      "standard": 35,
+      "premium_accessible": 88,
+      "premium_createur": 175,
+      "luxe_contemporain": 280,
+      "luxe_etabli": 875,
+      "luxe_iconique": 1750,
+      "ultra_luxe": null
+    },
+    "Combinaisons & Combi Shorts": {
+      "fast_fashion": 18,
+      "standard": 62,
+      "premium_accessible": 156,
+      "premium_createur": 310,
+      "luxe_contemporain": 500,
+      "luxe_etabli": 1560,
+      "luxe_iconique": 3100,
+      "ultra_luxe": null
+    },
+    "Maillots de bain (1 pièce, 2 pièces, Paréos)": {
+      "fast_fashion": 12,
+      "standard": 40,
+      "premium_accessible": 100,
+      "premium_createur": 200,
+      "luxe_contemporain": 320,
+      "luxe_etabli": 1000,
+      "luxe_iconique": 2000,
+      "ultra_luxe": null
+    },
+    "Chemises & Blouses": {
+      "fast_fashion": 13,
+      "standard": 45,
+      "premium_accessible": 112,
+      "premium_createur": 220,
+      "luxe_contemporain": 360,
+      "luxe_etabli": 1120,
+      "luxe_iconique": 2200,
+      "ultra_luxe": null
+    },
+    "T-shirts, Débardeurs, Tops courts": {
+      "fast_fashion": 6,
+      "standard": 24,
+      "premium_accessible": 58,
+      "premium_createur": 118,
+      "luxe_contemporain": 188,
+      "luxe_etabli": 585,
+      "luxe_iconique": 1175,
+      "ultra_luxe": null
+    },
+    "Bodies, Cols roulés, Tops dos nu / Épaules dénudées": {
+      "fast_fashion": 9,
+      "standard": 32,
+      "premium_accessible": 78,
+      "premium_createur": 158,
+      "luxe_contemporain": 250,
+      "luxe_etabli": 785,
+      "luxe_iconique": 1575,
+      "ultra_luxe": null
+    },
+    "Lingerie (Soutiens-gorge, Culottes, Ensembles, Collants)": {
+      "fast_fashion": 10,
+      "standard": 32,
+      "premium_accessible": 81,
+      "premium_createur": 162,
+      "luxe_contemporain": 260,
+      "luxe_etabli": 810,
+      "luxe_iconique": 1625,
+      "ultra_luxe": null
+    },
+    "Pyjamas, tenues de nuit & Peignoirs": {
+      "fast_fashion": 12,
+      "standard": 42,
+      "premium_accessible": 106,
+      "premium_createur": 210,
+      "luxe_contemporain": 340,
+      "luxe_etabli": 1060,
+      "luxe_iconique": 2100,
+      "ultra_luxe": null
+    },
+    "Maternité (Tops, Robes, Pantalons, Sous-vêtements)": {
+      "fast_fashion": 13,
+      "standard": 45,
+      "premium_accessible": 112,
+      "premium_createur": 220,
+      "luxe_contemporain": 360,
+      "luxe_etabli": 1120,
+      "luxe_iconique": 2200,
+      "ultra_luxe": null
+    },
+    "Costumes, tenues particulières & Autres": {
+      "fast_fashion": 24,
+      "standard": 80,
+      "premium_accessible": 200,
+      "premium_createur": 400,
+      "luxe_contemporain": 640,
+      "luxe_etabli": 2000,
+      "luxe_iconique": 4000,
+      "ultra_luxe": null
+    },
+    "Manteaux (Duffle-coats, Pardessus, Parkas, Trenchs)": {
+      "fast_fashion": 38,
+      "standard": 125,
+      "premium_accessible": 310,
+      "premium_createur": 625,
+      "luxe_contemporain": 1000,
+      "luxe_etabli": 3100,
+      "luxe_iconique": 6250,
+      "ultra_luxe": null
+    },
+    "Vestes (Perfectos, Aviateur, Denim, Doudounes, Ski)": {
+      "fast_fashion": 28,
+      "standard": 95,
+      "premium_accessible": 235,
+      "premium_createur": 475,
+      "luxe_contemporain": 760,
+      "luxe_etabli": 2350,
+      "luxe_iconique": 4750,
+      "ultra_luxe": null
+    },
+    "Vestes sans manches & Ponchos": {
+      "fast_fashion": 18,
+      "standard": 62,
+      "premium_accessible": 156,
+      "premium_createur": 310,
+      "luxe_contemporain": 500,
+      "luxe_etabli": 1560,
+      "luxe_iconique": 3100,
+      "ultra_luxe": null
+    },
+    "Blazers & Ensembles tailleurs": {
+      "fast_fashion": 32,
+      "standard": 105,
+      "premium_accessible": 260,
+      "premium_createur": 525,
+      "luxe_contemporain": 840,
+      "luxe_etabli": 2600,
+      "luxe_iconique": 5250,
+      "ultra_luxe": null
+    },
+    "Ensembles costume & Costumes de mariage": {
+      "fast_fashion": 63,
+      "standard": 210,
+      "premium_accessible": 525,
+      "premium_createur": 1050,
+      "luxe_contemporain": 1680,
+      "luxe_etabli": 5250,
+      "luxe_iconique": 10500,
+      "ultra_luxe": null
+    },
+    "Pantalons & Gilets de costume séparés": {
+      "fast_fashion": 18,
+      "standard": 62,
+      "premium_accessible": 156,
+      "premium_createur": 310,
+      "luxe_contemporain": 500,
+      "luxe_etabli": 1560,
+      "luxe_iconique": 3100,
+      "ultra_luxe": null
+    },
+    "Sweats, Pulls (Col roulé, Col V, Ras de cou, Capuche)": {
+      "fast_fashion": 14,
+      "standard": 48,
+      "premium_accessible": 118,
+      "premium_createur": 235,
+      "luxe_contemporain": 380,
+      "luxe_etabli": 1185,
+      "luxe_iconique": 2350,
+      "ultra_luxe": null
+    },
+    "Cardigans & Vestes en maille": {
+      "fast_fashion": 16,
+      "standard": 55,
+      "premium_accessible": 138,
+      "premium_createur": 275,
+      "luxe_contemporain": 440,
+      "luxe_etabli": 1375,
+      "luxe_iconique": 2750,
+      "ultra_luxe": null
+    },
+    "Chemises (Habillées, Casual)": {
+      "fast_fashion": 13,
+      "standard": 45,
+      "premium_accessible": 112,
+      "premium_createur": 220,
+      "luxe_contemporain": 360,
+      "luxe_etabli": 1120,
+      "luxe_iconique": 2200,
+      "ultra_luxe": null
+    },
+    "T-shirts, Polos & Débardeurs": {
+      "fast_fashion": 8,
+      "standard": 30,
+      "premium_accessible": 74,
+      "premium_createur": 150,
+      "luxe_contemporain": 240,
+      "luxe_etabli": 745,
+      "luxe_iconique": 1500,
+      "ultra_luxe": null
+    },
+    "Jeans (Skinny, Slim, Coupe droite, Troués)": {
+      "fast_fashion": 15,
+      "standard": 50,
+      "premium_accessible": 125,
+      "premium_createur": 250,
+      "luxe_contemporain": 400,
+      "luxe_etabli": 1250,
+      "luxe_iconique": 2500,
+      "ultra_luxe": null
+    },
+    "Pantalons (Chinos, Jogging, Cargo)": {
+      "fast_fashion": 13,
+      "standard": 45,
+      "premium_accessible": 112,
+      "premium_createur": 220,
+      "luxe_contemporain": 360,
+      "luxe_etabli": 1120,
+      "luxe_iconique": 2200,
+      "ultra_luxe": null
+    },
+    "Shorts (Cargo, Chino, Denim)": {
+      "fast_fashion": 10,
+      "standard": 35,
+      "premium_accessible": 88,
+      "premium_createur": 175,
+      "luxe_contemporain": 280,
+      "luxe_etabli": 875,
+      "luxe_iconique": 1750,
+      "ultra_luxe": null
+    },
+    "Sous-vêtements & Chaussettes": {
+      "fast_fashion": 6,
+      "standard": 20,
+      "premium_accessible": 50,
+      "premium_createur": 100,
+      "luxe_contemporain": 160,
+      "luxe_etabli": 500,
+      "luxe_iconique": 1000,
+      "ultra_luxe": null
+    },
+    "Pyjamas & Peignoirs": {
+      "fast_fashion": 12,
+      "standard": 42,
+      "premium_accessible": 106,
+      "premium_createur": 210,
+      "luxe_contemporain": 340,
+      "luxe_etabli": 1060,
+      "luxe_iconique": 2100,
+      "ultra_luxe": null
+    },
+    "Maillots de bain": {
+      "fast_fashion": 10,
+      "standard": 35,
+      "premium_accessible": 88,
+      "premium_createur": 175,
+      "luxe_contemporain": 280,
+      "luxe_etabli": 875,
+      "luxe_iconique": 1750,
+      "ultra_luxe": null
+    },
+    "Baskets & Sneakers Mode": {
+      "fast_fashion": 20,
+      "standard": 65,
+      "premium_accessible": 160,
+      "premium_createur": 325,
+      "luxe_contemporain": 520,
+      "luxe_etabli": 1600,
+      "luxe_iconique": 3250,
+      "ultra_luxe": null
+    },
+    "Bottes, Bottines (Chelsea, Lacets, Cuissardes)": {
+      "fast_fashion": 27,
+      "standard": 90,
+      "premium_accessible": 220,
+      "premium_createur": 450,
+      "luxe_contemporain": 720,
+      "luxe_etabli": 2200,
+      "luxe_iconique": 4500,
+      "ultra_luxe": null
+    },
+    "Mocassins, Chaussures bateau & Habillées": {
+      "fast_fashion": 23,
+      "standard": 78,
+      "premium_accessible": 190,
+      "premium_createur": 385,
+      "luxe_contemporain": 620,
+      "luxe_etabli": 1900,
+      "luxe_iconique": 3850,
+      "ultra_luxe": null
+    },
+    "Sandales, Mules, Sabots, Escarpins, Talons": {
+      "fast_fashion": 18,
+      "standard": 62,
+      "premium_accessible": 156,
+      "premium_createur": 310,
+      "luxe_contemporain": 500,
+      "luxe_etabli": 1560,
+      "luxe_iconique": 3100,
+      "ultra_luxe": null
+    },
+    "Chaussures de sport spécialisées (Randonnée, Ski, Tennis)": {
+      "fast_fashion": 25,
+      "standard": 72,
+      "premium_accessible": 135,
+      "premium_createur": 210,
+      "luxe_contemporain": 300,
+      "luxe_etabli": 675,
+      "luxe_iconique": 1100,
+      "ultra_luxe": null
+    },
+    "Chaussons, pantoufles, claquettes & tongs": {
+      "fast_fashion": 7,
+      "standard": 25,
+      "premium_accessible": 62,
+      "premium_createur": 125,
+      "luxe_contemporain": 200,
+      "luxe_etabli": 620,
+      "luxe_iconique": 1250,
+      "ultra_luxe": null
+    },
+    "Pochettes, Wristlets, Trousses à maquillage": {
+      "fast_fashion": 8,
+      "standard": 28,
+      "premium_accessible": 68,
+      "premium_createur": 138,
+      "luxe_contemporain": 220,
+      "luxe_etabli": 685,
+      "luxe_iconique": 1375,
+      "ultra_luxe": null
+    },
+    "Bagages, Sacs de voyage, Mallettes, Cartables": {
+      "fast_fashion": 28,
+      "standard": 95,
+      "premium_accessible": 235,
+      "premium_createur": 475,
+      "luxe_contemporain": 760,
+      "luxe_etabli": 2350,
+      "luxe_iconique": 4750,
+      "ultra_luxe": null
+    },
+    "Porte-monnaie & Petite maroquinerie": {
+      "fast_fashion": 6,
+      "standard": 24,
+      "premium_accessible": 58,
+      "premium_createur": 118,
+      "luxe_contemporain": 188,
+      "luxe_etabli": 585,
+      "luxe_iconique": 1175,
+      "ultra_luxe": null
+    },
+    "Ceintures, Gants, Écharpes, Mouchoirs, Bretelles": {
+      "fast_fashion": 8,
+      "standard": 28,
+      "premium_accessible": 68,
+      "premium_createur": 138,
+      "luxe_contemporain": 220,
+      "luxe_etabli": 685,
+      "luxe_iconique": 1375,
+      "ultra_luxe": null
+    },
+    "Chapeaux, Casquettes, Bonnets, Cagoules": {
+      "fast_fashion": 6,
+      "standard": 21,
+      "premium_accessible": 52,
+      "premium_createur": 105,
+      "luxe_contemporain": 168,
+      "luxe_etabli": 525,
+      "luxe_iconique": 1050,
+      "ultra_luxe": null
+    },
+    "Lunettes de soleil": {
+      "fast_fashion": 10,
+      "standard": 35,
+      "premium_accessible": 88,
+      "premium_createur": 175,
+      "luxe_contemporain": 280,
+      "luxe_etabli": 875,
+      "luxe_iconique": 1750,
+      "ultra_luxe": null
+    },
+    "Bijoux (Bracelets, Colliers, Bagues, Boucles d'oreilles)": {
+      "fast_fashion": 8,
+      "standard": 28,
+      "premium_accessible": 75,
+      "premium_createur": 150,
+      "luxe_contemporain": 275,
+      "luxe_etabli": 600,
+      "luxe_iconique": 2050,
+      "ultra_luxe": 13750
+    },
+    "Montres analogiques & prestige": {
+      "fast_fashion": 16,
+      "standard": 65,
+      "premium_accessible": 235,
+      "premium_createur": 450,
+      "luxe_contemporain": 750,
+      "luxe_etabli": 3100,
+      "luxe_iconique": 9250,
+      "ultra_luxe": 32500
+    },
+    "Parfums & Eaux de toilette": {
+      "fast_fashion": 15,
+      "standard": 50,
+      "premium_accessible": 125,
+      "premium_createur": 250,
+      "luxe_contemporain": 400,
+      "luxe_etabli": 1250,
+      "luxe_iconique": 2500,
+      "ultra_luxe": 425
+    },
+    "Maquillage & Cosmétiques (Visage, Yeux, Lèvres)": {
+      "fast_fashion": 6,
+      "standard": 24,
+      "premium_accessible": 58,
+      "premium_createur": 118,
+      "luxe_contemporain": 188,
+      "luxe_etabli": 585,
+      "luxe_iconique": 1175,
+      "ultra_luxe": null
+    },
+    "Soins du visage, du corps, des cheveux, mains & ongles": {
+      "fast_fashion": 8,
+      "standard": 28,
+      "premium_accessible": 68,
+      "premium_createur": 138,
+      "luxe_contemporain": 220,
+      "luxe_etabli": 685,
+      "luxe_iconique": 1375,
+      "ultra_luxe": null
+    },
+    "Jeux et jouets (Figurines, Poupées, Éducatifs, Peluches)": {
+      "fast_fashion": 6,
+      "standard": 24,
+      "premium_accessible": 58,
+      "premium_createur": 118,
+      "luxe_contemporain": 188,
+      "luxe_etabli": 585,
+      "luxe_iconique": 1175,
+      "ultra_luxe": null
+    },
+    "Poussettes, landaus, porte-bébé & sièges auto": {
+      "fast_fashion": 36,
+      "standard": 120,
+      "premium_accessible": 300,
+      "premium_createur": 600,
+      "luxe_contemporain": 960,
+      "luxe_etabli": 3000,
+      "luxe_iconique": 6000,
+      "ultra_luxe": null
+    },
+    "Petits appareils de cuisine (Bouilloires, Blenders, Grils)": {
+      "fast_fashion": 16,
+      "standard": 55,
+      "premium_accessible": 138,
+      "premium_createur": 275,
+      "luxe_contemporain": 440,
+      "luxe_etabli": 1375,
+      "luxe_iconique": 2750,
+      "ultra_luxe": null
+    },
+    "Cuisson (Casseroles, Poêles, Plats four, Moules)": {
+      "fast_fashion": 10,
+      "standard": 35,
+      "premium_accessible": 88,
+      "premium_createur": 175,
+      "luxe_contemporain": 280,
+      "luxe_etabli": 875,
+      "luxe_iconique": 1750,
+      "ultra_luxe": null
+    },
+    "Outils de cuisine (Planches, Ustensiles, Stockage)": {
+      "fast_fashion": 6,
+      "standard": 20,
+      "premium_accessible": 50,
+      "premium_createur": 100,
+      "luxe_contemporain": 160,
+      "luxe_etabli": 500,
+      "luxe_iconique": 1000,
+      "ultra_luxe": null
+    },
+    "Arts de la table (Couverts, Vaisselle, Verres)": {
+      "fast_fashion": 12,
+      "standard": 40,
+      "premium_accessible": 100,
+      "premium_createur": 200,
+      "luxe_contemporain": 320,
+      "luxe_etabli": 1000,
+      "luxe_iconique": 2000,
+      "ultra_luxe": null
+    },
+    "Textiles Maison (Linge de lit, Couvertures, Rideaux, Tapis)": {
+      "fast_fashion": 14,
+      "standard": 48,
+      "premium_accessible": 118,
+      "premium_createur": 235,
+      "luxe_contemporain": 380,
+      "luxe_etabli": 1185,
+      "luxe_iconique": 2350,
+      "ultra_luxe": null
+    },
+    "Décoration (Bougies, Vases, Miroirs, Éclairage, Cadres)": {
+      "fast_fashion": 8,
+      "standard": 30,
+      "premium_accessible": 74,
+      "premium_createur": 150,
+      "luxe_contemporain": 240,
+      "luxe_etabli": 745,
+      "luxe_iconique": 1500,
+      "ultra_luxe": null
+    },
+    "Entretien de la maison (Aspirateurs, Fers, Chauffage élec)": {
+      "fast_fashion": 24,
+      "standard": 80,
+      "premium_accessible": 200,
+      "premium_createur": 400,
+      "luxe_contemporain": 640,
+      "luxe_etabli": 2000,
+      "luxe_iconique": 4000,
+      "ultra_luxe": null
+    },
+    "Fournitures de bureau & Éléments d'organisation": {
+      "fast_fashion": 4,
+      "standard": 16,
+      "premium_accessible": 41,
+      "premium_createur": 82,
+      "luxe_contemporain": 132,
+      "luxe_etabli": 410,
+      "luxe_iconique": 825,
+      "ultra_luxe": null
+    },
+    "Célébrations, fêtes, décorations de Noël/saisonnières": {
+      "fast_fashion": 4,
+      "standard": 12,
+      "premium_accessible": 31,
+      "premium_createur": 62,
+      "luxe_contemporain": 100,
+      "luxe_etabli": 310,
+      "luxe_iconique": 625,
+      "ultra_luxe": null
+    },
+    "Outils et bricolage (Outils à main, Électricité, Quincaillerie)": {
+      "fast_fashion": 10,
+      "standard": 32,
+      "premium_accessible": 81,
+      "premium_createur": 162,
+      "luxe_contemporain": 260,
+      "luxe_etabli": 810,
+      "luxe_iconique": 1625,
+      "ultra_luxe": null
+    },
+    "Extérieur et jardin (Outils, Pots, Cuisine extérieure, Arrosage)": {
+      "fast_fashion": 8,
+      "standard": 28,
+      "premium_accessible": 71,
+      "premium_createur": 142,
+      "luxe_contemporain": 228,
+      "luxe_etabli": 710,
+      "luxe_iconique": 1425,
+      "ultra_luxe": null
+    },
+    "Articles pour animaux (Chiens, Chats, Oiseaux, Poissons)": {
+      "fast_fashion": 6,
+      "standard": 22,
+      "premium_accessible": 56,
+      "premium_createur": 112,
+      "luxe_contemporain": 180,
+      "luxe_etabli": 560,
+      "luxe_iconique": 1125,
+      "ultra_luxe": null
+    },
+    "Jeux vidéo, Consoles, Manettes & Casques VR": {
+      "fast_fashion": 28,
+      "standard": 95,
+      "premium_accessible": 235,
+      "premium_createur": 475,
+      "luxe_contemporain": 760,
+      "luxe_etabli": 2350,
+      "luxe_iconique": 4750,
+      "ultra_luxe": null
+    },
+    "Ordinateurs, Accessoires info, Moniteurs, Souris": {
+      "fast_fashion": 38,
+      "standard": 125,
+      "premium_accessible": 310,
+      "premium_createur": 625,
+      "luxe_contemporain": 1000,
+      "luxe_etabli": 3100,
+      "luxe_iconique": 6250,
+      "ultra_luxe": null
+    },
+    "Téléphones portables, Équipement & Fixes": {
+      "fast_fashion": 57,
+      "standard": 190,
+      "premium_accessible": 475,
+      "premium_createur": 950,
+      "luxe_contemporain": 1520,
+      "luxe_etabli": 4750,
+      "luxe_iconique": 9500,
+      "ultra_luxe": null
+    },
+    "Audio casques, Écouteurs, Enceintes connectées / Hi-Fi": {
+      "fast_fashion": 20,
+      "standard": 65,
+      "premium_accessible": 162,
+      "premium_createur": 325,
+      "luxe_contemporain": 520,
+      "luxe_etabli": 800,
+      "luxe_iconique": 1950,
+      "ultra_luxe": null
+    },
+    "Appareils photo, Objectifs, Drones & Studio": {
+      "fast_fashion": 75,
+      "standard": 250,
+      "premium_accessible": 625,
+      "premium_createur": 1250,
+      "luxe_contemporain": 2000,
+      "luxe_etabli": 6250,
+      "luxe_iconique": 12500,
+      "ultra_luxe": null
+    },
+    "Objets connectés (Montres connectées, Bracelets, Bagues)": {
+      "fast_fashion": 24,
+      "standard": 80,
+      "premium_accessible": 200,
+      "premium_createur": 400,
+      "luxe_contemporain": 640,
+      "luxe_etabli": 850,
+      "luxe_iconique": 1700,
+      "ultra_luxe": null
+    },
+    "TV, Projecteurs & Home Cinéma": {
+      "fast_fashion": 98,
+      "standard": 325,
+      "premium_accessible": 810,
+      "premium_createur": 1625,
+      "luxe_contemporain": 2600,
+      "luxe_etabli": 8100,
+      "luxe_iconique": 16250,
+      "ultra_luxe": null
+    },
+    "Appareils beauté / Soin électrique (Coiffure, Rasage)": {
+      "fast_fashion": 14,
+      "standard": 48,
+      "premium_accessible": 118,
+      "premium_createur": 235,
+      "luxe_contemporain": 380,
+      "luxe_etabli": 1185,
+      "luxe_iconique": 2350,
+      "ultra_luxe": null
+    },
+    "Câbles, Connectique, Chargeurs, Batteries externes": {
+      "fast_fashion": 6,
+      "standard": 20,
+      "premium_accessible": 50,
+      "premium_createur": 100,
+      "luxe_contemporain": 160,
+      "luxe_etabli": 250,
+      "luxe_iconique": 425,
+      "ultra_luxe": null
+    },
+    "Livres (Fiction, Beaux-livres, BD, Manuels)": {
+      "fast_fashion": 6,
+      "standard": 20,
+      "premium_accessible": 50,
+      "premium_createur": 100,
+      "luxe_contemporain": 160,
+      "luxe_etabli": 165,
+      "luxe_iconique": 525,
+      "ultra_luxe": null
+    },
+    "Musique & Vidéo (CD, Vinyles collector, DVD, Blu-ray)": {
+      "fast_fashion": 6,
+      "standard": 24,
+      "premium_accessible": 58,
+      "premium_createur": 118,
+      "luxe_contemporain": 188,
+      "luxe_etabli": 585,
+      "luxe_iconique": 1175,
+      "ultra_luxe": null
+    },
+    "Instruments de musique & Équipement studio/DJ": {
+      "fast_fashion": 50,
+      "standard": 165,
+      "premium_accessible": 410,
+      "premium_createur": 825,
+      "luxe_contemporain": 1320,
+      "luxe_etabli": 4100,
+      "luxe_iconique": 5000,
+      "ultra_luxe": null
+    },
+    "Loisirs créatifs, Couture, Peinture, Fabrication bijoux": {
+      "fast_fashion": 4,
+      "standard": 16,
+      "premium_accessible": 41,
+      "premium_createur": 82,
+      "luxe_contemporain": 132,
+      "luxe_etabli": 410,
+      "luxe_iconique": 825,
+      "ultra_luxe": null
+    },
+    "Cartes à collectionner & Souvenirs de sport / cinéma": {
+      "fast_fashion": 4,
+      "standard": 15,
+      "premium_accessible": 37,
+      "premium_createur": 75,
+      "luxe_contemporain": 120,
+      "luxe_etabli": 370,
+      "luxe_iconique": 750,
+      "ultra_luxe": null
+    },
+    "Pièces, Billets, Timbres de collection": {
+      "fast_fashion": 10,
+      "standard": 32,
+      "premium_accessible": 81,
+      "premium_createur": 162,
+      "luxe_contemporain": 260,
+      "luxe_etabli": 810,
+      "luxe_iconique": 1625,
+      "ultra_luxe": null
+    },
+    "Cyclisme (Vélos, Casques, Pièces détachées)": {
+      "fast_fashion": 39,
+      "standard": 130,
+      "premium_accessible": 325,
+      "premium_createur": 650,
+      "luxe_contemporain": 1040,
+      "luxe_etabli": 3250,
+      "luxe_iconique": 9500,
+      "ultra_luxe": null
+    },
+    "Fitness, Course à pied & Yoga (Musculation, Tapis)": {
+      "fast_fashion": 10,
+      "standard": 32,
+      "premium_accessible": 81,
+      "premium_createur": 162,
+      "luxe_contemporain": 260,
+      "luxe_etabli": 810,
+      "luxe_iconique": 1625,
+      "ultra_luxe": null
+    },
+    "Golf (Clubs, Sacs, Balles, Chariots)": {
+      "fast_fashion": 26,
+      "standard": 85,
+      "premium_accessible": 210,
+      "premium_createur": 425,
+      "luxe_contemporain": 680,
+      "luxe_etabli": 2100,
+      "luxe_iconique": 4500,
+      "ultra_luxe": null
+    },
+    "Équitation (Protections, Selles, Harnachement)": {
+      "fast_fashion": 20,
+      "standard": 68,
+      "premium_accessible": 168,
+      "premium_createur": 335,
+      "luxe_contemporain": 540,
+      "luxe_etabli": 1685,
+      "luxe_iconique": 6000,
+      "ultra_luxe": null
+    },
+    "Skateboards, trottinettes & protections": {
+      "fast_fashion": 14,
+      "standard": 48,
+      "premium_accessible": 118,
+      "premium_createur": 235,
+      "luxe_contemporain": 380,
+      "luxe_etabli": 1185,
+      "luxe_iconique": 2350,
+      "ultra_luxe": null
+    },
+    "Boxe et arts martiaux (Gants, Sacs de frappe)": {
+      "fast_fashion": 12,
+      "standard": 42,
+      "premium_accessible": 106,
+      "premium_createur": 210,
+      "luxe_contemporain": 340,
+      "luxe_etabli": 1060,
+      "luxe_iconique": 2100,
+      "ultra_luxe": null
+    },
+    "Sacs à main, Tote bags, Sacs bandoulière": {
+      "fast_fashion": 25,
+      "standard": 75,
+      "premium_accessible": 190,
+      "premium_createur": 420,
+      "luxe_contemporain": 750,
+      "luxe_etabli": 1800,
+      "luxe_iconique": 4500,
+      "ultra_luxe": 12000
+    }
+  },
+  "multiplicateur_matiere": {
+    "Polyester": 1,
+    "Coton": 1.1,
+    "Lin": 1.2,
+    "Laine": 1.35,
+    "Soie": 1.5,
+    "Cachemire": 2,
+    "Cuir": 2.5
+  },
+  "ponderation": {
+    "description": "Poids donné à la médiane Vinted vs au neuf-décoté, progressif selon le nb d'annonces. Réglage 'très collé marché' : le marché Vinted pilote, le neuf-décoté sert de garde-fou.",
+    "formule": "poids_vinted = min(0.97, 0.75 + (n-1)*0.04) ; 0 annonce => 0 (100% neuf-décoté)",
+    "points_cles": {
+      "0": 0.0,
+      "1": 0.75,
+      "2": 0.79,
+      "6": 0.95,
+      "10+": 0.97
+    }
+  },
+  "bornes_securite": {
+    "description": "Le prix final est borné pour éviter les valeurs aberrantes.",
+    "min": "max(0.40 * mediane_vinted, ...) si médiane dispo",
+    "max": "ne pas dépasser le neuf-décoté (prix_neuf_ref * decote * matiere)"
+  },
+  "notes": [
+    "État appliqué UNE SEULE FOIS, sur la branche neuf-décoté.",
+    "Médiane Vinted déjà filtrée par état comparable (ne PAS réappliquer l'état dessus).",
+    "Ancienneté retirée (info non fiable).",
+    "prixAchatNeuf saisi par le user remplace prix_neuf_ref (priorité absolue).",
+    "Segment via table de marques déterministe.",
+    "Décote vêtement par défaut ; décote accessoire douce seulement pour sacs iconiques/ultra-luxe.",
+    "Grille de décote validée par recherche web (rapport Vinted, RealReal, Vestiaire, Panaprium)."
+  ],
+  "decote_etat_vetement": {
+    "fast_fashion": {
+      "Neuf avec étiquette": 0.55,
+      "Neuf sans étiquette": 0.45,
+      "Excellent état": 0.4,
+      "Très bon état": 0.35,
+      "Bon état": 0.28,
+      "État correct": 0.18,
+      "État usé": 0.1
+    },
+    "standard": {
+      "Neuf avec étiquette": 0.55,
+      "Neuf sans étiquette": 0.45,
+      "Excellent état": 0.4,
+      "Très bon état": 0.35,
+      "Bon état": 0.28,
+      "État correct": 0.18,
+      "État usé": 0.1
+    },
+    "premium_accessible": {
+      "Neuf avec étiquette": 0.5,
+      "Neuf sans étiquette": 0.42,
+      "Excellent état": 0.37,
+      "Très bon état": 0.32,
+      "Bon état": 0.25,
+      "État correct": 0.16,
+      "État usé": 0.09
+    },
+    "premium_createur": {
+      "Neuf avec étiquette": 0.48,
+      "Neuf sans étiquette": 0.4,
+      "Excellent état": 0.35,
+      "Très bon état": 0.3,
+      "Bon état": 0.23,
+      "État correct": 0.15,
+      "État usé": 0.08
+    },
+    "luxe_contemporain": {
+      "Neuf avec étiquette": 0.45,
+      "Neuf sans étiquette": 0.38,
+      "Excellent état": 0.33,
+      "Très bon état": 0.28,
+      "Bon état": 0.21,
+      "État correct": 0.14,
+      "État usé": 0.08
+    },
+    "luxe_etabli": {
+      "Neuf avec étiquette": 0.42,
+      "Neuf sans étiquette": 0.35,
+      "Excellent état": 0.3,
+      "Très bon état": 0.25,
+      "Bon état": 0.19,
+      "État correct": 0.12,
+      "État usé": 0.07
+    },
+    "luxe_iconique": {
+      "Neuf avec étiquette": 0.45,
+      "Neuf sans étiquette": 0.38,
+      "Excellent état": 0.33,
+      "Très bon état": 0.28,
+      "Bon état": 0.22,
+      "État correct": 0.14,
+      "État usé": 0.08
+    },
+    "ultra_luxe": {
+      "Neuf avec étiquette": 0.48,
+      "Neuf sans étiquette": 0.42,
+      "Excellent état": 0.36,
+      "Très bon état": 0.31,
+      "Bon état": 0.24,
+      "État correct": 0.16,
+      "État usé": 0.09
+    }
+  },
+  "decote_etat_accessoire": {
+    "fast_fashion": {
+      "Neuf avec étiquette": 0.55,
+      "Neuf sans étiquette": 0.45,
+      "Excellent état": 0.4,
+      "Très bon état": 0.35,
+      "Bon état": 0.28,
+      "État correct": 0.18,
+      "État usé": 0.1
+    },
+    "standard": {
+      "Neuf avec étiquette": 0.55,
+      "Neuf sans étiquette": 0.45,
+      "Excellent état": 0.4,
+      "Très bon état": 0.35,
+      "Bon état": 0.28,
+      "État correct": 0.18,
+      "État usé": 0.1
+    },
+    "premium_accessible": {
+      "Neuf avec étiquette": 0.5,
+      "Neuf sans étiquette": 0.42,
+      "Excellent état": 0.37,
+      "Très bon état": 0.32,
+      "Bon état": 0.25,
+      "État correct": 0.16,
+      "État usé": 0.09
+    },
+    "premium_createur": {
+      "Neuf avec étiquette": 0.48,
+      "Neuf sans étiquette": 0.4,
+      "Excellent état": 0.35,
+      "Très bon état": 0.3,
+      "Bon état": 0.23,
+      "État correct": 0.15,
+      "État usé": 0.08
+    },
+    "luxe_contemporain": {
+      "Neuf avec étiquette": 0.45,
+      "Neuf sans étiquette": 0.38,
+      "Excellent état": 0.33,
+      "Très bon état": 0.28,
+      "Bon état": 0.21,
+      "État correct": 0.14,
+      "État usé": 0.08
+    },
+    "luxe_etabli": {
+      "Neuf avec étiquette": 0.42,
+      "Neuf sans étiquette": 0.35,
+      "Excellent état": 0.3,
+      "Très bon état": 0.25,
+      "Bon état": 0.19,
+      "État correct": 0.12,
+      "État usé": 0.07
+    },
+    "luxe_iconique": {
+      "Neuf avec étiquette": 0.92,
+      "Neuf sans étiquette": 0.85,
+      "Excellent état": 0.78,
+      "Très bon état": 0.7,
+      "Bon état": 0.6,
+      "État correct": 0.45,
+      "État usé": 0.3
+    },
+    "ultra_luxe": {
+      "Neuf avec étiquette": 1.0,
+      "Neuf sans étiquette": 0.95,
+      "Excellent état": 0.88,
+      "Très bon état": 0.8,
+      "Bon état": 0.7,
+      "État correct": 0.55,
+      "État usé": 0.4
+    }
+  },
+  "regle_decote": "Par défaut, utiliser decote_etat_vetement (Vinted = surtout des vêtements). Utiliser decote_etat_accessoire UNIQUEMENT si la catégorie est un sac/accessoire ET segment luxe_iconique ou ultra_luxe (ex. sac Chanel/Hermès garde sa valeur). Validé par données réelles : rapport Vinted 2025 (-72% vs neuf en moyenne), vêtements luxe décotent fort, seuls les sacs iconiques gardent leur valeur."
+}
