@@ -733,7 +733,7 @@ async function cleanCutout(blob: Blob): Promise<Blob> {
   for (let p = 0; p < W * H; p++) { if (!keep[p]) data[p * 4 + 3] = 0 }
 
   // Érodage — rogner 2px sur le contour pour supprimer le liseré de l'ancien fond
-  const erodePixels = 2
+  const erodePixels = 1
   const alphaCopy = new Uint8ClampedArray(W * H)
   for (let p = 0; p < W * H; p++) alphaCopy[p] = data[p * 4 + 3]
   for (let y = 0; y < H; y++) {
@@ -749,6 +749,25 @@ async function cleanCutout(blob: Blob): Promise<Blob> {
         }
       }
       if (nearEdge) data[p * 4 + 3] = 0
+    }
+  }
+
+  // Lissage du canal alpha — adoucir les bords en escalier (anti-aliasing)
+  const alphaSrc = new Uint8ClampedArray(W * H)
+  for (let p = 0; p < W * H; p++) alphaSrc[p] = data[p * 4 + 3]
+
+  for (let y = 0; y < H; y++) {
+    for (let x = 0; x < W; x++) {
+      let sum = 0, count = 0
+      for (let dy = -1; dy <= 1; dy++) {
+        for (let dx = -1; dx <= 1; dx++) {
+          const nx = x + dx, ny = y + dy
+          if (nx < 0 || nx >= W || ny < 0 || ny >= H) continue
+          sum += alphaSrc[ny * W + nx]
+          count++
+        }
+      }
+      data[(y * W + x) * 4 + 3] = Math.round(sum / count)
     }
   }
 
@@ -791,19 +810,138 @@ async function compositeWithBackground(cutoutUrl: string, bg: BgDef, isWorn = fa
         const warmth = (bgR - bgB) / 255
         const brightnessVal = 1 + (-warmth * 0.08)
 
-        /* ── 2. Ombre portée douce + adoucissement bord + brightness ── */
-        ctx.save()
-        ctx.filter        = `blur(0.5px) brightness(${brightnessVal.toFixed(3)})`
-        ctx.shadowColor   = 'rgba(20, 20, 35, 0.12)'
-        ctx.shadowOffsetX = 4
-        ctx.shadowOffsetY = 8
-        ctx.shadowBlur    = 30
+        /* ── 1b. Balance des blancs douce sur le sujet (neutralise dominante d'éclairage) ── */
+        const wbCanvas = document.createElement('canvas')
+        wbCanvas.width  = W
+        wbCanvas.height = H
+        const wbCtx = wbCanvas.getContext('2d')!
         if (isWorn && bounds) {
-          ctx.drawImage(cutout, bounds.left, bounds.top, bounds.right - bounds.left, bounds.bottom - bounds.top, cx, cy, cw, ch)
+          wbCtx.drawImage(cutout,
+            bounds.left, bounds.top, bounds.right - bounds.left, bounds.bottom - bounds.top,
+            cx, cy, cw, ch)
         } else {
-          ctx.drawImage(cutout, cx, cy, cw, ch)
+          wbCtx.drawImage(cutout, cx, cy, cw, ch)
         }
+
+        const wbData = wbCtx.getImageData(0, 0, W, H)
+        const wd = wbData.data
+        let sR = 0, sG = 0, sB = 0, sCount = 0
+        for (let i = 0; i < wd.length; i += 4) {
+          if (wd[i + 3] > 200) {
+            sR += wd[i]; sG += wd[i + 1]; sB += wd[i + 2]; sCount++
+          }
+        }
+
+        if (sCount > 0) {
+          const avgR = sR / sCount, avgG = sG / sCount, avgB = sB / sCount
+          const avgGray = (avgR + avgG + avgB) / 3
+          const strength = 0.6
+          const fR = 1 + ((avgGray / avgR) - 1) * strength
+          const fG = 1 + ((avgGray / avgG) - 1) * strength
+          const fB = 1 + ((avgGray / avgB) - 1) * strength
+          for (let i = 0; i < wd.length; i += 4) {
+            if (wd[i + 3] > 0) {
+              wd[i]     = Math.max(0, Math.min(255, wd[i]     * fR))
+              wd[i + 1] = Math.max(0, Math.min(255, wd[i + 1] * fG))
+              wd[i + 2] = Math.max(0, Math.min(255, wd[i + 2] * fB))
+            }
+          }
+          wbCtx.putImageData(wbData, 0, 0)
+        }
+
+        /* ── 1c. Sharpening subtil du sujet (convolution 3x3, préserve l'alpha) ── */
+        const sharpSrc = wbCtx.getImageData(0, 0, W, H)
+        const sp = sharpSrc.data
+        const sharpOut = wbCtx.createImageData(W, H)
+        const op = sharpOut.data
+        const amount = 0.35
+        const center = 1 + 4 * amount
+        const side = -amount
+        for (let y = 0; y < H; y++) {
+          for (let x = 0; x < W; x++) {
+            const idx = (y * W + x) * 4
+            const alpha = sp[idx + 3]
+            if (alpha < 250) {
+              op[idx] = sp[idx]; op[idx + 1] = sp[idx + 1]; op[idx + 2] = sp[idx + 2]; op[idx + 3] = alpha
+              continue
+            }
+            for (let c = 0; c < 3; c++) {
+              const cur   = sp[idx + c]
+              const up    = y > 0     ? sp[idx - W * 4 + c] : cur
+              const down  = y < H - 1 ? sp[idx + W * 4 + c] : cur
+              const left  = x > 0     ? sp[idx - 4 + c]     : cur
+              const right = x < W - 1 ? sp[idx + 4 + c]     : cur
+              const val = center * cur + side * (up + down + left + right)
+              op[idx + c] = Math.max(0, Math.min(255, val))
+            }
+            op[idx + 3] = alpha
+          }
+        }
+        wbCtx.putImageData(sharpOut, 0, 0)
+
+        /* ── 2. Ombre portée via canvas temporaire (suit la forme réelle du sujet) ── */
+        const shadowCanvas = document.createElement('canvas')
+        shadowCanvas.width  = W
+        shadowCanvas.height = H
+        const shadowCtx = shadowCanvas.getContext('2d')!
+
+        // a. Dessiner le cutout dans le canvas d'ombre (à la bonne position/taille)
+        if (isWorn && bounds) {
+          shadowCtx.drawImage(cutout,
+            bounds.left, bounds.top, bounds.right - bounds.left, bounds.bottom - bounds.top,
+            cx, cy, cw, ch)
+        } else {
+          shadowCtx.drawImage(cutout, cx, cy, cw, ch)
+        }
+
+        // b. Repeindre en noir en préservant l'alpha (source-in garde la forme exacte)
+        shadowCtx.globalCompositeOperation = 'source-in'
+        shadowCtx.fillStyle = 'rgba(10, 10, 20, 1)'
+        shadowCtx.fillRect(0, 0, W, H)
+
+        // c. Composer l'ombre sur le canvas principal : décalée, floutée, semi-transparente
+        ctx.save()
+        ctx.globalAlpha = 0.38
+        ctx.filter = 'blur(14px)'
+        ctx.drawImage(shadowCanvas, 12, 22)
         ctx.restore()
+
+        /* ── 3. Sujet net par-dessus (balance des blancs appliquée, filter brightness) ── */
+        ctx.save()
+        ctx.filter = `blur(0.5px) brightness(${brightnessVal.toFixed(3)}) contrast(1.06)`
+        ctx.drawImage(wbCanvas, 0, 0)
+        ctx.restore()
+
+        /* ── 4. Color bleed — déposer la teinte du fond sur la zone du sujet ── */
+        const bleedCanvas = document.createElement('canvas')
+        bleedCanvas.width  = W
+        bleedCanvas.height = H
+        const bleedCtx = bleedCanvas.getContext('2d')!
+
+        bleedCtx.drawImage(shadowCanvas, 0, 0)
+
+        bleedCtx.globalCompositeOperation = 'source-in'
+        bleedCtx.fillStyle = `rgb(${Math.round(bgR)}, ${Math.round(bgG)}, ${Math.round(bgB)})`
+        bleedCtx.fillRect(0, 0, W, H)
+
+        ctx.save()
+        ctx.globalAlpha = 0.20
+        ctx.globalCompositeOperation = 'soft-light'
+        ctx.filter = 'blur(2px)'
+        ctx.drawImage(bleedCanvas, 0, 0)
+        ctx.restore()
+
+        /* ── 6. Grain uniforme — harmonise le sujet net avec le bruit du fond ── */
+        const grainData = ctx.getImageData(0, 0, W, H)
+        const gd = grainData.data
+        const grainStrength = 5
+        for (let i = 0; i < gd.length; i += 4) {
+          const noise = (Math.random() - 0.5) * 2 * grainStrength
+          gd[i]     = Math.max(0, Math.min(255, gd[i]     + noise))
+          gd[i + 1] = Math.max(0, Math.min(255, gd[i + 1] + noise))
+          gd[i + 2] = Math.max(0, Math.min(255, gd[i + 2] + noise))
+        }
+        ctx.putImageData(grainData, 0, 0)
 
         canvas.toBlob(
           (blob) => blob ? resolve(URL.createObjectURL(blob)) : reject(new Error('toBlob failed')),
