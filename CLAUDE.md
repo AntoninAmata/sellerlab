@@ -72,7 +72,7 @@ SaaS pour vendeurs Vinted (et autres plateformes à terme).
 - Paiements : Stripe
 - Emails : Resend + react-email
 - IA : Claude API — claude-sonnet-4-6 pour vision et génération, claude-haiku-4-5 pour classification photos et traduction de prompts
-- Suppression fond : @imgly/background-removal (WebAssembly côté client, gratuit, privé)
+- Suppression fond : isnet-general-use via @bunnio/rembg-web (ONNX/WASM côté client, licence Apache 2.0, gratuit, privé, usage commercial OK)
 - Mannequin IA : FASHN.ai — tryon-max pour photos portées, product-to-model pour photos produit
 - Analytics : Umami (RGPD, gratuit)
 - Hébergement : Vercel
@@ -189,7 +189,11 @@ Deux blocs distincts :
 Les deux fonds sont mémorisés séparément via `lib/user-prefs.ts` (localStorage aujourd'hui, Supabase plus tard). Si le fond IA n'a pas été personnalisé, il hérite du fond personnel. Changement de fond = recomposition gratuite côté client à tout moment.
 
 #### Suppression de fond
-- @imgly/background-removal (WebAssembly côté client) — GRATUIT, privé
+- isnet-general-use via @bunnio/rembg-web (ONNX Runtime/WASM côté client) — GRATUIT, privé, Apache 2.0
+- Wrapper : lib/background-removal.ts — charge les bundles UMD au runtime via <script> tags (invisible pour Turbopack, évite le hang de compilation)
+- Modèle servi depuis /public/models/ (~170 Mo, mis en cache IndexedDB au premier chargement)
+- Bannière "Préparation du détourage…" au premier load (7 langues)
+- Post-traitement cleanCutout : seuillage alpha + plus grande zone connexe + érodage 2px (anti-liseré)
 - Safari : message orange d'avertissement — NE PAS bloquer le flux
 - Résultat : détourage PNG → composition sur fond choisi → JPEG 3:4 1080×1440
 
@@ -242,7 +246,7 @@ Ordre strict dans le panneau :
 - Descriptions : `lib/mannequin-descriptions.ts`
 - Bouton sélection : "Choisir ce mannequin" (confirmation avant génération)
 - Paramètres FASHN : `model_image` (base64 PNG pose choisie), `garment_image` (slot 0 base64), `outfit_prompt` (tenue traduite EN), `resolution: "1k"`, NO background_reference
-- Résultat : URL FASHN → removeBackground (@imgly) → composition sur fond choisi
+- Résultat : URL FASHN → removeBackground (isnet via @bunnio/rembg-web) → cleanCutout → composition sur fond choisi
 
 #### Style auto-adapté — generateOutfitPrompt
 - Fichier : `RecognitionStep.tsx` (fonction pure avant le composant)
@@ -523,7 +527,7 @@ Chemins exacts de l'interface Vinted FR, format `"N1 > N2 > N3 [> N4 [> N5]]"`.
 
 ## V2
 - Mode retouche background removal (outil pinceau/gomme)
-- Amélioration suppression de fond (rembg MIT)
+- Amélioration suppression de fond : tester érodage variable, anti-aliasing du bord alpha, WebGPU (Chrome) pour réduire le temps de traitement
 - Graphique probabilité vente / prix / temps
 
 ---
@@ -534,7 +538,7 @@ Chemins exacts de l'interface Vinted FR, format `"N1 > N2 > N3 [> N4 [> N5]]"`.
 - RGPD : autorité compétente AEPD (Espagne)
 - CGU à harmoniser avec droit espagnol
 - Vinted CGU : scraping/automation en zone grise → mentionner dans CGU
-- @imgly/background-removal : licence AGPL → contacter IMG.LY avant commercialisation
+- Suppression de fond : isnet-general-use via @bunnio/rembg-web, licence Apache 2.0 — usage commercial libre, aucune action légale requise ✅ (migration @imgly AGPL effectuée)
 
 ---
 

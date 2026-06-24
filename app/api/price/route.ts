@@ -44,7 +44,6 @@ export interface PriceRequest {
   matieres: string[]
   style: string
   prixAchatNeuf?: number
-  plateforme?: string
   rarete?: string
   brand_segment?: BrandSegment
   skipWebSearch?: boolean
@@ -91,8 +90,10 @@ async function extractMarketData(body: PriceRequest): Promise<PriceResult['march
   const {
     marque, genre, vintedPath, taille, etat,
     couleurs, matieres, style,
-    prixAchatNeuf,
+    prixAchatNeuf, rarete,
   } = body
+
+  const rareteActive = rarete && rarete !== 'Non'
 
   const prompt = `Tu es un expert en pricing sur le marché de la mode de seconde main. Pour l'article décrit, collecte les annonces comparables et renvoie les prix retenus.
 
@@ -106,15 +107,18 @@ Article :
 - Matières : ${matieres.join(', ') || 'Non précisées'}
 - Style : ${style || 'Non précisé'}
 ${prixAchatNeuf ? `- Prix d'achat neuf déclaré : ${prixAchatNeuf}€` : ''}
+${rareteActive ? `- Particularité : ${rarete}` : ''}
 
 ━━━ COLLECTE DES ANNONCES ━━━
 Cherche des annonces d'articles comparables sur Vinted, Vestiaire Collective et Leboncoin.
+${rareteActive ? `Cet article est de type « ${rarete} » — oriente ta recherche vers des annonces de même nature (ex: « ${marque} ${rarete!.toLowerCase()} »), pas des articles standards.` : ''}
 
 CRITÈRES DE COMPARABILITÉ (toutes ces conditions) :
 ✓ Même marque exacte
 ✓ Même type d'article (même catégorie)
 ✓ État identique OU à ±1 cran (ex: pour "Bon état", accepter aussi "Très bon état" et "Satisfaisant")
 ✓ Taille identique OU ±1 taille
+${rareteActive ? `✓ Même particularité (${rarete})` : ''}
 
 ANNONCES À EXCLURE IMPÉRATIVEMENT :
 ✗ Lots ou packs multi-articles

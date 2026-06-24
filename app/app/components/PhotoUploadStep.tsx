@@ -1383,7 +1383,7 @@ export default function PhotoUploadStep({ slots, setSlots, result, setResult, pl
       if (shouldAutoRemove) {
         updateSlot(slotId, { status: 'processing-bg' })
         try {
-          const { removeBackground } = await import('@imgly/background-removal')
+          const { removeBackground } = await import('@/lib/background-removal')
           const blob = new Blob([await file.arrayBuffer()], { type: file.type || 'image/jpeg' })
           const resultBlob = await removeBackground(blob)
           updateSlot(slotId, { status: 'done', processedUrl: URL.createObjectURL(resultBlob), ...(contentType ? { contentType } : {}) })

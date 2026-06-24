@@ -493,6 +493,7 @@ const BG_PANEL_I18N: Record<Lang, {
   selectPhotoHint: string
   processBtn: (n: number) => string
   processing: string
+  modelLoading: string
   rendTitle: string
   modalConfirmBg: string
   bannerTitle: string
@@ -508,6 +509,7 @@ const BG_PANEL_I18N: Record<Lang, {
     selectPhotoHint: 'Sélectionnez une photo, puis choisissez un fond ci-dessous',
     processBtn:      (n) => `Traiter ${n} photo${n > 1 ? 's' : ''} sélectionnée${n > 1 ? 's' : ''}`,
     processing:      'Traitement en cours…',
+    modelLoading:    'Préparation du détourage, veuillez patienter…',
     rendTitle:       '📸 RENDU — PHOTOS TRAITÉES',
     modalConfirmBg:  'Utiliser ce fond',
     bannerTitle:     'Supprimez le fond de votre photo',
@@ -523,6 +525,7 @@ const BG_PANEL_I18N: Record<Lang, {
     selectPhotoHint: 'Select a photo, then choose a background below',
     processBtn:      (n) => `Process ${n} selected photo${n > 1 ? 's' : ''}`,
     processing:      'Processing…',
+    modelLoading:    'Preparing background removal, please wait…',
     rendTitle:       '📸 RENDER — PROCESSED PHOTOS',
     modalConfirmBg:  'Use this background',
     bannerTitle:     'Remove your photo background',
@@ -538,6 +541,7 @@ const BG_PANEL_I18N: Record<Lang, {
     selectPhotoHint: 'Selecciona una foto y elige un fondo a continuación',
     processBtn:      (n) => `Procesar ${n} foto${n > 1 ? 's' : ''} seleccionada${n > 1 ? 's' : ''}`,
     processing:      'Procesando…',
+    modelLoading:    'Preparando la eliminación de fondo, por favor espere…',
     rendTitle:       '📸 RESULTADO — FOTOS PROCESADAS',
     modalConfirmBg:  'Usar este fondo',
     bannerTitle:     'Elimina el fondo de tu foto',
@@ -553,6 +557,7 @@ const BG_PANEL_I18N: Record<Lang, {
     selectPhotoHint: 'Foto auswählen, dann Hintergrund wählen',
     processBtn:      (n) => `${n} Foto${n > 1 ? 's' : ''} verarbeiten`,
     processing:      'Wird verarbeitet…',
+    modelLoading:    'Hintergrundentfernung wird vorbereitet, bitte warten…',
     rendTitle:       '📸 VORSCHAU — BEARBEITETE FOTOS',
     modalConfirmBg:  'Hintergrund verwenden',
     bannerTitle:     'Hintergrund entfernen',
@@ -568,6 +573,7 @@ const BG_PANEL_I18N: Record<Lang, {
     selectPhotoHint: 'Seleziona una foto, poi scegli uno sfondo',
     processBtn:      (n) => `Elabora ${n} foto selezionat${n > 1 ? 'e' : 'a'}`,
     processing:      'Elaborazione in corso…',
+    modelLoading:    'Preparazione della rimozione dello sfondo, attendere…',
     rendTitle:       '📸 RISULTATO — FOTO ELABORATE',
     modalConfirmBg:  'Usa questo sfondo',
     bannerTitle:     'Rimuovi lo sfondo della tua foto',
@@ -583,6 +589,7 @@ const BG_PANEL_I18N: Record<Lang, {
     selectPhotoHint: "Selecteer een foto en kies een achtergrond",
     processBtn:      (n) => `Verwerk ${n} geselecteerde foto${n > 1 ? "'s" : ''}`,
     processing:      'Bezig met verwerken…',
+    modelLoading:    'Achtergrondverwijdering voorbereiden, even geduld…',
     rendTitle:       "📸 WEERGAVE — BEWERKTE FOTO'S",
     modalConfirmBg:  'Gebruik achtergrond',
     bannerTitle:     'Verwijder de achtergrond van je foto',
@@ -598,6 +605,7 @@ const BG_PANEL_I18N: Record<Lang, {
     selectPhotoHint: 'Wybierz zdjęcie, a następnie wybierz tło poniżej',
     processBtn:      (n) => `Przetwórz ${n} wybrane zdjęci${n === 1 ? 'e' : 'a'}`,
     processing:      'Przetwarzanie…',
+    modelLoading:    'Przygotowywanie usuwania tła, proszę czekać…',
     rendTitle:       '📸 PODGLĄD — PRZETWORZONE ZDJĘCIA',
     modalConfirmBg:  'Użyj tego tła',
     bannerTitle:     'Usuń tło ze swojego zdjęcia',
@@ -652,7 +660,103 @@ function sampleAvgColor(ctx: CanvasRenderingContext2D, W: number, H: number): [n
   return [r / n, g / n, b / n]
 }
 
-async function compositeWithBackground(cutoutUrl: string, bg: BgDef): Promise<string> {
+function getContentBounds(img: HTMLImageElement): { top: number; bottom: number; left: number; right: number } | null {
+  const tmp = document.createElement('canvas')
+  tmp.width  = img.naturalWidth
+  tmp.height = img.naturalHeight
+  const tmpCtx = tmp.getContext('2d')
+  if (!tmpCtx) return null
+  tmpCtx.drawImage(img, 0, 0)
+  const { width, height } = tmp
+  const data = tmpCtx.getImageData(0, 0, width, height).data
+  let top = height, bottom = 0, left = width, right = 0
+  for (let y = 0; y < height; y++) {
+    for (let x = 0; x < width; x++) {
+      if (data[(y * width + x) * 4 + 3] > 10) {
+        if (y < top)    top    = y
+        if (y > bottom) bottom = y
+        if (x < left)   left   = x
+        if (x > right)  right  = x
+      }
+    }
+  }
+  if (top >= bottom || left >= right) return null
+  return { top, bottom, left, right }
+}
+
+async function cleanCutout(blob: Blob): Promise<Blob> {
+  const img = await createImageBitmap(blob)
+  const canvas = document.createElement('canvas')
+  canvas.width  = img.width
+  canvas.height = img.height
+  const ctx = canvas.getContext('2d')!
+  ctx.drawImage(img, 0, 0)
+  const imageData = ctx.getImageData(0, 0, canvas.width, canvas.height)
+  const data = imageData.data
+  const W = canvas.width, H = canvas.height
+
+  // Seuillage alpha — supprimer les pixels quasi-transparents
+  for (let i = 3; i < data.length; i += 4) {
+    if (data[i] < 40) data[i] = 0
+  }
+
+  // BFS — trouver la plus grande zone connexe d'opaques
+  const visited = new Uint8Array(W * H)
+  const isOpaque = (idx: number) => data[idx * 4 + 3] > 40
+  let bestRegion: number[] = []
+
+  for (let start = 0; start < W * H; start++) {
+    if (visited[start] || !isOpaque(start)) continue
+    const stack = [start]
+    const region: number[] = []
+    visited[start] = 1
+    while (stack.length) {
+      const p = stack.pop()!
+      region.push(p)
+      const x = p % W, y = Math.floor(p / W)
+      const neighbors = [
+        x > 0     ? p - 1 : -1,
+        x < W - 1 ? p + 1 : -1,
+        y > 0     ? p - W : -1,
+        y < H - 1 ? p + W : -1,
+      ]
+      for (const n of neighbors) {
+        if (n >= 0 && !visited[n] && isOpaque(n)) { visited[n] = 1; stack.push(n) }
+      }
+    }
+    if (region.length > bestRegion.length) bestRegion = region
+  }
+
+  // Effacer tout sauf la plus grande zone
+  const keep = new Uint8Array(W * H)
+  for (const p of bestRegion) keep[p] = 1
+  for (let p = 0; p < W * H; p++) { if (!keep[p]) data[p * 4 + 3] = 0 }
+
+  // Érodage — rogner 2px sur le contour pour supprimer le liseré de l'ancien fond
+  const erodePixels = 2
+  const alphaCopy = new Uint8ClampedArray(W * H)
+  for (let p = 0; p < W * H; p++) alphaCopy[p] = data[p * 4 + 3]
+  for (let y = 0; y < H; y++) {
+    for (let x = 0; x < W; x++) {
+      const p = y * W + x
+      if (alphaCopy[p] === 0) continue
+      let nearEdge = false
+      for (let dy = -erodePixels; dy <= erodePixels && !nearEdge; dy++) {
+        for (let dx = -erodePixels; dx <= erodePixels && !nearEdge; dx++) {
+          const nx = x + dx, ny = y + dy
+          if (nx < 0 || nx >= W || ny < 0 || ny >= H) { nearEdge = true; break }
+          if (alphaCopy[ny * W + nx] === 0) nearEdge = true
+        }
+      }
+      if (nearEdge) data[p * 4 + 3] = 0
+    }
+  }
+
+  ctx.putImageData(imageData, 0, 0)
+  return new Promise((resolve) => canvas.toBlob((b) => resolve(b!), 'image/png'))
+}
+
+async function compositeWithBackground(cutoutUrl: string, bg: BgDef, isWorn = false): Promise<string> {
   return new Promise((resolve, reject) => {
     const cutout = new Image()
     cutout.onload = () => {
@@ -663,72 +767,45 @@ async function compositeWithBackground(cutoutUrl: string, bg: BgDef): Promise<st
       const ctx = canvas.getContext('2d')!
 
       const draw = () => {
-        /* ── 1. Cutout : feather léger des bords alpha via shadow interne ── */
-        const scale = Math.min((W * 0.85) / cutout.naturalWidth, (H * 0.85) / cutout.naturalHeight)
-        const cw = cutout.naturalWidth  * scale
-        const ch = cutout.naturalHeight * scale
-        const cx = (W - cw) / 2
-        const cy = (H - ch) / 2
+        /* ── Dimensions cutout : recadrage intelligent selon type ── */
+        let cx: number, cy: number, cw: number, ch: number
+        const bounds = isWorn ? getContentBounds(cutout) : null
+        if (isWorn && bounds) {
+          const subjectH = bounds.bottom - bounds.top
+          const subjectW = bounds.right  - bounds.left
+          const scale    = Math.min((H * 0.98) / subjectH, (W * 0.95) / subjectW)
+          cw = subjectW * scale
+          ch = subjectH * scale
+          cx = (W - cw) / 2
+          cy = H * 0.01
+        } else {
+          const scale = Math.min((W * 0.85) / cutout.naturalWidth, (H * 0.85) / cutout.naturalHeight)
+          cw = cutout.naturalWidth  * scale
+          ch = cutout.naturalHeight * scale
+          cx = (W - cw) / 2
+          cy = (H - ch) / 2
+        }
 
-        /* Soft feather : dessiner le cutout avec un très léger shadow blanc superposé */
+        /* ── 1. Color matching : adapter la luminosité du cutout au fond ── */
+        const [bgR, bgG, bgB] = sampleAvgColor(ctx, W, H)
+        const warmth = (bgR - bgB) / 255
+        const brightnessVal = 1 + (-warmth * 0.08)
+
+        /* ── 2. Ombre portée douce + adoucissement bord + brightness ── */
         ctx.save()
-        ctx.shadowColor = 'rgba(255,255,255,0.0)'
-        ctx.shadowBlur  = 0
-        ctx.drawImage(cutout, cx, cy, cw, ch)
+        ctx.filter        = `blur(0.5px) brightness(${brightnessVal.toFixed(3)})`
+        ctx.shadowColor   = 'rgba(20, 20, 35, 0.12)'
+        ctx.shadowOffsetX = 4
+        ctx.shadowOffsetY = 8
+        ctx.shadowBlur    = 30
+        if (isWorn && bounds) {
+          ctx.drawImage(cutout, bounds.left, bounds.top, bounds.right - bounds.left, bounds.bottom - bounds.top, cx, cy, cw, ch)
+        } else {
+          ctx.drawImage(cutout, cx, cy, cw, ch)
+        }
         ctx.restore()
 
-        /* ── 2. Ombre de contact douce sous l'objet ── */
-        const shadowCanvas = document.createElement('canvas')
-        shadowCanvas.width  = W
-        shadowCanvas.height = H
-        const sCtx = shadowCanvas.getContext('2d')!
-        /* ellipse au "sol" de l'objet (bas du cutout) */
-        const ew = cw * 0.65
-        const eh = ew * 0.18
-        const ex = cx + cw / 2
-        const ey = cy + ch + eh * 0.3
-        const grad = sCtx.createRadialGradient(ex, ey, 0, ex, ey, ew / 2)
-        grad.addColorStop(0,   'rgba(0,0,0,0.28)')
-        grad.addColorStop(0.5, 'rgba(0,0,0,0.12)')
-        grad.addColorStop(1,   'rgba(0,0,0,0)')
-        sCtx.save()
-        sCtx.scale(1, eh / (ew / 2))
-        sCtx.fillStyle = grad
-        sCtx.beginPath()
-        sCtx.arc(ex, ey / (eh / (ew / 2)), ew / 2, 0, Math.PI * 2)
-        sCtx.fill()
-        sCtx.restore()
-
-        /* Flou de l'ombre */
-        const blurCanvas = document.createElement('canvas')
-        blurCanvas.width  = W
-        blurCanvas.height = H
-        const bCtx = blurCanvas.getContext('2d')!
-        bCtx.filter = 'blur(18px)'
-        bCtx.drawImage(shadowCanvas, 0, 0)
-
-        /* Insérer l'ombre SOUS le cutout : re-draw fond puis ombre puis cutout */
-        const composited = document.createElement('canvas')
-        composited.width  = W
-        composited.height = H
-        const cCtx = composited.getContext('2d')!
-        /* copie le fond du canvas courant */
-        cCtx.drawImage(canvas, 0, 0)
-        /* ombre floue */
-        cCtx.drawImage(blurCanvas, 0, 0)
-        /* cutout par-dessus */
-        cCtx.drawImage(cutout, cx, cy, cw, ch)
-
-        /* ── 3. Overlay teinte : accord lumière fond ── */
-        const [avgR, avgG, avgB] = sampleAvgColor(cCtx, W, H)
-        cCtx.save()
-        cCtx.globalCompositeOperation = 'overlay'
-        cCtx.globalAlpha = 0.10
-        cCtx.fillStyle = `rgb(${Math.round(avgR)},${Math.round(avgG)},${Math.round(avgB)})`
-        cCtx.fillRect(cx, cy, cw, ch)
-        cCtx.restore()
-
-        composited.toBlob(
+        canvas.toBlob(
           (blob) => blob ? resolve(URL.createObjectURL(blob)) : reject(new Error('toBlob failed')),
           'image/jpeg', 0.92,
         )
@@ -1543,6 +1620,7 @@ export default function RecognitionStep({ slots, setSlots, result, aiPhotos: _ai
   const bgI18n    = BG_PANEL_I18N[lang]   ?? BG_PANEL_I18N.fr
   /* Fonds séparés — user photos / AI photos */
   const [selectedBgUser, setSelectedBgUser] = useState(() => {
+    if (plan === 'freemium') return 0
     const p = readPrefs()
     return p.bgUser ?? 0
   })
@@ -1570,6 +1648,9 @@ export default function RecognitionStep({ slots, setSlots, result, aiPhotos: _ai
   const [productDisplayMode, setProductDisplayMode] = useState<'bust' | 'hanger' | 'flat'>('bust')
   const [isGeneratingProductPhoto, setIsGeneratingProductPhoto] = useState(false)
   const [productPhotos, setProductPhotos] = useState<string[]>([])
+
+  /* Fond — modèle first-load */
+  const [isModelLoading, setIsModelLoading] = useState(false)
 
   /* Fond — slots réels */
   const slotsRef = useRef<PhotoSlot[]>(slots)
@@ -1624,7 +1705,7 @@ export default function RecognitionStep({ slots, setSlots, result, aiPhotos: _ai
     setIsCompositing(true)
     Promise.all(
       processedSlots.map(slot =>
-        compositeWithBackground(slot.processedUrl!, BACKGROUNDS.find(b => b.id === selectedBgUser) ?? BACKGROUNDS[0])
+        compositeWithBackground(slot.processedUrl!, plan === 'freemium' ? BACKGROUNDS[0] : (BACKGROUNDS.find(b => b.id === selectedBgUser) ?? BACKGROUNDS[0]), slot.id >= 9)
           .then(url => ({ id: slot.id, url }))
           .catch(() => ({ id: slot.id, url: '' }))
       )
@@ -1650,7 +1731,7 @@ export default function RecognitionStep({ slots, setSlots, result, aiPhotos: _ai
     let cancelled = false
     Promise.all(
       aiCutoutEntries.map(({ cutout, original }) =>
-        compositeWithBackground(cutout ?? original, bg).catch(() => original)
+        compositeWithBackground(cutout ?? original, bg, true).catch(() => original)
       )
     ).then(results => { if (!cancelled) setAiCompositedPhotos(results) })
     return () => { cancelled = true }
@@ -1663,7 +1744,7 @@ export default function RecognitionStep({ slots, setSlots, result, aiPhotos: _ai
     let cancelled = false
     Promise.all(
       productCutoutEntries.map(({ cutout, original }) =>
-        compositeWithBackground(cutout ?? original, bg).catch(() => original)
+        compositeWithBackground(cutout ?? original, bg, false).catch(() => original)
       )
     ).then(results => { if (!cancelled) setProductPhotos(results) })
     return () => { cancelled = true }
@@ -1711,15 +1792,16 @@ export default function RecognitionStep({ slots, setSlots, result, aiPhotos: _ai
       if (!res.ok) throw new Error('Generation failed')
       const { urls } = await res.json() as { urls: string[] }
       setAiPhotos(urls)
-      const { removeBackground } = await import('@imgly/background-removal')
+      const { removeBackground } = await import('@/lib/background-removal')
       const entries: AiCutoutEntry[] = await Promise.all(
         urls.map(async (original): Promise<AiCutoutEntry> => {
           try {
             const fetchRes = await fetch(original)
             if (!fetchRes.ok) return { cutout: null, original }
-            const blob       = await fetchRes.blob()
-            const resultBlob = await removeBackground(blob)
-            return { cutout: URL.createObjectURL(resultBlob), original }
+            const blob        = await fetchRes.blob()
+            const resultBlob  = await removeBackground(blob)
+            const cleanedBlob = await cleanCutout(resultBlob)
+            return { cutout: URL.createObjectURL(cleanedBlob), original }
           } catch {
             return { cutout: null, original }
           }
@@ -1764,15 +1846,16 @@ export default function RecognitionStep({ slots, setSlots, result, aiPhotos: _ai
       })
       if (!res.ok) throw new Error('Generation failed')
       const { urls } = await res.json() as { urls: string[] }
-      const { removeBackground } = await import('@imgly/background-removal')
+      const { removeBackground } = await import('@/lib/background-removal')
       const entries: AiCutoutEntry[] = await Promise.all(
         urls.map(async (original): Promise<AiCutoutEntry> => {
           try {
             const fetchRes = await fetch(original)
             if (!fetchRes.ok) return { cutout: null, original }
-            const blob       = await fetchRes.blob()
-            const resultBlob = await removeBackground(blob)
-            return { cutout: URL.createObjectURL(resultBlob), original }
+            const blob        = await fetchRes.blob()
+            const resultBlob  = await removeBackground(blob)
+            const cleanedBlob = await cleanCutout(resultBlob)
+            return { cutout: URL.createObjectURL(cleanedBlob), original }
           } catch {
             return { cutout: null, original }
           }
@@ -1800,16 +1883,20 @@ export default function RecognitionStep({ slots, setSlots, result, aiPhotos: _ai
     setSlots(prev => prev.map(s =>
       toProcess.includes(s.id) && s.file ? { ...s, status: 'processing-bg' as const } : s
     ))
+    const { removeBackground, isModelReady } = await import('@/lib/background-removal')
+    if (!isModelReady()) setIsModelLoading(true)
     for (const slotId of toProcess) {
       const slot = slotsRef.current[slotId]
       if (!slot?.file) continue
       try {
-        const { removeBackground } = await import('@imgly/background-removal')
-        const blob = new Blob([await slot.file.arrayBuffer()], { type: slot.file.type || 'image/jpeg' })
-        const resultBlob = await removeBackground(blob)
-        updateSlot(slotId, { status: 'done', processedUrl: URL.createObjectURL(resultBlob) })
+        const blob        = new Blob([await slot.file.arrayBuffer()], { type: slot.file.type || 'image/jpeg' })
+        const resultBlob  = await removeBackground(blob)
+        const cleanedBlob = await cleanCutout(resultBlob)
+        setIsModelLoading(false)
+        updateSlot(slotId, { status: 'done', processedUrl: URL.createObjectURL(cleanedBlob) })
       } catch (err) {
         console.error(`Background removal failed (slot ${slotId}):`, err)
+        setIsModelLoading(false)
         updateSlot(slotId, { status: 'done', processedUrl: null, error: 'bg_failed' })
       }
     }
@@ -1822,11 +1909,15 @@ export default function RecognitionStep({ slots, setSlots, result, aiPhotos: _ai
     if (slot0?.file) {
       updateSlot(0, { status: 'processing-bg' })
       try {
-        const { removeBackground } = await import('@imgly/background-removal')
-        const blob = new Blob([await slot0.file.arrayBuffer()], { type: slot0.file.type || 'image/jpeg' })
-        const resultBlob = await removeBackground(blob)
-        updateSlot(0, { status: 'done', processedUrl: URL.createObjectURL(resultBlob) })
+        const { removeBackground, isModelReady } = await import('@/lib/background-removal')
+        if (!isModelReady()) setIsModelLoading(true)
+        const blob        = new Blob([await slot0.file.arrayBuffer()], { type: slot0.file.type || 'image/jpeg' })
+        const resultBlob  = await removeBackground(blob)
+        const cleanedBlob = await cleanCutout(resultBlob)
+        setIsModelLoading(false)
+        updateSlot(0, { status: 'done', processedUrl: URL.createObjectURL(cleanedBlob) })
       } catch {
+        setIsModelLoading(false)
         updateSlot(0, { status: 'done', processedUrl: null, error: 'bg_failed' })
       }
     }
@@ -1858,32 +1949,9 @@ export default function RecognitionStep({ slots, setSlots, result, aiPhotos: _ai
         bgCheckedSlots={bgCheckedSlots}
         onCheckToggle={toggleBgCheck}
         isProcessing={isProcessingBg}
+        isModelLoading={isModelLoading}
         onProcess={processCheckedSlots}
         onValidateFreemium={handleValidateAndProcess}
-        bgI18n={bgI18n}
-      />
-
-      {/* ── Bloc 2 — Mannequin IA (Pro) ── */}
-      <MannequinPanel
-        selectedMannequin={selectedMannequin}
-        onSelect={setSelectedMannequin}
-        onGenerate={handleGenerateMannequin}
-        isGenerating={isGeneratingMannequin}
-        hasSlot0Photo={!!slots[0]?.file}
-        mannI18n={mannI18n}
-        customPrompt={mannequinCustomPrompt}
-        onCustomPromptChange={handleCustomPromptChange}
-        wearingPrompt={mannequinWearingPrompt}
-        onWearingPromptChange={setMannequinWearingPrompt}
-        productDisplayMode={productDisplayMode}
-        onProductDisplayModeChange={setProductDisplayMode}
-        onGenerateProductPhoto={handleGenerateProductPhoto}
-        isGeneratingProductPhoto={isGeneratingProductPhoto}
-        initialGender={result.genre.value === 'homme' ? 'men' : result.genre.value === 'femme' ? 'women' : 'men'}
-        totalGeneratedPhotos={totalAiPhotos}
-        selectedBgAi={selectedBgAi}
-        onBgAiSelect={handleBgAiSelect}
-        plan={plan}
         bgI18n={bgI18n}
       />
 
@@ -1919,6 +1987,30 @@ export default function RecognitionStep({ slots, setSlots, result, aiPhotos: _ai
           </div>
         </div>
       )}
+
+      {/* ── Bloc 2 — Mannequin IA (Pro) ── */}
+      <MannequinPanel
+        selectedMannequin={selectedMannequin}
+        onSelect={setSelectedMannequin}
+        onGenerate={handleGenerateMannequin}
+        isGenerating={isGeneratingMannequin}
+        hasSlot0Photo={!!slots[0]?.file}
+        mannI18n={mannI18n}
+        customPrompt={mannequinCustomPrompt}
+        onCustomPromptChange={handleCustomPromptChange}
+        wearingPrompt={mannequinWearingPrompt}
+        onWearingPromptChange={setMannequinWearingPrompt}
+        productDisplayMode={productDisplayMode}
+        onProductDisplayModeChange={setProductDisplayMode}
+        onGenerateProductPhoto={handleGenerateProductPhoto}
+        isGeneratingProductPhoto={isGeneratingProductPhoto}
+        initialGender={result.genre.value === 'homme' ? 'men' : result.genre.value === 'femme' ? 'women' : 'men'}
+        totalGeneratedPhotos={totalAiPhotos}
+        selectedBgAi={selectedBgAi}
+        onBgAiSelect={handleBgAiSelect}
+        plan={plan}
+        bgI18n={bgI18n}
+      />
 
     </div>
   )
@@ -2184,6 +2276,21 @@ function MannequinPanel({
         )}
       </button>
 
+      {isGenerating && (
+        <div className="w-full rounded-lg bg-indigo-50 border border-indigo-200 p-3 my-2">
+          <div className="flex items-center gap-2 mb-2 text-sm text-indigo-700 font-medium">
+            <svg className="animate-spin h-4 w-4 text-indigo-500" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+              <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"/>
+              <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8v8z"/>
+            </svg>
+            <span>{mannI18n.mannequinGenerating}</span>
+          </div>
+          <div className="w-full bg-indigo-100 rounded-full h-1.5 overflow-hidden">
+            <div className="bg-indigo-500 h-1.5 rounded-full animate-pulse w-full" />
+          </div>
+        </div>
+      )}
+
       {!hasSlot0Photo && (
         <p className="text-xs text-purple-400 text-center">{mannI18n.noSlot0Msg}</p>
       )}
@@ -2249,6 +2356,7 @@ interface BgPanelProps {
   bgCheckedSlots: Set<number>
   onCheckToggle: (id: number) => void
   isProcessing: boolean
+  isModelLoading: boolean
   onProcess: () => void
   onValidateFreemium: () => void
   bgI18n: typeof BG_PANEL_I18N.fr
@@ -2256,7 +2364,7 @@ interface BgPanelProps {
 
 function BgPanel({
   plan, slots, selectedBg, onBgSelect,
-  bgCheckedSlots, onCheckToggle, isProcessing, onProcess,
+  bgCheckedSlots, onCheckToggle, isProcessing, isModelLoading, onProcess,
   onValidateFreemium, bgI18n,
 }: BgPanelProps) {
   const [showPreview, setShowPreview] = useState(false)
@@ -2348,7 +2456,7 @@ function BgPanel({
                 className="w-full flex items-center justify-center gap-2 bg-indigo-600 hover:bg-indigo-700 text-white font-semibold text-sm py-2.5 rounded-xl transition-all active:scale-[0.98] disabled:opacity-50"
               >
                 {slots[0]?.status === 'processing-bg' ? (
-                  <><div className="w-4 h-4 border-2 border-white/60 border-t-transparent rounded-full animate-spin" />{bgI18n.processing}</>
+                  <><div className="w-4 h-4 border-2 border-white/60 border-t-transparent rounded-full animate-spin" />{isModelLoading ? bgI18n.modelLoading : bgI18n.processing}</>
                 ) : (
                   <><Wand2 className="w-4 h-4" />{bgI18n.bannerBtn}</>
                 )}
@@ -2368,7 +2476,7 @@ function BgPanel({
                 : 'bg-indigo-100 text-indigo-400 cursor-wait'}`}
             >
               {isProcessing
-                ? <><div className="w-4 h-4 border-2 border-indigo-400 border-t-transparent rounded-full animate-spin" />{bgI18n.processing}</>
+                ? <><div className="w-4 h-4 border-2 border-indigo-400 border-t-transparent rounded-full animate-spin" />{isModelLoading ? bgI18n.modelLoading : bgI18n.processing}</>
                 : <><Wand2 className="w-4 h-4" />{bgI18n.processBtn(bgCheckedSlots.size)}</>}
             </button>
           )}

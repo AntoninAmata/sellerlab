@@ -1,0 +1,269 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Test rembg-web — 6 modèles</title>
+  <style>
+    * { box-sizing: border-box; }
+    body { font-family: monospace; padding: 24px; max-width: 1400px; margin: 0 auto; background: #f5f5f5; color: #111; }
+    h1 { font-size: 18px; margin: 0 0 4px; }
+    .sub { font-size: 12px; color: #666; margin: 0 0 16px; }
+
+    #controls { display: flex; gap: 12px; align-items: center; margin-bottom: 16px; flex-wrap: wrap; }
+    #run-all {
+      padding: 6px 16px; background: #6366f1; color: #fff;
+      border: none; border-radius: 6px; cursor: pointer;
+      font-weight: bold; font-family: monospace; font-size: 13px;
+    }
+    #run-all:disabled { background: #aaa; cursor: not-allowed; }
+
+    #original-zone { margin-bottom: 20px; display: none; }
+    #original-zone b { display: block; margin-bottom: 4px; }
+    #original-img { max-width: 260px; max-height: 300px; object-fit: contain; border: 1px solid #ccc; display: block; }
+    #dims { font-size: 12px; color: #555; margin-top: 4px; }
+
+    #grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(270px, 1fr));
+      gap: 16px;
+    }
+
+    .card { border: 1px solid #ddd; border-radius: 8px; padding: 12px; background: #fff; }
+    .card-label { font-weight: bold; font-size: 14px; margin-bottom: 2px; }
+    .card-meta  { font-size: 11px; color: #888; margin-bottom: 4px; }
+    .card-note  { font-size: 11px; color: #6366f1; margin-bottom: 6px; }
+
+    .btn-test {
+      padding: 4px 12px; background: #6366f1; color: #fff;
+      border: none; border-radius: 4px; cursor: pointer;
+      font-size: 12px; font-family: monospace; margin-bottom: 8px;
+    }
+    .btn-test:hover { background: #4f46e5; }
+
+    .progress-step { font-size: 11px; color: #555; margin-bottom: 4px; }
+    .progress-bg   { background: #eee; border-radius: 4px; height: 8px; margin-bottom: 8px; }
+    .progress-fill { background: #6366f1; height: 100%; border-radius: 4px; width: 0%; transition: width 0.2s; }
+
+    .error-box {
+      font-size: 11px; color: #dc2626; background: #fee2e2;
+      padding: 6px; border-radius: 4px; margin-bottom: 8px; word-break: break-all;
+    }
+
+    .result-time { font-size: 11px; color: #16a34a; margin-bottom: 6px; }
+    .result-time a { color: #6366f1; }
+
+    .result-row { display: flex; gap: 6px; }
+    .result-col label { display: block; font-size: 10px; color: #888; margin-bottom: 2px; }
+
+    .checker {
+      background-image:
+        linear-gradient(45deg, #ccc 25%, transparent 25%),
+        linear-gradient(-45deg, #ccc 25%, transparent 25%),
+        linear-gradient(45deg, transparent 75%, #ccc 75%),
+        linear-gradient(-45deg, transparent 75%, #ccc 75%);
+      background-size: 16px 16px;
+      background-position: 0 0, 0 8px, 8px -8px, -8px 0;
+      border: 1px solid #ccc;
+    }
+    .dark-bg { background: #1e293b; border: 1px solid #334155; }
+
+    .result-img { width: 110px; height: 130px; object-fit: contain; display: block; }
+
+    .idle { font-size: 11px; color: #bbb; }
+  </style>
+</head>
+<body>
+
+<h1>Test rembg-web — 6 modèles</h1>
+<p class="sub">
+  Fichiers servis depuis /public/ — aucune compilation Next.js.
+  ORT 1.27.0 + rembg-web 1.0.2 chargés localement.
+</p>
+
+<div id="controls">
+  <input type="file" id="file-input" accept="image/*">
+  <button id="run-all" disabled>▶ Tester les 6 modèles (séquentiel)</button>
+</div>
+
+<div id="original-zone">
+  <b>Original</b>
+  <img id="original-img" alt="original">
+  <div id="dims"></div>
+</div>
+
+<div id="grid"></div>
+
+<!-- ── Chargement ORT puis rembg-web (ordre important) ── -->
+<script src="/ort.all.min.js"></script>
+<script>
+  // Indiquer à ORT où trouver les fichiers WASM (servis depuis /public/)
+  ort.env.wasm.wasmPaths = '/';
+</script>
+<script src="/rembg-web.umd.min.js"></script>
+
+<script>
+/* ── Config modèles ─────────────────────────────────────────────────── */
+const MODELS = [
+  {
+    key: 'u2netp',
+    label: 'u2netp',
+    size: '4.4 MB', input: '320×320',
+  },
+  {
+    key: 'silueta',
+    label: 'silueta',
+    size: '42 MB', input: '320×320',
+  },
+  {
+    key: 'u2net_cloth_seg',
+    label: 'u2net_cloth_seg',
+    size: '168 MB', input: '320×320',
+    note: 'Spécialisé vêtements (haut/bas/corps)',
+  },
+  {
+    key: 'u2net',
+    label: 'u2net',
+    size: '168 MB', input: '320×320',
+  },
+  {
+    key: 'isnet-general-use',
+    label: 'isnet-general-use',
+    size: '170 MB', input: '1024×1024',
+  },
+  {
+    key: 'birefnet-lite',
+    label: 'BiRefNet-lite FP16',
+    size: '109 MB', input: '1024×1024',
+    customPath: '/models/birefnet-lite-fp16.onnx',
+    customSize: [1024, 1024],
+    note: '⚡ Test décisif — bad_alloc ou victoire ?',
+  },
+]
+
+/* ── État ────────────────────────────────────────────────────────────── */
+let blobRef = null
+
+/* ── Construction des cartes ─────────────────────────────────────────── */
+const grid = document.getElementById('grid')
+for (const m of MODELS) {
+  const card = document.createElement('div')
+  card.className = 'card'
+  card.innerHTML = `
+    <div class="card-label">${m.label}</div>
+    <div class="card-meta">${m.size} · input ${m.input}</div>
+    ${m.note ? `<div class="card-note">ℹ ${m.note}</div>` : ''}
+    <div id="body-${m.key}" class="idle">En attente d'une image…</div>
+  `
+  grid.appendChild(card)
+}
+
+/* ── Utilitaire ──────────────────────────────────────────────────────── */
+function setBody(key, html) {
+  document.getElementById(`body-${key}`).innerHTML = html
+}
+
+/* ── Upload ──────────────────────────────────────────────────────────── */
+document.getElementById('file-input').addEventListener('change', async (e) => {
+  const file = e.target.files?.[0]
+  if (!file) return
+
+  blobRef = new Blob([await file.arrayBuffer()], { type: file.type || 'image/jpeg' })
+  const objUrl = URL.createObjectURL(file)
+
+  const zone = document.getElementById('original-zone')
+  zone.style.display = 'block'
+  document.getElementById('original-img').src = objUrl
+
+  const tmpImg = new Image()
+  tmpImg.onload = () => {
+    document.getElementById('dims').textContent =
+      `${tmpImg.naturalWidth} × ${tmpImg.naturalHeight} px — ${(file.size / 1024 / 1024).toFixed(1)} MB`
+  }
+  tmpImg.src = objUrl
+
+  // Réinitialise chaque carte avec le bouton de test
+  for (const m of MODELS) {
+    setBody(m.key, `<button class="btn-test" onclick="runModel('${m.key}')">Tester seul</button>`)
+  }
+
+  document.getElementById('run-all').disabled = false
+})
+
+/* ── Test d'un modèle ────────────────────────────────────────────────── */
+async function runModel(key) {
+  if (!blobRef) return
+  const m = MODELS.find(x => x.key === key)
+
+  setBody(key, `
+    <div class="progress-step" id="step-${key}">Démarrage…</div>
+    <div class="progress-bg"><div class="progress-fill" id="bar-${key}"></div></div>
+  `)
+
+  try {
+    const { remove, newSession } = RembgWeb
+
+    let session
+    if (m.customPath) {
+      session = await newSession('u2net_custom', {
+        modelPath: m.customPath,
+        inputSize: m.customSize ?? [320, 320],
+      })
+    } else {
+      session = await newSession(m.key)
+    }
+
+    const t0 = performance.now()
+    const result = await remove(blobRef, {
+      session,
+      onProgress: (info) => {
+        const stepEl = document.getElementById(`step-${key}`)
+        const barEl  = document.getElementById(`bar-${key}`)
+        if (stepEl) stepEl.textContent = `${info.step} — ${info.message}`
+        if (barEl)  barEl.style.width  = `${info.progress}%`
+      },
+    })
+    const ms = Math.round(performance.now() - t0)
+
+    const outUrl  = URL.createObjectURL(result)
+    const dlName  = `${key}_result.png`
+
+    setBody(key, `
+      <div class="result-time">
+        ✓ ${ms} ms ·
+        <a href="${outUrl}" download="${dlName}">Télécharger PNG</a>
+      </div>
+      <div class="result-row">
+        <div class="result-col">
+          <label>Damier</label>
+          <div class="checker"><img class="result-img" src="${outUrl}" alt="${key}"></div>
+        </div>
+        <div class="result-col">
+          <label>Fond sombre</label>
+          <div class="dark-bg"><img class="result-img" src="${outUrl}" alt="${key}"></div>
+        </div>
+      </div>
+    `)
+  } catch (err) {
+    setBody(key, `
+      <div class="error-box">❌ ${String(err)}</div>
+      <button class="btn-test" onclick="runModel('${key}')">Réessayer</button>
+    `)
+  }
+}
+
+/* ── Tout tester (séquentiel) ────────────────────────────────────────── */
+async function runAll() {
+  if (!blobRef) return
+  const btn = document.getElementById('run-all')
+  btn.disabled = true
+  for (const m of MODELS) {
+    await runModel(m.key)
+  }
+  btn.disabled = false
+}
+
+document.getElementById('run-all').addEventListener('click', runAll)
+</script>
+</body>
+</html>

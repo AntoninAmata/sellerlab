@@ -3,7 +3,7 @@
 import { useCallback, useEffect, useRef, useState } from 'react'
 import {
   Loader2, RefreshCw, AlertCircle, AlertTriangle,
-  Tag, TrendingUp, Euro, CheckCircle2, Info, X, ChevronDown,
+  Tag, TrendingUp, Euro, CheckCircle2, Info,
 } from 'lucide-react'
 import type { RecognitionResult, PriceResult, PricePrecisions } from '../types'
 import { useLang } from '@/app/providers'
@@ -23,9 +23,8 @@ const UI: Record<Lang, {
   fewDays: string; oneTwo: string; oneMonth: string
   tip: string; tipBold: string
   displayPrice: string; realPrice: string; minAccept: string; delay: string
-  buyPriceLabel: string; boughtAt: string
-  shopOfficial: string; shopOther: string
-  choose: string; rare: string
+  buyPriceLabel: string
+  rare: string; rareteHint: string
   rareOptions: string[]; recalcBtn: string
   reseller: string; myBuyPrice: string; netMargin: string; marginPct: string
   estimatedVal: (bought: number, val: number, pct: number, state: string) => string
@@ -34,7 +33,6 @@ const UI: Record<Lang, {
   synthBoth: string; synthDecoteOnly: string; synthMedianOnly: string; synthNoData: string
   synthRefBoth: string; synthRefOnly: string
   noDataTitle: string; noDataMsg: string; yourPrice: string
-  moreDetails: string
   refValue: string
   apply: string
   showMore: string; showLess: string
@@ -51,10 +49,9 @@ const UI: Record<Lang, {
     tip: 'Astuce Vinted : affichez 15–20% au-dessus de votre prix plancher.', tipBold: '70% des acheteurs négocient.',
     displayPrice: "Prix d'affichage", realPrice: "Prix réel estimé après négociation avec l'acheteur",
     minAccept: "Nous vous recommandons de ne pas accepter d'offre en dessous de", delay: 'Délai estimé',
-    buyPriceLabel: "Prix d'achat neuf (€)", boughtAt: 'Acheté chez',
-    shopOfficial: 'Boutique officielle', shopOther: 'Autre',
-    choose: '— Choisir —', rare: 'Article rare ou édition limitée ?',
-    rareOptions: ['Non', 'Collaboration', 'Édition limitée', 'Vintage'], recalcBtn: 'Recalculer avec ces informations',
+    buyPriceLabel: "Prix d'achat neuf (€)",
+    rare: 'Article rare ou édition limitée ?', rareteHint: 'Recalcule pour prendre en compte',
+    rareOptions: ['Non', 'Collaboration', 'Édition limitée', 'Vintage'], recalcBtn: 'Recalculer les prix Vinted',
     reseller: 'Je suis revendeur', myBuyPrice: "Mon prix d'achat (€)", netMargin: 'Marge nette estimée', marginPct: '% de marge',
     estimatedVal: (b, v, p, s) => `Acheté ${b}€ → valeur marché ~${v}€ en ${s.toLowerCase()} (${p}%)`,
     confidenceSource: (n) => `${n} annonce${n > 1 ? 's' : ''} similaire${n > 1 ? 's' : ''} analysée${n > 1 ? 's' : ''}`,
@@ -69,7 +66,6 @@ const UI: Record<Lang, {
     noDataMsg: "Nous n'avons pas trouvé assez de données pour estimer le prix de cet article. Renseignez votre prix d'achat neuf pour obtenir une estimation, ou fixez directement votre prix de vente ci-dessous.",
     yourPrice: 'Votre prix de vente',
     showMore: 'Voir plus', showLess: 'Réduire',
-    moreDetails: 'Plus de précisions',
     refValue: 'Valeur à neuf estimée',
     apply: 'Appliquer',
   },
@@ -85,10 +81,9 @@ const UI: Record<Lang, {
     tip: 'Vinted tip: list 15–20% above your minimum price.', tipBold: '70% of buyers negotiate.',
     displayPrice: 'Listed price', realPrice: 'Estimated real price after buyer negotiation',
     minAccept: "We recommend not accepting offers below", delay: 'Estimated time',
-    buyPriceLabel: 'Original purchase price (€)', boughtAt: 'Bought from',
-    shopOfficial: 'Official store', shopOther: 'Other',
-    choose: '— Choose —', rare: 'Rare item or limited edition?',
-    rareOptions: ['No', 'Collaboration', 'Limited edition', 'Vintage'], recalcBtn: 'Recalculate with this info',
+    buyPriceLabel: 'Original purchase price (€)',
+    rare: 'Rare item or limited edition?', rareteHint: 'Recalculate to apply',
+    rareOptions: ['No', 'Collaboration', 'Limited edition', 'Vintage'], recalcBtn: 'Recalculate Vinted prices',
     reseller: 'I am a reseller', myBuyPrice: 'My purchase price (€)', netMargin: 'Estimated net margin', marginPct: '% margin',
     estimatedVal: (b, v, p, s) => `Bought for ${b}€ → market value ~${v}€ in ${s.toLowerCase()} condition (${p}%)`,
     confidenceSource: (n) => `${n} similar listing${n > 1 ? 's' : ''} analysed`,
@@ -103,7 +98,6 @@ const UI: Record<Lang, {
     noDataMsg: "We couldn't find enough data to estimate the price of this item. Enter your original purchase price for an estimate, or set your selling price directly below.",
     yourPrice: 'Your selling price',
     showMore: 'Show more', showLess: 'Show less',
-    moreDetails: 'More details',
     refValue: 'Estimated retail value',
     apply: 'Apply',
   },
@@ -119,10 +113,9 @@ const UI: Record<Lang, {
     tip: 'Consejo Vinted: publica 15–20% por encima de tu precio mínimo.', tipBold: 'El 70% de los compradores negocian.',
     displayPrice: 'Precio publicado', realPrice: 'Precio real estimado tras negociación con el comprador',
     minAccept: 'No recomendamos aceptar ofertas por debajo de', delay: 'Plazo estimado',
-    buyPriceLabel: 'Precio de compra nuevo (€)', boughtAt: 'Comprado en',
-    shopOfficial: 'Tienda oficial', shopOther: 'Otro',
-    choose: '— Elegir —', rare: '¿Artículo raro o edición limitada?',
-    rareOptions: ['No', 'Colaboración', 'Edición limitada', 'Vintage'], recalcBtn: 'Recalcular con esta información',
+    buyPriceLabel: 'Precio de compra nuevo (€)',
+    rare: '¿Artículo raro o edición limitada?', rareteHint: 'Recalcula para aplicar',
+    rareOptions: ['No', 'Colaboración', 'Edición limitada', 'Vintage'], recalcBtn: 'Recalcular precios Vinted',
     reseller: 'Soy revendedor', myBuyPrice: 'Mi precio de compra (€)', netMargin: 'Margen neto estimado', marginPct: '% margen',
     estimatedVal: (b, v, p, s) => `Comprado a ${b}€ → valor de mercado ~${v}€ en ${s.toLowerCase()} (${p}%)`,
     confidenceSource: (n) => `${n} anuncio${n > 1 ? 's' : ''} similar${n > 1 ? 'es' : ''} analizado${n > 1 ? 's' : ''}`,
@@ -137,7 +130,6 @@ const UI: Record<Lang, {
     noDataMsg: 'No encontramos datos suficientes para estimar el precio de este artículo. Ingresa tu precio de compra nuevo para obtener una estimación, o fija tu precio de venta directamente abajo.',
     yourPrice: 'Tu precio de venta',
     showMore: 'Ver más', showLess: 'Ver menos',
-    moreDetails: 'Más detalles',
     refValue: 'Valor nuevo estimado',
     apply: 'Aplicar',
   },
@@ -153,10 +145,9 @@ const UI: Record<Lang, {
     tip: 'Vinted-Tipp: 15–20% über Ihrem Mindestpreis anbieten.', tipBold: '70% der Käufer verhandeln.',
     displayPrice: 'Angezeigter Preis', realPrice: 'Geschätzter tatsächlicher Preis nach Käuferverhandlung',
     minAccept: 'Wir empfehlen, kein Angebot unter diesem Preis anzunehmen:', delay: 'Geschätzte Dauer',
-    buyPriceLabel: 'Originalkaufpreis (€)', boughtAt: 'Gekauft bei',
-    shopOfficial: 'Offizieller Shop', shopOther: 'Andere',
-    choose: '— Wählen —', rare: 'Seltener Artikel oder limitierte Edition?',
-    rareOptions: ['Nein', 'Kollaboration', 'Limitierte Edition', 'Vintage'], recalcBtn: 'Mit diesen Infos neu berechnen',
+    buyPriceLabel: 'Originalkaufpreis (€)',
+    rare: 'Seltener Artikel oder limitierte Edition?', rareteHint: 'Neu berechnen zum Anwenden',
+    rareOptions: ['Nein', 'Kollaboration', 'Limitierte Edition', 'Vintage'], recalcBtn: 'Vinted-Preise neu berechnen',
     reseller: 'Ich bin Wiederverkäufer', myBuyPrice: 'Mein Kaufpreis (€)', netMargin: 'Geschätzter Nettogewinn', marginPct: '% Marge',
     estimatedVal: (b, v, p, s) => `Gekauft für ${b}€ → Marktwert ~${v}€ in ${s.toLowerCase()} (${p}%)`,
     confidenceSource: (n) => `${n} ähnliche Anzeige${n > 1 ? 'n' : ''} analysiert`,
@@ -171,7 +162,6 @@ const UI: Record<Lang, {
     noDataMsg: 'Wir konnten nicht genügend Daten finden, um den Preis dieses Artikels zu schätzen. Geben Sie Ihren Originalkaufpreis ein oder legen Sie Ihren Verkaufspreis direkt unten fest.',
     yourPrice: 'Ihr Verkaufspreis',
     showMore: 'Mehr anzeigen', showLess: 'Weniger anzeigen',
-    moreDetails: 'Weitere Angaben',
     refValue: 'Geschätzter Neupreis',
     apply: 'Anwenden',
   },
@@ -187,10 +177,9 @@ const UI: Record<Lang, {
     tip: 'Consiglio Vinted: pubblica 15–20% sopra il tuo prezzo minimo.', tipBold: "Il 70% degli acquirenti negozia.",
     displayPrice: 'Prezzo pubblicato', realPrice: "Prezzo reale stimato dopo negoziazione con l'acquirente",
     minAccept: "Consigliamo di non accettare offerte inferiori a", delay: 'Tempo stimato',
-    buyPriceLabel: "Prezzo d'acquisto originale (€)", boughtAt: 'Acquistato da',
-    shopOfficial: 'Negozio ufficiale', shopOther: 'Altro',
-    choose: '— Scegli —', rare: 'Articolo raro o edizione limitata?',
-    rareOptions: ['No', 'Collaborazione', 'Edizione limitata', 'Vintage'], recalcBtn: 'Ricalcola con queste informazioni',
+    buyPriceLabel: "Prezzo d'acquisto originale (€)",
+    rare: 'Articolo raro o edizione limitata?', rareteHint: 'Ricalcola per applicare',
+    rareOptions: ['No', 'Collaborazione', 'Edizione limitata', 'Vintage'], recalcBtn: 'Ricalcola i prezzi Vinted',
     reseller: 'Sono un rivenditore', myBuyPrice: "Il mio prezzo d'acquisto (€)", netMargin: 'Margine netto stimato', marginPct: '% margine',
     estimatedVal: (b, v, p, s) => `Acquistato a ${b}€ → valore di mercato ~${v}€ in ${s.toLowerCase()} (${p}%)`,
     confidenceSource: (n) => `${n} annuncio${n > 1 ? 'i' : ''} simil${n > 1 ? 'i' : 'e'} analizzat${n > 1 ? 'i' : 'o'}`,
@@ -205,7 +194,6 @@ const UI: Record<Lang, {
     noDataMsg: "Non abbiamo trovato dati sufficienti per stimare il prezzo di questo articolo. Inserisci il tuo prezzo d'acquisto originale per una stima, o imposta direttamente il tuo prezzo di vendita qui sotto.",
     yourPrice: 'Il tuo prezzo di vendita',
     showMore: 'Mostra di più', showLess: 'Mostra meno',
-    moreDetails: 'Ulteriori dettagli',
     refValue: 'Valore nuovo stimato',
     apply: 'Applica',
   },
@@ -221,10 +209,9 @@ const UI: Record<Lang, {
     tip: 'Vinted tip: stel 15–20% boven je minimumprijs in.', tipBold: '70% van de kopers onderhandelt.',
     displayPrice: 'Vermelde prijs', realPrice: 'Geschatte werkelijke prijs na onderhandeling met koper',
     minAccept: 'We raden aan geen bod onder dit bedrag te accepteren:', delay: 'Geschatte tijd',
-    buyPriceLabel: 'Originele aankoopprijs (€)', boughtAt: 'Gekocht bij',
-    shopOfficial: 'Officiële winkel', shopOther: 'Andere',
-    choose: '— Kies —', rare: 'Zeldzaam artikel of beperkte editie?',
-    rareOptions: ['Nee', 'Samenwerking', 'Beperkte editie', 'Vintage'], recalcBtn: 'Opnieuw berekenen met deze info',
+    buyPriceLabel: 'Originele aankoopprijs (€)',
+    rare: 'Zeldzaam artikel of beperkte editie?', rareteHint: 'Herberekenen om toe te passen',
+    rareOptions: ['Nee', 'Samenwerking', 'Beperkte editie', 'Vintage'], recalcBtn: 'Vinted-prijzen herberekenen',
     reseller: 'Ik ben een doorverkoper', myBuyPrice: 'Mijn aankoopprijs (€)', netMargin: 'Geschatte nettomarge', marginPct: '% marge',
     estimatedVal: (b, v, p, s) => `Gekocht voor ${b}€ → marktwaarde ~${v}€ in ${s.toLowerCase()} staat (${p}%)`,
     confidenceSource: (n) => `${n} vergelijkbare advertentie${n > 1 ? 's' : ''} geanalyseerd`,
@@ -239,7 +226,6 @@ const UI: Record<Lang, {
     noDataMsg: 'We hebben onvoldoende gegevens gevonden om de prijs van dit artikel te schatten. Voer je oorspronkelijke aankoopprijs in voor een schatting, of stel je verkoopprijs direct hieronder in.',
     yourPrice: 'Uw verkoopprijs',
     showMore: 'Meer tonen', showLess: 'Minder tonen',
-    moreDetails: 'Meer details',
     refValue: 'Geschatte nieuwwaarde',
     apply: 'Toepassen',
   },
@@ -255,10 +241,9 @@ const UI: Record<Lang, {
     tip: 'Wskazówka Vinted: wystawiaj 15–20% powyżej ceny minimalnej.', tipBold: '70% kupujących negocjuje.',
     displayPrice: 'Wystawiona cena', realPrice: 'Szacowana rzeczywista cena po negocjacji z kupującym',
     minAccept: 'Zalecamy nie przyjmować ofert poniżej', delay: 'Szacowany czas',
-    buyPriceLabel: 'Oryginalna cena zakupu (€)', boughtAt: 'Kupione w',
-    shopOfficial: 'Oficjalny sklep', shopOther: 'Inne',
-    choose: '— Wybierz —', rare: 'Rzadki artykuł lub ograniczona edycja?',
-    rareOptions: ['Nie', 'Współpraca', 'Limitowana edycja', 'Vintage'], recalcBtn: 'Przelicz z tymi informacjami',
+    buyPriceLabel: 'Oryginalna cena zakupu (€)',
+    rare: 'Rzadki artykuł lub ograniczona edycja?', rareteHint: 'Przelicz, aby zastosować',
+    rareOptions: ['Nie', 'Współpraca', 'Limitowana edycja', 'Vintage'], recalcBtn: 'Przelicz ceny Vinted',
     reseller: 'Jestem odsprzedawcą', myBuyPrice: 'Moja cena zakupu (€)', netMargin: 'Szacowana marża netto', marginPct: '% marży',
     estimatedVal: (b, v, p, s) => `Kupiono za ${b}€ → wartość rynkowa ~${v}€ w stanie ${s.toLowerCase()} (${p}%)`,
     confidenceSource: (n) => n === 1 ? '1 podobne ogłoszenie przeanalizowane' : `${n} podobnych ogłoszeń przeanalizowanych`,
@@ -273,7 +258,6 @@ const UI: Record<Lang, {
     noDataMsg: 'Nie znaleźliśmy wystarczających danych, aby oszacować cenę tego przedmiotu. Wprowadź swoją oryginalną cenę zakupu, aby uzyskać szacunek, lub bezpośrednio ustal cenę sprzedaży poniżej.',
     yourPrice: 'Twoja cena sprzedaży',
     showMore: 'Pokaż więcej', showLess: 'Pokaż mniej',
-    moreDetails: 'Więcej szczegółów',
     refValue: 'Szacowana wartość nowa',
     apply: 'Zastosuj',
   },
@@ -382,13 +366,11 @@ export default function PricingStep({ recognition, result, setResult }: Props) {
   const { loading, error, retry } = usePricing(recognition, result, setResult)
 
   /* ── État local du bloc interactif ── */
-  const [prixAchat, setPrixAchat]           = useState('')
+  const [prixAchat, setPrixAchat]               = useState('')
   const [appliedPrixAchat, setAppliedPrixAchat] = useState<number | null>(null)
-  const [plateforme, setPlateforme]         = useState('')
-  const [rareteIdx, setRareteIdx]           = useState<number | null>(null)
-  const [showMargin, setShowMargin]         = useState(false)
-  const [showPrecisions, setShowPrecisions] = useState(false)
-  const [sliderVal, setSliderVal]           = useState<number | null>(null)
+  const [rareteIdx, setRareteIdx]               = useState<number | null>(null)
+  const [showMargin, setShowMargin]             = useState(false)
+  const [sliderVal, setSliderVal]               = useState<number | null>(null)
   const [showFullRaisonnement, setShowFullRaisonnement] = useState(false)
 
   /* Initialise le slider sur le prixSuggere quand le résultat arrive (hors noData) */
@@ -416,14 +398,11 @@ export default function PricingStep({ recognition, result, setResult }: Props) {
     return t.oneMonth
   }
 
-  /* ── Recalcul avec précisions ── */
-  function handleRecalculate() {
+  /* ── Recalcul complet avec web search (rareté affine la recherche d'annonces) ── */
+  function handleFullRecalculate() {
     retry({
-      prixAchatNeuf:  appliedPrixAchat ?? (prixAchat ? parseFloat(prixAchat) : undefined),
-      plateforme:     plateforme || undefined,
-      rarete:         rareteIdx !== null ? UI.fr.rareOptions[rareteIdx] : undefined,
-      skipWebSearch:  true,
-      existingMarche: result?.marche,
+      prixAchatNeuf: appliedPrixAchat ?? (prixAchat ? parseFloat(prixAchat) : undefined),
+      rarete:        rareteIdx !== null ? UI.fr.rareOptions[rareteIdx] : undefined,
     })
   }
 
@@ -725,6 +704,42 @@ export default function PricingStep({ recognition, result, setResult }: Props) {
               </div>
             </div>
           )}
+
+          {/* Rareté — affine la recherche d'annonces Vinted comparables */}
+          <div className="border-t border-gray-50 pt-4 space-y-2">
+            <label className="text-xs font-semibold text-gray-600 uppercase tracking-wide block">
+              {t.rare}
+            </label>
+            <div className="grid grid-cols-2 sm:grid-cols-4 gap-2">
+              {t.rareOptions.map((r, idx) => (
+                <button
+                  key={idx}
+                  type="button"
+                  onClick={() => setRareteIdx(rareteIdx === idx ? null : idx)}
+                  className={`py-2 px-3 rounded-xl text-xs font-semibold border transition-all ${
+                    rareteIdx === idx
+                      ? 'bg-indigo-600 text-white border-indigo-600'
+                      : 'bg-white text-gray-600 border-gray-200 hover:border-indigo-300 hover:text-indigo-600'
+                  }`}
+                >
+                  {r}
+                </button>
+              ))}
+            </div>
+            {rareteIdx !== null && rareteIdx > 0 && (
+              <p className="text-[11px] text-indigo-500">{t.rareteHint}</p>
+            )}
+          </div>
+
+          {/* Bouton recalcul — nouveau web search (prend en compte rareté + prix d'achat) */}
+          <button
+            onClick={handleFullRecalculate}
+            disabled={loading}
+            className="w-full flex items-center justify-center gap-2 bg-indigo-600 text-white text-sm font-semibold py-3 rounded-xl hover:bg-indigo-700 disabled:opacity-50 transition-colors"
+          >
+            {loading ? <Loader2 className="w-4 h-4 animate-spin" /> : <RefreshCw className="w-4 h-4" />}
+            {t.recalcBtn}
+          </button>
         </div>
 
         {/* ═══════════════════════════════════════════════════════════════ */}
@@ -835,75 +850,6 @@ export default function PricingStep({ recognition, result, setResult }: Props) {
               </div>
             </div>
           )}
-
-          {/* ── Toggle accordion précisions (plateforme, rareté, recalcul) ── */}
-          <div className="border-t border-gray-50 pt-4">
-            <button
-              onClick={() => setShowPrecisions(!showPrecisions)}
-              className="flex items-center justify-between w-full text-sm font-semibold text-gray-500 hover:text-gray-700"
-            >
-              <span>{t.moreDetails}</span>
-              <ChevronDown className={`w-4 h-4 transition-transform ${showPrecisions ? 'rotate-180' : ''}`} />
-            </button>
-            {showPrecisions && (
-              <div className="mt-4 space-y-4">
-
-                {/* Plateforme */}
-                <div>
-                  <label className="text-xs font-semibold text-gray-600 uppercase tracking-wide block mb-1.5">
-                    {t.boughtAt}
-                  </label>
-                  <select
-                    value={plateforme}
-                    onChange={e => setPlateforme(e.target.value)}
-                    className={inputCls}
-                  >
-                    <option value="">{t.choose}</option>
-                    <option value="Boutique officielle">{t.shopOfficial}</option>
-                    <option value="Zalando">Zalando</option>
-                    <option value="ASOS">ASOS</option>
-                    <option value="Shein">Shein</option>
-                    <option value="Vinted">Vinted</option>
-                    <option value="Depop">Depop</option>
-                    <option value="Vestiaire Collective">Vestiaire Collective</option>
-                    <option value="Autre">{t.shopOther}</option>
-                  </select>
-                </div>
-
-                {/* Rareté */}
-                <div>
-                  <label className="text-xs font-semibold text-gray-600 uppercase tracking-wide block mb-1.5">
-                    {t.rare}
-                  </label>
-                  <div className="grid grid-cols-2 sm:grid-cols-4 gap-2">
-                    {t.rareOptions.map((r, idx) => (
-                      <button
-                        key={idx}
-                        type="button"
-                        onClick={() => setRareteIdx(rareteIdx === idx ? null : idx)}
-                        className={`py-2 px-3 rounded-xl text-xs font-semibold border transition-all ${
-                          rareteIdx === idx
-                            ? 'bg-indigo-600 text-white border-indigo-600'
-                            : 'bg-white text-gray-600 border-gray-200 hover:border-indigo-300 hover:text-indigo-600'
-                        }`}
-                      >
-                        {r}
-                      </button>
-                    ))}
-                  </div>
-                </div>
-
-                <button
-                  onClick={handleRecalculate}
-                  disabled={loading}
-                  className="w-full flex items-center justify-center gap-2 bg-indigo-600 text-white text-sm font-semibold py-3 rounded-xl hover:bg-indigo-700 disabled:opacity-50 transition-colors"
-                >
-                  {loading ? <Loader2 className="w-4 h-4 animate-spin" /> : <RefreshCw className="w-4 h-4" />}
-                  {t.recalcBtn}
-                </button>
-              </div>
-            )}
-          </div>
 
           {/* ── Toggle revendeur ── */}
           <div className="border-t border-gray-50 pt-4">

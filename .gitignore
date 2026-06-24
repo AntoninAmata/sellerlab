@@ -49,3 +49,9 @@ public/mannequins/
 public/test-output/
 public/test-veste.jpg
 scripts/
+
+# Modèles ONNX et bundles WASM (téléchargeables, hébergés séparément en prod)
+public/models/
+public/ort-wasm-simd-threaded.*
+public/ort.all.min.js
+public/rembg-web.umd.min.js
