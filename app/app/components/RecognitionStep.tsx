@@ -369,6 +369,14 @@ const MANNEQUIN_I18N: Record<Lang, {
   rendTitle: string
   modalConfirmMannequin: string
   photosGenerated: (n: number) => string
+  posesLabel: string
+  poseFace: string
+  poseBack: string
+  poseSelfieFace: string
+  poseSelfie34: string
+  poseSelfieProfile: string
+  poseSeatedSelfie: string
+  posesHint: string
 }> = {
   fr: {
     mannequinTitle: 'Studio photo IA',
@@ -385,6 +393,10 @@ const MANNEQUIN_I18N: Record<Lang, {
     noMannequinMsg: 'Sélectionnez un mannequin',
     rendTitle: '📸 RENDU — PHOTOS IA', modalConfirmMannequin: 'Choisir ce mannequin',
     photosGenerated: (n) => `· ${n} photo${n > 1 ? 's' : ''} générée${n > 1 ? 's' : ''}`,
+    posesLabel: 'Poses à générer',
+    poseFace: 'De face', poseBack: 'De dos', poseSelfieFace: 'Selfie de face', poseSelfie34: 'Selfie 3/4',
+    poseSelfieProfile: 'Selfie de profil', poseSeatedSelfie: 'Selfie assis',
+    posesHint: 'La photo de face est toujours générée. Cochez les poses supplémentaires.',
   },
   en: {
     mannequinTitle: 'AI Photo Studio',
@@ -401,6 +413,10 @@ const MANNEQUIN_I18N: Record<Lang, {
     noMannequinMsg: 'Select a model',
     rendTitle: '📸 RENDER — AI PHOTOS', modalConfirmMannequin: 'Choose this model',
     photosGenerated: (n) => `· ${n} photo${n > 1 ? 's' : ''} generated`,
+    posesLabel: 'Poses to generate',
+    poseFace: 'Front view', poseBack: 'Back view', poseSelfieFace: 'Front selfie', poseSelfie34: '3/4 selfie',
+    poseSelfieProfile: 'Profile selfie', poseSeatedSelfie: 'Seated selfie',
+    posesHint: 'The front photo is always generated. Check additional poses.',
   },
   es: {
     mannequinTitle: 'Estudio foto IA',
@@ -417,6 +433,10 @@ const MANNEQUIN_I18N: Record<Lang, {
     noMannequinMsg: 'Selecciona un maniquí',
     rendTitle: '📸 RESULTADO — FOTOS IA', modalConfirmMannequin: 'Elegir este maniquí',
     photosGenerated: (n) => `· ${n} foto${n > 1 ? 's' : ''} generada${n > 1 ? 's' : ''}`,
+    posesLabel: 'Poses a generar',
+    poseFace: 'De frente', poseBack: 'De espaldas', poseSelfieFace: 'Selfie de frente', poseSelfie34: 'Selfie 3/4',
+    poseSelfieProfile: 'Selfie de perfil', poseSeatedSelfie: 'Selfie sentado',
+    posesHint: 'La foto de frente siempre se genera. Marca las poses adicionales.',
   },
   de: {
     mannequinTitle: 'KI-Fotostudio',
@@ -433,6 +453,10 @@ const MANNEQUIN_I18N: Record<Lang, {
     noMannequinMsg: 'Wähle ein Modell',
     rendTitle: '📸 VORSCHAU — KI-FOTOS', modalConfirmMannequin: 'Dieses Modell wählen',
     photosGenerated: (n) => `· ${n} Foto${n > 1 ? 's' : ''} generiert`,
+    posesLabel: 'Zu generierende Posen',
+    poseFace: 'Vorderansicht', poseBack: 'Rückansicht', poseSelfieFace: 'Selfie von vorne', poseSelfie34: '3/4-Selfie',
+    poseSelfieProfile: 'Profil-Selfie', poseSeatedSelfie: 'Sitzendes Selfie',
+    posesHint: 'Das Frontfoto wird immer generiert. Wähle zusätzliche Posen.',
   },
   it: {
     mannequinTitle: 'Studio foto IA',
@@ -449,6 +473,10 @@ const MANNEQUIN_I18N: Record<Lang, {
     noMannequinMsg: 'Seleziona un manichino',
     rendTitle: '📸 RISULTATO — FOTO IA', modalConfirmMannequin: 'Scegli questo modello',
     photosGenerated: (n) => `· ${n} foto generat${n > 1 ? 'e' : 'a'}`,
+    posesLabel: 'Pose da generare',
+    poseFace: 'Di fronte', poseBack: 'Di spalle', poseSelfieFace: 'Selfie frontale', poseSelfie34: 'Selfie 3/4',
+    poseSelfieProfile: 'Selfie di profilo', poseSeatedSelfie: 'Selfie seduto',
+    posesHint: 'La foto frontale è sempre generata. Seleziona le pose aggiuntive.',
   },
   nl: {
     mannequinTitle: 'AI-fotostudio',
@@ -465,6 +493,10 @@ const MANNEQUIN_I18N: Record<Lang, {
     noMannequinMsg: 'Selecteer een model',
     rendTitle: "📸 WEERGAVE — AI-FOTO'S", modalConfirmMannequin: 'Kies dit model',
     photosGenerated: (n) => `· ${n} foto${n > 1 ? "'s" : ''} gegenereerd`,
+    posesLabel: 'Te genereren poses',
+    poseFace: 'Vooraanzicht', poseBack: 'Achterkant', poseSelfieFace: 'Selfie vooraanzicht', poseSelfie34: '3/4 selfie',
+    poseSelfieProfile: 'Profiel selfie', poseSeatedSelfie: 'Zittende selfie',
+    posesHint: 'De voorfoto wordt altijd gegenereerd. Vink extra poses aan.',
   },
   pl: {
     mannequinTitle: 'Studio foto AI',
@@ -481,6 +513,10 @@ const MANNEQUIN_I18N: Record<Lang, {
     noMannequinMsg: 'Wybierz manekin',
     rendTitle: '📸 PODGLĄD — ZDJĘCIA AI', modalConfirmMannequin: 'Wybierz ten manekin',
     photosGenerated: (n) => `· ${n} zdjęci${n === 1 ? 'e' : 'a'} wygenerowane`,
+    posesLabel: 'Pozy do wygenerowania',
+    poseFace: 'Przód', poseBack: 'Tył', poseSelfieFace: 'Selfie z przodu', poseSelfie34: 'Selfie 3/4',
+    poseSelfieProfile: 'Selfie z profilu', poseSeatedSelfie: 'Selfie na siedząco',
+    posesHint: 'Zdjęcie z przodu jest zawsze generowane. Zaznacz dodatkowe pozy.',
   },
 }
 
@@ -501,6 +537,7 @@ const BG_PANEL_I18N: Record<Lang, {
   bannerBtn: string
   yourPhotosTitle: string
   rendFinalTitle: string
+  rendStudioTitle: string
 }> = {
   fr: {
     bgPanelTitle:    'Fond',
@@ -517,6 +554,7 @@ const BG_PANEL_I18N: Record<Lang, {
     bannerBtn:       'Supprimer le fond (photo principale)',
     yourPhotosTitle: 'Tes photos',
     rendFinalTitle:  'Rendu final',
+    rendStudioTitle: 'Rendu Studio photo IA',
   },
   en: {
     bgPanelTitle:    'Background',
@@ -533,6 +571,7 @@ const BG_PANEL_I18N: Record<Lang, {
     bannerBtn:       'Remove background (main photo)',
     yourPhotosTitle: 'Your photos',
     rendFinalTitle:  'Final render',
+    rendStudioTitle: 'AI Photo Studio render',
   },
   es: {
     bgPanelTitle:    'Fondo',
@@ -549,6 +588,7 @@ const BG_PANEL_I18N: Record<Lang, {
     bannerBtn:       'Eliminar fondo (foto principal)',
     yourPhotosTitle: 'Tus fotos',
     rendFinalTitle:  'Resultado final',
+    rendStudioTitle: 'Render Estudio foto IA',
   },
   de: {
     bgPanelTitle:    'Hintergrund',
@@ -565,6 +605,7 @@ const BG_PANEL_I18N: Record<Lang, {
     bannerBtn:       'Hintergrund entfernen (Hauptfoto)',
     yourPhotosTitle: 'Deine Fotos',
     rendFinalTitle:  'Endergebnis',
+    rendStudioTitle: 'KI-Fotostudio-Ergebnis',
   },
   it: {
     bgPanelTitle:    'Sfondo',
@@ -581,6 +622,7 @@ const BG_PANEL_I18N: Record<Lang, {
     bannerBtn:       'Rimuovi sfondo (foto principale)',
     yourPhotosTitle: 'Le tue foto',
     rendFinalTitle:  'Risultato finale',
+    rendStudioTitle: 'Render Studio foto IA',
   },
   nl: {
     bgPanelTitle:    'Achtergrond',
@@ -597,6 +639,7 @@ const BG_PANEL_I18N: Record<Lang, {
     bannerBtn:       'Achtergrond verwijderen (hoofdfoto)',
     yourPhotosTitle: "Jouw foto's",
     rendFinalTitle:  'Eindresultaat',
+    rendStudioTitle: 'AI-fotostudio resultaat',
   },
   pl: {
     bgPanelTitle:    'Tło',
@@ -613,6 +656,7 @@ const BG_PANEL_I18N: Record<Lang, {
     bannerBtn:       'Usuń tło (główne zdjęcie)',
     yourPhotosTitle: 'Twoje zdjęcia',
     rendFinalTitle:  'Wynik końcowy',
+    rendStudioTitle: 'Render Studio zdjęć AI',
   },
 }
 
@@ -1781,6 +1825,8 @@ export default function RecognitionStep({ slots, setSlots, result, aiPhotos: _ai
     setMannequinCustomPrompt(v)
   }
   const [mannequinWearingPrompt, setMannequinWearingPrompt] = useState('')
+  // Poses portées cochées par l'utilisateur (la face est toujours générée en base, hors de cette liste)
+  const [mannequinPoses, setMannequinPoses] = useState<string[]>(['back', 'selfie_34'])
 
   /* Photos produit non portées */
   const [productDisplayMode, setProductDisplayMode] = useState<'bust' | 'hanger' | 'flat'>('bust')
@@ -1862,31 +1908,20 @@ export default function RecognitionStep({ slots, setSlots, result, aiPhotos: _ai
   // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [processedSlotKey, selectedBgUser])
 
-  /* Recomposite photos portées sur le fond IA choisi */
+  /* Photos FASHN : fond déjà généré par l'IA → affichage direct, sans canvas */
   useEffect(() => {
     if (aiCutoutEntries.length === 0) { setAiCompositedPhotos([]); return }
-    const bg = BACKGROUNDS.find(b => b.id === selectedBgAi) ?? BACKGROUNDS[0]
-    let cancelled = false
-    Promise.all(
-      aiCutoutEntries.map(({ cutout, original }) =>
-        compositeWithBackground(cutout ?? original, bg, true).catch(() => original)
-      )
-    ).then(results => { if (!cancelled) setAiCompositedPhotos(results) })
-    return () => { cancelled = true }
-  }, [aiCutoutEntries, selectedBgAi])
+    // Les photos FASHN ont déjà leur fond (background_reference) : on n'applique
+    // aucun traitement canvas (pas de compositeWithBackground). On affiche l'URL telle quelle.
+    setAiCompositedPhotos(aiCutoutEntries.map(({ cutout, original }) => cutout ?? original))
+  }, [aiCutoutEntries])
 
   /* Recomposite photos produit non portées sur le fond IA choisi */
   useEffect(() => {
     if (productCutoutEntries.length === 0) { setProductPhotos([]); return }
-    const bg = BACKGROUNDS.find(b => b.id === selectedBgAi) ?? BACKGROUNDS[0]
-    let cancelled = false
-    Promise.all(
-      productCutoutEntries.map(({ cutout, original }) =>
-        compositeWithBackground(cutout ?? original, bg, false).catch(() => original)
-      )
-    ).then(results => { if (!cancelled) setProductPhotos(results) })
-    return () => { cancelled = true }
-  }, [productCutoutEntries, selectedBgAi])
+    // Photos non portées FASHN : fond déjà intégré → affichage direct sans canvas.
+    setProductPhotos(productCutoutEntries.map(({ cutout, original }) => cutout ?? original))
+  }, [productCutoutEntries])
 
   const handleGenerateMannequin = useCallback(async () => {
     if (!selectedMannequin || isGeneratingMannequin) return
@@ -1925,33 +1960,23 @@ export default function RecognitionStep({ slots, setSlots, result, aiPhotos: _ai
           mannequin_id:   selectedMannequin,
           outfit_prompt:  outfitPromptEn,
           wearing_prompt: mannequinWearingPrompt.trim() || undefined,
+          background_id:  selectedBgAi,
+          poses:          mannequinPoses,
         }),
       })
       if (!res.ok) throw new Error('Generation failed')
       const { urls } = await res.json() as { urls: string[] }
       setAiPhotos(urls)
-      const { removeBackground } = await import('@/lib/background-removal')
-      const entries: AiCutoutEntry[] = await Promise.all(
-        urls.map(async (original): Promise<AiCutoutEntry> => {
-          try {
-            const fetchRes = await fetch(original)
-            if (!fetchRes.ok) return { cutout: null, original }
-            const blob        = await fetchRes.blob()
-            const resultBlob  = await removeBackground(blob)
-            const cleanedBlob = await cleanCutout(resultBlob)
-            return { cutout: URL.createObjectURL(cleanedBlob), original }
-          } catch {
-            return { cutout: null, original }
-          }
-        })
-      )
+      // Les photos FASHN sont déjà naturelles (mannequin + fond générés) :
+      // pas de détourage/composition canvas. On les affiche telles quelles.
+      const entries: AiCutoutEntry[] = urls.map((original) => ({ cutout: null, original }))
       setAiCutoutEntries(entries)
     } catch (err) {
       console.error('Mannequin generation failed:', err)
     } finally {
       setIsGeneratingMannequin(false)
     }
-  }, [selectedMannequin, isGeneratingMannequin, mannequinCustomPrompt, mannequinWearingPrompt, slots, setAiPhotos])
+  }, [selectedMannequin, isGeneratingMannequin, mannequinCustomPrompt, mannequinWearingPrompt, mannequinPoses, selectedBgAi, slots, setAiPhotos])
 
   const handleGenerateProductPhoto = useCallback(async () => {
     if (isGeneratingProductPhoto) return
@@ -1980,25 +2005,14 @@ export default function RecognitionStep({ slots, setSlots, result, aiPhotos: _ai
           product_image: base64Recto,
           verso_image:   base64Verso,
           display_mode:  productDisplayMode,
+          background_id: selectedBgAi,
         }),
       })
       if (!res.ok) throw new Error('Generation failed')
       const { urls } = await res.json() as { urls: string[] }
-      const { removeBackground } = await import('@/lib/background-removal')
-      const entries: AiCutoutEntry[] = await Promise.all(
-        urls.map(async (original): Promise<AiCutoutEntry> => {
-          try {
-            const fetchRes = await fetch(original)
-            if (!fetchRes.ok) return { cutout: null, original }
-            const blob        = await fetchRes.blob()
-            const resultBlob  = await removeBackground(blob)
-            const cleanedBlob = await cleanCutout(resultBlob)
-            return { cutout: URL.createObjectURL(cleanedBlob), original }
-          } catch {
-            return { cutout: null, original }
-          }
-        })
-      )
+      // Photos non portées FASHN : fond déjà généré (background_reference) →
+      // affichage direct, aucun traitement canvas.
+      const entries: AiCutoutEntry[] = urls.map((original) => ({ cutout: null, original }))
       setProductCutoutEntries(entries)
     } catch (err) {
       console.error('Product photo generation failed:', err)
@@ -2093,8 +2107,8 @@ export default function RecognitionStep({ slots, setSlots, result, aiPhotos: _ai
         bgI18n={bgI18n}
       />
 
-      {/* ── Bloc 4 — Rendu final ── */}
-      {(Object.keys(compositedUrls).length > 0 || aiCompositedPhotos.length > 0 || productPhotos.length > 0) && (
+      {/* ── Bloc 4 — Rendu final (background remover des photos uploadées) ── */}
+      {Object.keys(compositedUrls).length > 0 && (
         <div className="space-y-2">
           <p className="text-[10px] font-bold text-gray-400 uppercase tracking-widest">{bgI18n.rendFinalTitle}</p>
           <div className="grid grid-cols-4 gap-2 items-start">
@@ -2106,6 +2120,40 @@ export default function RecognitionStep({ slots, setSlots, result, aiPhotos: _ai
                 </div>
               </div>
             ))}
+          </div>
+        </div>
+      )}
+
+      {/* ── Bloc 2 — Mannequin IA (Pro) ── */}
+      <MannequinPanel
+        selectedMannequin={selectedMannequin}
+        onSelect={setSelectedMannequin}
+        onGenerate={handleGenerateMannequin}
+        isGenerating={isGeneratingMannequin}
+        hasSlot0Photo={!!slots[0]?.file}
+        mannI18n={mannI18n}
+        customPrompt={mannequinCustomPrompt}
+        onCustomPromptChange={handleCustomPromptChange}
+        wearingPrompt={mannequinWearingPrompt}
+        onWearingPromptChange={setMannequinWearingPrompt}
+        poses={mannequinPoses}
+        onPosesChange={setMannequinPoses}
+        productDisplayMode={productDisplayMode}
+        onProductDisplayModeChange={setProductDisplayMode}
+        onGenerateProductPhoto={handleGenerateProductPhoto}
+        isGeneratingProductPhoto={isGeneratingProductPhoto}
+        initialGender={result.genre.value === 'homme' ? 'men' : result.genre.value === 'femme' ? 'women' : 'men'}
+        totalGeneratedPhotos={totalAiPhotos}
+        selectedBgAi={selectedBgAi}
+        onBgAiSelect={handleBgAiSelect}
+        plan={plan}
+        bgI18n={bgI18n}
+      />
+      {/* ── Rendu Studio photo IA (portées + produit), sous le panneau ── */}
+      {(aiCompositedPhotos.length > 0 || productPhotos.length > 0) && (
+        <div className="space-y-2">
+          <p className="text-[10px] font-bold text-gray-400 uppercase tracking-widest">{bgI18n.rendStudioTitle}</p>
+          <div className="grid grid-cols-4 gap-2 items-start">
             {aiCompositedPhotos.map((url, i) => (
               <div key={`ai-${i}`} className="relative aspect-[3/4] rounded-xl overflow-hidden border border-purple-200 shadow-sm">
                 <img src={url} alt={`IA ${i + 1}`} className="w-full h-full object-cover" draggable={false} />
@@ -2126,30 +2174,6 @@ export default function RecognitionStep({ slots, setSlots, result, aiPhotos: _ai
         </div>
       )}
 
-      {/* ── Bloc 2 — Mannequin IA (Pro) ── */}
-      <MannequinPanel
-        selectedMannequin={selectedMannequin}
-        onSelect={setSelectedMannequin}
-        onGenerate={handleGenerateMannequin}
-        isGenerating={isGeneratingMannequin}
-        hasSlot0Photo={!!slots[0]?.file}
-        mannI18n={mannI18n}
-        customPrompt={mannequinCustomPrompt}
-        onCustomPromptChange={handleCustomPromptChange}
-        wearingPrompt={mannequinWearingPrompt}
-        onWearingPromptChange={setMannequinWearingPrompt}
-        productDisplayMode={productDisplayMode}
-        onProductDisplayModeChange={setProductDisplayMode}
-        onGenerateProductPhoto={handleGenerateProductPhoto}
-        isGeneratingProductPhoto={isGeneratingProductPhoto}
-        initialGender={result.genre.value === 'homme' ? 'men' : result.genre.value === 'femme' ? 'women' : 'men'}
-        totalGeneratedPhotos={totalAiPhotos}
-        selectedBgAi={selectedBgAi}
-        onBgAiSelect={handleBgAiSelect}
-        plan={plan}
-        bgI18n={bgI18n}
-      />
-
     </div>
   )
 }
@@ -2167,6 +2191,8 @@ interface MannequinPanelProps {
   onCustomPromptChange: (v: string) => void
   wearingPrompt: string
   onWearingPromptChange: (v: string) => void
+  poses: string[]
+  onPosesChange: (v: string[]) => void
   productDisplayMode: 'bust' | 'hanger' | 'flat'
   onProductDisplayModeChange: (v: 'bust' | 'hanger' | 'flat') => void
   onGenerateProductPhoto: () => void
@@ -2183,6 +2209,7 @@ function MannequinPanel({
   selectedMannequin, onSelect, onGenerate, isGenerating, hasSlot0Photo,
   mannI18n, customPrompt, onCustomPromptChange,
   wearingPrompt, onWearingPromptChange,
+  poses, onPosesChange,
   productDisplayMode, onProductDisplayModeChange,
   onGenerateProductPhoto, isGeneratingProductPhoto,
   initialGender = 'men',
@@ -2389,6 +2416,53 @@ function MannequinPanel({
             />
           )}
         </div>
+      </div>
+
+      {/* 3bis — Choix des poses portées (la face est toujours générée) */}
+      <div className="space-y-2">
+        <p className="text-xs font-semibold text-purple-700">{mannI18n.posesLabel}</p>
+        <div className="grid grid-cols-2 gap-1.5">
+          {/* Face — toujours générée (base), non décochable */}
+          <div className="flex items-center gap-2 text-left text-xs px-2.5 py-2 rounded-lg border bg-purple-100 border-purple-300 text-purple-800 font-semibold cursor-not-allowed">
+            <span className="w-3.5 h-3.5 rounded border flex items-center justify-center shrink-0 bg-purple-600 border-purple-600">
+              <Check className="w-2.5 h-2.5 text-white" />
+            </span>
+            {mannI18n.poseFace}
+          </div>
+          {([
+            { id: 'back',           label: mannI18n.poseBack },
+            { id: 'selfie_face',    label: mannI18n.poseSelfieFace },
+            { id: 'selfie_34',      label: mannI18n.poseSelfie34 },
+            { id: 'selfie_profile', label: mannI18n.poseSelfieProfile },
+            { id: 'seated_selfie',  label: mannI18n.poseSeatedSelfie },
+          ] as const).map(pose => {
+            const checked = poses.includes(pose.id)
+            return (
+              <button
+                key={pose.id}
+                type="button"
+                onClick={() =>
+                  onPosesChange(
+                    checked ? poses.filter(p => p !== pose.id) : [...poses, pose.id]
+                  )
+                }
+                className={`flex items-center gap-2 text-left text-xs px-2.5 py-2 rounded-lg border transition-all ${
+                  checked
+                    ? 'bg-purple-100 border-purple-300 text-purple-800 font-semibold'
+                    : 'bg-white border-purple-100 text-purple-500 hover:border-purple-200'
+                }`}
+              >
+                <span className={`w-3.5 h-3.5 rounded border flex items-center justify-center shrink-0 ${
+                  checked ? 'bg-purple-600 border-purple-600' : 'border-purple-300'
+                }`}>
+                  {checked && <Check className="w-2.5 h-2.5 text-white" />}
+                </span>
+                {pose.label}
+              </button>
+            )
+          })}
+        </div>
+        <p className="text-[11px] text-purple-400">{mannI18n.posesHint}</p>
       </div>
 
       {/* 4 — Bouton générer photos portées */}
