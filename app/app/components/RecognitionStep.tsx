@@ -377,6 +377,10 @@ const MANNEQUIN_I18N: Record<Lang, {
   poseSelfieProfile: string
   poseSeatedSelfie: string
   posesHint: string
+  noVersoWarning: string
+  proBadge: string
+  proRequired: string
+  proMessage: string
 }> = {
   fr: {
     mannequinTitle: 'Studio photo IA',
@@ -397,6 +401,10 @@ const MANNEQUIN_I18N: Record<Lang, {
     poseFace: 'De face', poseBack: 'De dos', poseSelfieFace: 'Selfie de face', poseSelfie34: 'Selfie 3/4',
     poseSelfieProfile: 'Selfie de profil', poseSeatedSelfie: 'Selfie assis',
     posesHint: 'La photo de face est toujours générée. Cochez les poses supplémentaires.',
+    noVersoWarning: 'Sans photo de dos de l\'article (étape Photos), les vues de dos ne seront pas générées.',
+    proBadge: 'Pro',
+    proRequired: 'Réservé au plan Pro',
+    proMessage: 'Passez au plan Pro pour générer des photos portées avec mannequin IA',
   },
   en: {
     mannequinTitle: 'AI Photo Studio',
@@ -417,6 +425,10 @@ const MANNEQUIN_I18N: Record<Lang, {
     poseFace: 'Front view', poseBack: 'Back view', poseSelfieFace: 'Front selfie', poseSelfie34: '3/4 selfie',
     poseSelfieProfile: 'Profile selfie', poseSeatedSelfie: 'Seated selfie',
     posesHint: 'The front photo is always generated. Check additional poses.',
+    noVersoWarning: 'Without a back photo of the item (Photos step), back views won\'t be generated.',
+    proBadge: 'Pro',
+    proRequired: 'Pro plan only',
+    proMessage: 'Upgrade to Pro to generate worn photos with AI models',
   },
   es: {
     mannequinTitle: 'Estudio foto IA',
@@ -437,6 +449,10 @@ const MANNEQUIN_I18N: Record<Lang, {
     poseFace: 'De frente', poseBack: 'De espaldas', poseSelfieFace: 'Selfie de frente', poseSelfie34: 'Selfie 3/4',
     poseSelfieProfile: 'Selfie de perfil', poseSeatedSelfie: 'Selfie sentado',
     posesHint: 'La foto de frente siempre se genera. Marca las poses adicionales.',
+    noVersoWarning: 'Sin una foto trasera del artículo (paso Fotos), no se generarán las vistas de espalda.',
+    proBadge: 'Pro',
+    proRequired: 'Solo plan Pro',
+    proMessage: 'Cambia al plan Pro para generar fotos vestidas con modelos IA',
   },
   de: {
     mannequinTitle: 'KI-Fotostudio',
@@ -457,6 +473,10 @@ const MANNEQUIN_I18N: Record<Lang, {
     poseFace: 'Vorderansicht', poseBack: 'Rückansicht', poseSelfieFace: 'Selfie von vorne', poseSelfie34: '3/4-Selfie',
     poseSelfieProfile: 'Profil-Selfie', poseSeatedSelfie: 'Sitzendes Selfie',
     posesHint: 'Das Frontfoto wird immer generiert. Wähle zusätzliche Posen.',
+    noVersoWarning: 'Ohne Rückenfoto des Artikels (Schritt Fotos) werden keine Rückansichten generiert.',
+    proBadge: 'Pro',
+    proRequired: 'Nur im Pro-Tarif',
+    proMessage: 'Wechsle zum Pro-Tarif, um getragene Fotos mit KI-Modellen zu erstellen',
   },
   it: {
     mannequinTitle: 'Studio foto IA',
@@ -477,6 +497,10 @@ const MANNEQUIN_I18N: Record<Lang, {
     poseFace: 'Di fronte', poseBack: 'Di spalle', poseSelfieFace: 'Selfie frontale', poseSelfie34: 'Selfie 3/4',
     poseSelfieProfile: 'Selfie di profilo', poseSeatedSelfie: 'Selfie seduto',
     posesHint: 'La foto frontale è sempre generata. Seleziona le pose aggiuntive.',
+    noVersoWarning: 'Senza una foto del retro dell\'articolo (passo Foto), le viste posteriori non verranno generate.',
+    proBadge: 'Pro',
+    proRequired: 'Solo piano Pro',
+    proMessage: 'Passa al piano Pro per generare foto indossate con modelli IA',
   },
   nl: {
     mannequinTitle: 'AI-fotostudio',
@@ -497,6 +521,10 @@ const MANNEQUIN_I18N: Record<Lang, {
     poseFace: 'Vooraanzicht', poseBack: 'Achterkant', poseSelfieFace: 'Selfie vooraanzicht', poseSelfie34: '3/4 selfie',
     poseSelfieProfile: 'Profiel selfie', poseSeatedSelfie: 'Zittende selfie',
     posesHint: 'De voorfoto wordt altijd gegenereerd. Vink extra poses aan.',
+    noVersoWarning: 'Zonder rugfoto van het artikel (stap Foto\'s) worden achteraanzichten niet gegenereerd.',
+    proBadge: 'Pro',
+    proRequired: 'Alleen Pro-abonnement',
+    proMessage: 'Upgrade naar Pro om gedragen foto\'s met AI-modellen te genereren',
   },
   pl: {
     mannequinTitle: 'Studio foto AI',
@@ -517,6 +545,10 @@ const MANNEQUIN_I18N: Record<Lang, {
     poseFace: 'Przód', poseBack: 'Tył', poseSelfieFace: 'Selfie z przodu', poseSelfie34: 'Selfie 3/4',
     poseSelfieProfile: 'Selfie z profilu', poseSeatedSelfie: 'Selfie na siedząco',
     posesHint: 'Zdjęcie z przodu jest zawsze generowane. Zaznacz dodatkowe pozy.',
+    noVersoWarning: 'Bez zdjęcia tyłu przedmiotu (krok Zdjęcia) widoki z tyłu nie zostaną wygenerowane.',
+    proBadge: 'Pro',
+    proRequired: 'Tylko plan Pro',
+    proMessage: 'Przejdź na plan Pro, aby generować zdjęcia noszone z modelami AI',
   },
 }
 
@@ -528,6 +560,7 @@ const BG_PANEL_I18N: Record<Lang, {
   checkboxHint: string
   selectPhotoHint: string
   processBtn: (n: number) => string
+  selectPhotosHint: string
   processing: string
   modelLoading: string
   rendTitle: string
@@ -538,6 +571,8 @@ const BG_PANEL_I18N: Record<Lang, {
   yourPhotosTitle: string
   rendFinalTitle: string
   rendStudioTitle: string
+  bgCatInterieur: string
+  bgCatStudio: string
 }> = {
   fr: {
     bgPanelTitle:    'Fond',
@@ -545,6 +580,7 @@ const BG_PANEL_I18N: Record<Lang, {
     checkboxHint:    'Sélectionnez une photo, puis choisissez un fond ci-dessous',
     selectPhotoHint: 'Sélectionnez une photo, puis choisissez un fond ci-dessous',
     processBtn:      (n) => `Traiter ${n} photo${n > 1 ? 's' : ''} sélectionnée${n > 1 ? 's' : ''}`,
+    selectPhotosHint: 'Sélectionnez des photos',
     processing:      'Traitement en cours…',
     modelLoading:    'Préparation du détourage, veuillez patienter…',
     rendTitle:       '📸 RENDU — PHOTOS TRAITÉES',
@@ -555,6 +591,8 @@ const BG_PANEL_I18N: Record<Lang, {
     yourPhotosTitle: 'Tes photos',
     rendFinalTitle:  'Rendu final',
     rendStudioTitle: 'Rendu Studio photo IA',
+    bgCatInterieur:  '🏠 Intérieur',
+    bgCatStudio:     '🎨 Studio',
   },
   en: {
     bgPanelTitle:    'Background',
@@ -562,6 +600,7 @@ const BG_PANEL_I18N: Record<Lang, {
     checkboxHint:    'Select a photo, then choose a background below',
     selectPhotoHint: 'Select a photo, then choose a background below',
     processBtn:      (n) => `Process ${n} selected photo${n > 1 ? 's' : ''}`,
+    selectPhotosHint: 'Select photos',
     processing:      'Processing…',
     modelLoading:    'Preparing background removal, please wait…',
     rendTitle:       '📸 RENDER — PROCESSED PHOTOS',
@@ -572,6 +611,8 @@ const BG_PANEL_I18N: Record<Lang, {
     yourPhotosTitle: 'Your photos',
     rendFinalTitle:  'Final render',
     rendStudioTitle: 'AI Photo Studio render',
+    bgCatInterieur:  '🏠 Interior',
+    bgCatStudio:     '🎨 Studio',
   },
   es: {
     bgPanelTitle:    'Fondo',
@@ -579,6 +620,7 @@ const BG_PANEL_I18N: Record<Lang, {
     checkboxHint:    'Selecciona una foto y elige un fondo a continuación',
     selectPhotoHint: 'Selecciona una foto y elige un fondo a continuación',
     processBtn:      (n) => `Procesar ${n} foto${n > 1 ? 's' : ''} seleccionada${n > 1 ? 's' : ''}`,
+    selectPhotosHint: 'Selecciona fotos',
     processing:      'Procesando…',
     modelLoading:    'Preparando la eliminación de fondo, por favor espere…',
     rendTitle:       '📸 RESULTADO — FOTOS PROCESADAS',
@@ -589,6 +631,8 @@ const BG_PANEL_I18N: Record<Lang, {
     yourPhotosTitle: 'Tus fotos',
     rendFinalTitle:  'Resultado final',
     rendStudioTitle: 'Render Estudio foto IA',
+    bgCatInterieur:  '🏠 Interior',
+    bgCatStudio:     '🎨 Estudio',
   },
   de: {
     bgPanelTitle:    'Hintergrund',
@@ -596,6 +640,7 @@ const BG_PANEL_I18N: Record<Lang, {
     checkboxHint:    'Foto auswählen, dann Hintergrund wählen',
     selectPhotoHint: 'Foto auswählen, dann Hintergrund wählen',
     processBtn:      (n) => `${n} Foto${n > 1 ? 's' : ''} verarbeiten`,
+    selectPhotosHint: 'Fotos auswählen',
     processing:      'Wird verarbeitet…',
     modelLoading:    'Hintergrundentfernung wird vorbereitet, bitte warten…',
     rendTitle:       '📸 VORSCHAU — BEARBEITETE FOTOS',
@@ -606,6 +651,8 @@ const BG_PANEL_I18N: Record<Lang, {
     yourPhotosTitle: 'Deine Fotos',
     rendFinalTitle:  'Endergebnis',
     rendStudioTitle: 'KI-Fotostudio-Ergebnis',
+    bgCatInterieur:  '🏠 Innenraum',
+    bgCatStudio:     '🎨 Studio',
   },
   it: {
     bgPanelTitle:    'Sfondo',
@@ -613,6 +660,7 @@ const BG_PANEL_I18N: Record<Lang, {
     checkboxHint:    'Seleziona una foto, poi scegli uno sfondo',
     selectPhotoHint: 'Seleziona una foto, poi scegli uno sfondo',
     processBtn:      (n) => `Elabora ${n} foto selezionat${n > 1 ? 'e' : 'a'}`,
+    selectPhotosHint: 'Seleziona foto',
     processing:      'Elaborazione in corso…',
     modelLoading:    'Preparazione della rimozione dello sfondo, attendere…',
     rendTitle:       '📸 RISULTATO — FOTO ELABORATE',
@@ -623,6 +671,8 @@ const BG_PANEL_I18N: Record<Lang, {
     yourPhotosTitle: 'Le tue foto',
     rendFinalTitle:  'Risultato finale',
     rendStudioTitle: 'Render Studio foto IA',
+    bgCatInterieur:  '🏠 Interno',
+    bgCatStudio:     '🎨 Studio',
   },
   nl: {
     bgPanelTitle:    'Achtergrond',
@@ -630,6 +680,7 @@ const BG_PANEL_I18N: Record<Lang, {
     checkboxHint:    "Selecteer een foto en kies een achtergrond",
     selectPhotoHint: "Selecteer een foto en kies een achtergrond",
     processBtn:      (n) => `Verwerk ${n} geselecteerde foto${n > 1 ? "'s" : ''}`,
+    selectPhotosHint: 'Selecteer foto\'s',
     processing:      'Bezig met verwerken…',
     modelLoading:    'Achtergrondverwijdering voorbereiden, even geduld…',
     rendTitle:       "📸 WEERGAVE — BEWERKTE FOTO'S",
@@ -640,6 +691,8 @@ const BG_PANEL_I18N: Record<Lang, {
     yourPhotosTitle: "Jouw foto's",
     rendFinalTitle:  'Eindresultaat',
     rendStudioTitle: 'AI-fotostudio resultaat',
+    bgCatInterieur:  '🏠 Interieur',
+    bgCatStudio:     '🎨 Studio',
   },
   pl: {
     bgPanelTitle:    'Tło',
@@ -647,6 +700,7 @@ const BG_PANEL_I18N: Record<Lang, {
     checkboxHint:    'Wybierz zdjęcie, a następnie wybierz tło poniżej',
     selectPhotoHint: 'Wybierz zdjęcie, a następnie wybierz tło poniżej',
     processBtn:      (n) => `Przetwórz ${n} wybrane zdjęci${n === 1 ? 'e' : 'a'}`,
+    selectPhotosHint: 'Wybierz zdjęcia',
     processing:      'Przetwarzanie…',
     modelLoading:    'Przygotowywanie usuwania tła, proszę czekać…',
     rendTitle:       '📸 PODGLĄD — PRZETWORZONE ZDJĘCIA',
@@ -657,6 +711,8 @@ const BG_PANEL_I18N: Record<Lang, {
     yourPhotosTitle: 'Twoje zdjęcia',
     rendFinalTitle:  'Wynik końcowy',
     rendStudioTitle: 'Render Studio zdjęć AI',
+    bgCatInterieur:  '🏠 Wnętrze',
+    bgCatStudio:     '🎨 Studio',
   },
 }
 
@@ -672,11 +728,13 @@ function makeBg(id: number): BgDef {
   return { id, label, type: 'image' as const, src: `/backgrounds/${filename}`, preview: `/backgrounds/${filename}` }
 }
 
-const BACKGROUNDS: BgDef[] = [
-  makeBg(0), makeBg(1),
-  ...Array.from({ length: 8 },  (_, i) => makeBg(23 + i)),
-  ...Array.from({ length: 21 }, (_, i) => makeBg(2  + i)),
+const BACKGROUNDS_INTERIEUR: BgDef[] = [
+  ...Array.from({ length: 28 }, (_, i) => makeBg(1 + i)),  // bg-01 à bg-28 (intérieurs : ex 53-60 puis ex 01-20)
 ]
+const BACKGROUNDS_STUDIO: BgDef[] = [
+  ...Array.from({ length: 22 }, (_, i) => makeBg(29 + i)),  // bg-29 à bg-50 (studios : ex 31-52)
+]
+const BACKGROUNDS_ALL: BgDef[] = [makeBg(0), ...BACKGROUNDS_INTERIEUR, ...BACKGROUNDS_STUDIO]
 
 /* ─── Mannequins ─────────────────────────────────────────────────────────── */
 
@@ -684,11 +742,17 @@ const MEN_MANNEQUINS: string[] = [
   'man-01', 'man-02', 'man-03', 'man-04', 'man-05',
   'man-06', 'man-07', 'man-08', 'man-09', 'man-10',
   'man-11', 'man-12', 'man-13', 'man-14', 'man-15',
+  'man-16', 'man-17', 'man-18', 'man-19', 'man-20',
+  'man-21', 'man-22', 'man-23', 'man-24', 'man-25',
+  'man-26', 'man-27', 'man-28', 'man-29', 'man-30',
 ]
 const WOMEN_MANNEQUINS: string[] = [
   'woman-01', 'woman-02', 'woman-03', 'woman-04', 'woman-05',
   'woman-06', 'woman-07', 'woman-08', 'woman-09', 'woman-10',
   'woman-11', 'woman-12', 'woman-13', 'woman-14', 'woman-15',
+  'woman-16', 'woman-17', 'woman-18', 'woman-19', 'woman-20',
+  'woman-21', 'woman-22', 'woman-23', 'woman-24', 'woman-25',
+  'woman-26', 'woman-27', 'woman-28', 'woman-29', 'woman-30',
 ]
 
 /* ─── Composition fond + cutout PNG transparent ───────────────────────────── */
@@ -1122,6 +1186,7 @@ function normalizeConfidence(result: RecognitionResult): RecognitionResult {
     style:         fix(result.style),
     motif:         fix(result.motif),
     defauts:       fix(result.defauts),
+    ouverture:     fix(result.ouverture),
     /* brand_segment : champ interne transmis au pricing, jamais affiché ici */
     ...(result.brand_segment ? { brand_segment: result.brand_segment } : {}),
   }
@@ -1229,7 +1294,7 @@ const inputCls = (conf: Confidence) => {
 /* ─── Génération automatique du prompt de tenue ─────────────────────────── */
 
 type GarmentType = 'HAUT' | 'BAS' | 'PIECE_ENTIERE' | 'VESTE' | 'CHAUSSURE' | 'ACCESSOIRE'
-type StyleKey = 'casual' | 'chic' | 'sportif' | 'vintage' | 'streetwear' | 'rock' | 'business' | 'boheme' | 'minimaliste' | 'default'
+type StyleKey = 'casual' | 'classique' | 'sportif' | 'chic' | 'boheme' | 'streetwear' | 'vintage' | 'romantique' | 'minimaliste' | 'rock' | 'preppy' | 'gothique' | 'default'
 
 function classifyGarment(vintedPath: string): GarmentType {
   const parts = vintedPath.split('>').map(s => s.trim())
@@ -1246,549 +1311,199 @@ function classifyGarment(vintedPath: string): GarmentType {
 
 function normalizeStyle(style: string): StyleKey {
   const s = style.toLowerCase()
-  if (s.includes('casual')) return 'casual'
-  if (s.includes('chic') || s.includes('élégant') || s.includes('elegant')) return 'chic'
-  if (s.includes('sport') || s.includes('outdoor')) return 'sportif'
-  if (s.includes('vintage')) return 'vintage'
-  if (s.includes('street')) return 'streetwear'
-  if (s.includes('rock')) return 'rock'
-  if (s.includes('business') || s.includes('classique') || s.includes('preppy')) return 'business'
+  if (s.includes('casual'))                                                    return 'casual'
+  if (s.includes('classique') || s.includes('classic'))                        return 'classique'
+  if (s.includes('sport') || s.includes('outdoor'))                            return 'sportif'
+  if (s.includes('chic') || s.includes('élégant') || s.includes('elegant'))   return 'chic'
   if (s.includes('bohème') || s.includes('boheme') || s.includes('fantaisie')) return 'boheme'
-  if (s.includes('minimaliste') || s.includes('minimalist')) return 'minimaliste'
+  if (s.includes('street'))                                                     return 'streetwear'
+  if (s.includes('vintage') || s.includes('rétro') || s.includes('retro'))    return 'vintage'
+  if (s.includes('romantique') || s.includes('romantic'))                      return 'romantique'
+  if (s.includes('minimaliste') || s.includes('minimalist'))                   return 'minimaliste'
+  if (s.includes('rock'))                                                       return 'rock'
+  if (s.includes('preppy'))                                                     return 'preppy'
+  if (s.includes('gothique') || s.includes('gothic') || s.includes('goth'))   return 'gothique'
+  if (s.includes('business'))                                                   return 'classique'
   return 'default'
 }
 
-const OUTFIT_PROMPTS: Record<Lang, Partial<Record<GarmentType, Partial<Record<StyleKey, string>>>>> = {
+const OUTFIT_PROMPTS: Record<Lang, Record<StyleKey, string>> = {
   fr: {
-    HAUT: {
-      casual:      'porter ce haut avec un jean straight-leg et des sneakers blanches, style casual 2026',
-      chic:        'porter ce haut avec un pantalon tailleur et des escarpins, style chic élégant',
-      sportif:     'porter ce haut avec un legging de sport et des baskets running, style sportswear',
-      vintage:     'porter ce haut avec un jean taille haute et des bottines, look vintage rétro',
-      streetwear:  'porter ce haut avec un cargo baggy et des sneakers chunky, style streetwear urbain',
-      rock:        'porter ce haut avec un jean noir straight et des boots, style rock',
-      business:    'porter ce haut avec un pantalon de costume et des derbies, style business',
-      boheme:      'porter ce haut avec une jupe longue fleurie et des sandales, style bohème',
-      minimaliste: 'porter ce haut avec un pantalon épuré et des loafers, style minimaliste',
-      default:     'porter ce haut avec un jean et des sneakers, style contemporain 2026',
-    },
-    BAS: {
-      casual:      'porter ce bas avec un t-shirt blanc et des sneakers, style casual 2026',
-      chic:        'porter ce bas avec un chemisier en soie et des escarpins, style chic élégant',
-      sportif:     'porter ce bas avec un top de sport et des baskets, style sportswear',
-      vintage:     'porter ce bas avec un crop-top et des mules, look vintage rétro',
-      streetwear:  'porter ce bas avec un hoodie oversize et des sneakers chunky, style streetwear',
-      rock:        'porter ce bas avec un t-shirt band et des boots, style rock',
-      business:    'porter ce bas avec une chemise structurée et des derbies, style business',
-      boheme:      'porter ce bas avec un top en lin et des sandales, style bohème',
-      minimaliste: 'porter ce bas avec un t-shirt neutre et des sneakers épurées, style minimaliste',
-      default:     'porter ce bas avec un t-shirt simple et des sneakers, style contemporain 2026',
-    },
-    PIECE_ENTIERE: {
-      casual:      'porter cette pièce avec des sneakers blanches, style casual décontracté 2026',
-      chic:        'porter cette pièce avec des talons et un sac pochette, style chic élégant',
-      sportif:     'porter cette pièce avec des baskets running, style sportswear',
-      vintage:     'porter cette pièce avec des bottines plates, look vintage rétro',
-      streetwear:  'porter cette pièce avec des sneakers chunky, style streetwear urbain',
-      rock:        'porter cette pièce avec des boots et une ceinture cloutée, style rock',
-      business:    'porter cette pièce avec des escarpins, style business classique',
-      boheme:      'porter cette pièce avec des sandales tressées, style bohème naturel',
-      minimaliste: 'porter cette pièce avec des chaussures épurées, style minimaliste',
-      default:     'porter cette pièce avec des chaussures adaptées, style contemporain 2026',
-    },
-    VESTE: {
-      casual:      'porter cette veste sur un t-shirt blanc, jean straight-leg et sneakers, style casual 2026',
-      chic:        'porter cette veste sur un chemisier, pantalon tailleur et escarpins, style chic',
-      sportif:     'porter cette veste avec un jogging et des baskets, style sportswear',
-      vintage:     'porter cette veste sur un t-shirt graphique, jean vintage et bottines, look rétro',
-      streetwear:  'porter cette veste avec un hoodie, cargo et sneakers chunky, style streetwear',
-      rock:        'porter cette veste sur un t-shirt noir, jean straight et boots, style rock',
-      business:    'porter cette veste sur une chemise, pantalon de costume et derbies, style business',
-      boheme:      'porter cette veste sur une robe florale et des sandales, style bohème',
-      minimaliste: 'porter cette veste sur un t-shirt neutre, pantalon épuré et loafers, style minimaliste',
-      default:     'porter cette veste avec jean et sneakers, style contemporain 2026',
-    },
-    CHAUSSURE: {
-      casual:      'chaussures portées avec un jean straight-leg et un t-shirt blanc, style casual 2026',
-      chic:        'chaussures portées avec un pantalon tailleur et un chemisier, style chic élégant',
-      sportif:     'chaussures portées avec un legging et un top de sport, style sportswear',
-      vintage:     'chaussures portées avec un jean taille haute et un crop-top, look vintage rétro',
-      streetwear:  'chaussures portées avec un cargo et un hoodie oversize, style streetwear',
-      rock:        'chaussures portées avec un jean noir et un t-shirt band, style rock',
-      business:    'chaussures portées avec un costume et une chemise, style business',
-      boheme:      'chaussures portées avec une robe longue fleurie, style bohème',
-      minimaliste: 'chaussures portées avec un pantalon épuré et un t-shirt neutre, style minimaliste',
-      default:     'chaussures portées avec une tenue casual contemporaine 2026',
-    },
-    ACCESSOIRE: {
-      casual:      'accessoire porté avec un jean et un t-shirt blanc, style casual décontracté 2026',
-      chic:        'accessoire porté avec un ensemble chic, robe ou tailleur élégant',
-      sportif:     'accessoire porté avec une tenue sportswear, legging et top',
-      vintage:     'accessoire porté avec un jean vintage et un crop-top, look rétro',
-      streetwear:  'accessoire porté avec un cargo et un hoodie oversize, style streetwear',
-      rock:        'accessoire porté avec un jean noir et un t-shirt band, style rock',
-      business:    'accessoire porté avec un costume ou tailleur, style business',
-      boheme:      'accessoire porté avec une robe longue et des sandales, style bohème',
-      minimaliste: 'accessoire porté avec des pièces épurées neutres, style minimaliste',
-      default:     'accessoire porté avec une tenue casual contemporaine 2026',
-    },
+    casual:     'tenue casual contemporaine, pièces de complément en denim brut ou tons neutres, coupes droites ou légèrement amples (jamais slim moulant), sneakers en cuir minimalistes, allure épurée européenne',
+    classique:  'tenue classique intemporelle, pièces de complément bien coupées en tons neutres, coupes droites structurées (jamais slim), matières de qualité, élégance discrète',
+    sportif:    'tenue sportswear premium, pièces de complément techniques en tons sobres, coupes modernes confortables (jamais slim moulant), allure athleisure léchée',
+    chic:       'tenue chic et élégante, pièces de complément fluides et structurées en tons raffinés, coupes nettes (jamais slim), matières nobles, allure sophistiquée',
+    boheme:     'tenue bohème raffinée, pièces de complément en matières naturelles fluides, coupes amples maîtrisées, palette terreuse douce, élégance décontractée',
+    streetwear: 'tenue streetwear premium, pièces de complément en coupes oversize ou droites structurées (jamais slim), tons neutres, allure urbaine léchée',
+    vintage:    'tenue vintage réinterprétée, pièces de complément rétro modernisées en coupes droites ou amples, palette chaude maîtrisée, allure curée',
+    romantique: 'tenue romantique délicate, pièces de complément fluides et légères, coupes souples, palette douce et poudrée, allure féminine soignée',
+    minimaliste:'tenue minimaliste épurée, pièces de complément en coupes nettes et droites (jamais slim), palette monochrome neutre, sans fioriture',
+    rock:       'tenue rock épurée, pièces de complément à dominante noire en coupes droites structurées, matières mates, allure sombre contemporaine',
+    preppy:     'tenue preppy européenne, pièces de complément structurées en tons classiques sobres, coupes droites nettes, allure chic décontractée',
+    gothique:   'tenue gothique chic, pièces de complément total look noir en coupes droites structurées, matières mates profondes, allure sombre élégante',
+    default:    'tenue neutre et contemporaine, pièces de complément bien coupées en tons sobres, coupes droites ou légèrement amples (jamais slim moulant), allure épurée européenne',
   },
   en: {
-    HAUT: {
-      casual:      'wearing this top with straight-leg jeans and white sneakers, casual 2026 style',
-      chic:        'wearing this top with tailored trousers and heels, chic elegant style',
-      sportif:     'wearing this top with sports leggings and running shoes, sportswear style',
-      vintage:     'wearing this top with high-waist jeans and ankle boots, vintage retro look',
-      streetwear:  'wearing this top with baggy cargo pants and chunky sneakers, streetwear style',
-      rock:        'wearing this top with black straight jeans and boots, rock style',
-      business:    'wearing this top with dress trousers and oxford shoes, business style',
-      boheme:      'wearing this top with a floral maxi skirt and sandals, boho style',
-      minimaliste: 'wearing this top with clean-cut trousers and loafers, minimalist style',
-      default:     'wearing this top with jeans and sneakers, contemporary 2026 style',
-    },
-    BAS: {
-      casual:      'wearing these bottoms with a white t-shirt and sneakers, casual 2026 style',
-      chic:        'wearing these bottoms with a silk blouse and heels, chic elegant style',
-      sportif:     'wearing these bottoms with a sports top and trainers, sportswear style',
-      vintage:     'wearing these bottoms with a crop top and mules, vintage retro look',
-      streetwear:  'wearing these bottoms with an oversized hoodie and chunky sneakers, streetwear',
-      rock:        'wearing these bottoms with a band tee and boots, rock style',
-      business:    'wearing these bottoms with a structured shirt and oxford shoes, business style',
-      boheme:      'wearing these bottoms with a linen top and flat sandals, boho style',
-      minimaliste: 'wearing these bottoms with a neutral t-shirt and clean sneakers, minimalist style',
-      default:     'wearing these bottoms with a simple top and sneakers, contemporary 2026 style',
-    },
-    PIECE_ENTIERE: {
-      casual:      'wearing this piece with white sneakers, casual relaxed 2026 style',
-      chic:        'wearing this piece with heels and a clutch bag, chic elegant style',
-      sportif:     'wearing this piece with running shoes, sportswear style',
-      vintage:     'wearing this piece with flat ankle boots, vintage retro look',
-      streetwear:  'wearing this piece with chunky sneakers, urban streetwear style',
-      rock:        'wearing this piece with boots and a studded belt, rock style',
-      business:    'wearing this piece with heels, classic business style',
-      boheme:      'wearing this piece with woven sandals, natural boho style',
-      minimaliste: 'wearing this piece with clean-cut shoes, minimalist style',
-      default:     'wearing this piece with appropriate footwear, contemporary 2026 style',
-    },
-    VESTE: {
-      casual:      'wearing this jacket over a white t-shirt, straight-leg jeans and sneakers, casual 2026',
-      chic:        'wearing this jacket over a blouse, tailored trousers and heels, chic style',
-      sportif:     'wearing this jacket with joggers and trainers, sportswear style',
-      vintage:     'wearing this jacket over a graphic tee, vintage jeans and ankle boots, retro look',
-      streetwear:  'wearing this jacket with a hoodie, cargo pants and chunky sneakers, streetwear',
-      rock:        'wearing this jacket over a black tee, straight jeans and boots, rock style',
-      business:    'wearing this jacket over a shirt, dress trousers and oxfords, business style',
-      boheme:      'wearing this jacket over a floral dress and sandals, boho style',
-      minimaliste: 'wearing this jacket over a neutral tee, clean trousers and loafers, minimalist',
-      default:     'wearing this jacket with jeans and sneakers, contemporary 2026 style',
-    },
-    CHAUSSURE: {
-      casual:      'shoes worn with straight-leg jeans and a white t-shirt, casual 2026 style',
-      chic:        'shoes worn with tailored trousers and a blouse, chic elegant style',
-      sportif:     'shoes worn with sports leggings and a top, sportswear style',
-      vintage:     'shoes worn with high-waist jeans and a crop top, vintage retro look',
-      streetwear:  'shoes worn with cargo pants and an oversized hoodie, streetwear style',
-      rock:        'shoes worn with black jeans and a band tee, rock style',
-      business:    'shoes worn with a suit and dress shirt, business style',
-      boheme:      'shoes worn with a long floral dress, boho style',
-      minimaliste: 'shoes worn with clean trousers and a neutral t-shirt, minimalist style',
-      default:     'shoes worn with a contemporary casual outfit 2026',
-    },
-    ACCESSOIRE: {
-      casual:      'accessory worn with jeans and a white t-shirt, casual relaxed 2026 style',
-      chic:        'accessory worn with an elegant outfit, dress or suit',
-      sportif:     'accessory worn with sportswear, leggings and a top',
-      vintage:     'accessory worn with vintage jeans and a crop top, retro look',
-      streetwear:  'accessory worn with cargo pants and an oversized hoodie, streetwear',
-      rock:        'accessory worn with black jeans and a band tee, rock style',
-      business:    'accessory worn with a suit or blazer, business style',
-      boheme:      'accessory worn with a long dress and sandals, boho style',
-      minimaliste: 'accessory worn with clean neutral pieces, minimalist style',
-      default:     'accessory worn with a casual contemporary outfit 2026',
-    },
+    casual:     'contemporary casual outfit, complementary pieces in raw denim or neutral tones, straight or slightly relaxed cuts (never slim-fitting), minimalist leather sneakers, clean European allure',
+    classique:  'timeless classic outfit, well-cut complementary pieces in neutral tones, structured straight cuts (never slim), quality fabrics, quiet elegance',
+    sportif:    'premium sportswear outfit, technical complementary pieces in understated tones, modern comfortable cuts (never slim-fitting), polished athleisure allure',
+    chic:       'chic and elegant outfit, fluid and structured complementary pieces in refined tones, clean cuts (never slim), noble fabrics, sophisticated allure',
+    boheme:     'refined bohemian outfit, complementary pieces in fluid natural fabrics, mastered loose cuts, soft earthy palette, laid-back elegance',
+    streetwear: 'premium streetwear outfit, complementary pieces in oversized or structured straight cuts (never slim), neutral tones, polished urban allure',
+    vintage:    'reinterpreted vintage outfit, retro modernized complementary pieces in straight or relaxed cuts, mastered warm palette, curated allure',
+    romantique: 'delicate romantic outfit, fluid and light complementary pieces, supple cuts, soft powdery palette, polished feminine allure',
+    minimaliste:'clean minimalist outfit, complementary pieces in sharp straight cuts (never slim), neutral monochrome palette, no frills',
+    rock:       'clean rock outfit, black-dominant complementary pieces in structured straight cuts, matte fabrics, dark contemporary allure',
+    preppy:     'European preppy outfit, structured complementary pieces in sober classic tones, clean straight cuts, chic casual allure',
+    gothique:   'chic gothic outfit, total black complementary pieces in structured straight cuts, deep matte fabrics, dark elegant allure',
+    default:    'neutral and contemporary outfit, well-cut complementary pieces in understated tones, straight or slightly relaxed cuts (never slim-fitting), clean European allure',
   },
   es: {
-    HAUT: {
-      casual:      'llevar este top con vaqueros straight y zapatillas blancas, estilo casual 2026',
-      chic:        'llevar este top con pantalón de vestir y tacones, estilo chic elegante',
-      sportif:     'llevar este top con mallas deportivas y zapatillas running, estilo sportswear',
-      vintage:     'llevar este top con vaqueros de talle alto y botines, look vintage retro',
-      streetwear:  'llevar este top con cargo baggy y zapatillas chunky, estilo streetwear urbano',
-      rock:        'llevar este top con vaqueros negros y botas, estilo rock',
-      business:    'llevar este top con pantalón de traje y zapatos de vestir, estilo business',
-      boheme:      'llevar este top con falda larga floral y sandalias, estilo boho',
-      minimaliste: 'llevar este top con pantalón limpio y mocasines, estilo minimalista',
-      default:     'llevar este top con vaqueros y zapatillas, estilo contemporáneo 2026',
-    },
-    BAS: {
-      casual:      'llevar estas prendas con camiseta blanca y zapatillas, estilo casual 2026',
-      chic:        'llevar estas prendas con blusa de seda y tacones, estilo chic elegante',
-      sportif:     'llevar estas prendas con top deportivo y zapatillas running, estilo sportswear',
-      vintage:     'llevar estas prendas con crop-top y mules, look vintage retro',
-      streetwear:  'llevar estas prendas con sudadera oversize y zapatillas chunky, streetwear',
-      rock:        'llevar estas prendas con camiseta de banda y botas, estilo rock',
-      business:    'llevar estas prendas con camisa estructurada y zapatos de vestir, business',
-      boheme:      'llevar estas prendas con top de lino y sandalias planas, estilo boho',
-      minimaliste: 'llevar estas prendas con camiseta neutral y zapatillas limpias, minimalista',
-      default:     'llevar estas prendas con camiseta simple y zapatillas, estilo contemporáneo 2026',
-    },
-    PIECE_ENTIERE: {
-      casual:      'llevar esta prenda con zapatillas blancas, estilo casual relajado 2026',
-      chic:        'llevar esta prenda con tacones y bolso clutch, estilo chic elegante',
-      sportif:     'llevar esta prenda con zapatillas running, estilo sportswear',
-      vintage:     'llevar esta prenda con botines planos, look vintage retro',
-      streetwear:  'llevar esta prenda con zapatillas chunky, estilo streetwear urbano',
-      rock:        'llevar esta prenda con botas y cinturón con tachuelas, estilo rock',
-      business:    'llevar esta prenda con zapatos de tacón, estilo business clásico',
-      boheme:      'llevar esta prenda con sandalias trenzadas, estilo boho natural',
-      minimaliste: 'llevar esta prenda con zapatos limpios, estilo minimalista',
-      default:     'llevar esta prenda con calzado adecuado, estilo contemporáneo 2026',
-    },
-    VESTE: {
-      casual:      'llevar esta chaqueta sobre camiseta blanca, vaqueros straight y zapatillas, casual 2026',
-      chic:        'llevar esta chaqueta sobre blusa, pantalón de traje y tacones, estilo chic',
-      sportif:     'llevar esta chaqueta con pantalón deportivo y zapatillas, sportswear',
-      vintage:     'llevar esta chaqueta sobre camiseta gráfica, vaqueros vintage y botines, retro',
-      streetwear:  'llevar esta chaqueta con hoodie, cargo y zapatillas chunky, streetwear',
-      rock:        'llevar esta chaqueta sobre camiseta negra, vaqueros straight y botas, rock',
-      business:    'llevar esta chaqueta sobre camisa, pantalón de traje y zapatos, business',
-      boheme:      'llevar esta chaqueta sobre vestido floral y sandalias, estilo boho',
-      minimaliste: 'llevar esta chaqueta sobre camiseta neutral, pantalón limpio y mocasines',
-      default:     'llevar esta chaqueta con vaqueros y zapatillas, estilo contemporáneo 2026',
-    },
-    CHAUSSURE: {
-      casual:      'zapatos con vaqueros straight y camiseta blanca, estilo casual 2026',
-      chic:        'zapatos con pantalón de vestir y blusa, estilo chic elegante',
-      sportif:     'zapatillas con mallas deportivas y top, estilo sportswear',
-      vintage:     'zapatos con vaqueros de talle alto y crop-top, look vintage retro',
-      streetwear:  'zapatillas con cargo y sudadera oversize, estilo streetwear',
-      rock:        'botas con vaqueros negros y camiseta de banda, estilo rock',
-      business:    'zapatos con traje y camisa, estilo business',
-      boheme:      'sandalias con vestido largo floral, estilo boho',
-      minimaliste: 'zapatos con pantalón limpio y camiseta neutral, estilo minimalista',
-      default:     'calzado con outfit casual contemporáneo 2026',
-    },
-    ACCESSOIRE: {
-      casual:      'accesorio con vaqueros y camiseta blanca, estilo casual relajado 2026',
-      chic:        'accesorio con outfit elegante, vestido o conjunto chic',
-      sportif:     'accesorio con outfit deportivo, mallas y top',
-      vintage:     'accesorio con vaqueros vintage y crop-top, look retro',
-      streetwear:  'accesorio con cargo y sudadera oversize, streetwear',
-      rock:        'accesorio con vaqueros negros y camiseta de banda, rock',
-      business:    'accesorio con traje o blazer, estilo business',
-      boheme:      'accesorio con vestido largo y sandalias, estilo boho',
-      minimaliste: 'accesorio con prendas neutras limpias, estilo minimalista',
-      default:     'accesorio con outfit casual contemporáneo 2026',
-    },
+    casual:     'conjunto casual contemporáneo, prendas de complemento en denim crudo o tonos neutros, cortes rectos o ligeramente amplios (nunca slim ceñido), zapatillas de cuero minimalistas, aire europeo depurado',
+    classique:  'conjunto clásico atemporal, prendas de complemento bien cortadas en tonos neutros, cortes rectos estructurados (nunca slim), tejidos de calidad, elegancia discreta',
+    sportif:    'conjunto deportivo premium, prendas de complemento técnicas en tonos sobrios, cortes modernos y cómodos (nunca slim ceñido), aspecto athleisure cuidado',
+    chic:       'conjunto chic y elegante, prendas de complemento fluidas y estructuradas en tonos refinados, cortes limpios (nunca slim), tejidos nobles, aspecto sofisticado',
+    boheme:     'conjunto bohemio refinado, prendas de complemento en tejidos naturales fluidos, cortes amplios controlados, paleta terrosa suave, elegancia desenfadada',
+    streetwear: 'conjunto streetwear premium, prendas de complemento en cortes oversize o rectos estructurados (nunca slim), tonos neutros, aspecto urbano cuidado',
+    vintage:    'conjunto vintage reinterpretado, prendas de complemento retro modernizadas en cortes rectos o amplios, paleta cálida controlada, aspecto cuidado',
+    romantique: 'conjunto romántico delicado, prendas de complemento fluidas y ligeras, cortes suaves, paleta suave y empolvada, aspecto femenino cuidado',
+    minimaliste:'conjunto minimalista depurado, prendas de complemento en cortes limpios y rectos (nunca slim), paleta monocroma neutra, sin florituras',
+    rock:       'conjunto rock depurado, prendas de complemento de dominante negra en cortes rectos estructurados, tejidos mates, aspecto oscuro contemporáneo',
+    preppy:     'conjunto preppy europeo, prendas de complemento estructuradas en tonos clásicos sobrios, cortes rectos limpios, aspecto chic desenfadado',
+    gothique:   'conjunto gótico chic, prendas de complemento total negro en cortes rectos estructurados, tejidos mates profundos, aspecto oscuro y elegante',
+    default:    'conjunto neutro y contemporáneo, prendas de complemento bien cortadas en tonos sobrios, cortes rectos o ligeramente amplios (nunca slim ceñido), aire europeo depurado',
   },
   de: {
-    HAUT: {
-      casual:      'dieses Oberteil mit Straight-Jeans und weißen Sneakern, lässiger Casual-Stil 2026',
-      chic:        'dieses Oberteil mit Anzughose und Absatzschuhen, schicker eleganter Stil',
-      sportif:     'dieses Oberteil mit Sportleggings und Laufschuhen, Sportswear-Stil',
-      vintage:     'dieses Oberteil mit Highwaist-Jeans und Ankle Boots, Vintage-Retro-Look',
-      streetwear:  'dieses Oberteil mit Cargo-Baggy und Chunky-Sneakern, urbaner Streetwear-Stil',
-      rock:        'dieses Oberteil mit schwarzen Straight-Jeans und Boots, Rock-Stil',
-      business:    'dieses Oberteil mit Anzughose und Derby-Schuhen, Business-Stil',
-      boheme:      'dieses Oberteil mit langem Blumenrock und Sandalen, Boho-Stil',
-      minimaliste: 'dieses Oberteil mit cleaner Hose und Loafern, minimalistischer Stil',
-      default:     'dieses Oberteil mit Jeans und Sneakern, zeitgenössischer Stil 2026',
-    },
-    BAS: {
-      casual:      'diese Hose mit weißem T-Shirt und Sneakern, lässiger Casual-Stil 2026',
-      chic:        'diese Hose mit Seidenbluse und Absatzschuhen, schick-eleganter Stil',
-      sportif:     'diese Hose mit Sport-Top und Laufschuhen, Sportswear-Stil',
-      vintage:     'diese Hose mit Crop-Top und Mules, Vintage-Retro-Look',
-      streetwear:  'diese Hose mit Oversized-Hoodie und Chunky-Sneakern, Streetwear-Stil',
-      rock:        'diese Hose mit Band-T-Shirt und Boots, Rock-Stil',
-      business:    'diese Hose mit strukturiertem Hemd und Halbschuhen, Business-Stil',
-      boheme:      'diese Hose mit Leinenoberteil und flachen Sandalen, Boho-Stil',
-      minimaliste: 'diese Hose mit neutralem T-Shirt und cleanen Sneakern, minimalistischer Stil',
-      default:     'diese Hose mit einfachem Oberteil und Sneakern, zeitgenössischer Stil 2026',
-    },
-    PIECE_ENTIERE: {
-      casual:      'dieses Teil mit weißen Sneakern, lässiger Casual-Stil 2026',
-      chic:        'dieses Teil mit Absatzschuhen und Clutch, schick-eleganter Stil',
-      sportif:     'dieses Teil mit Laufschuhen, Sportswear-Stil',
-      vintage:     'dieses Teil mit flachen Ankle Boots, Vintage-Retro-Look',
-      streetwear:  'dieses Teil mit Chunky-Sneakern, urbaner Streetwear-Stil',
-      rock:        'dieses Teil mit Boots und Nieten-Gürtel, Rock-Stil',
-      business:    'dieses Teil mit Absatzschuhen, klassischer Business-Stil',
-      boheme:      'dieses Teil mit geflochtenen Sandalen, natürlicher Boho-Stil',
-      minimaliste: 'dieses Teil mit cleanen Schuhen, minimalistischer Stil',
-      default:     'dieses Teil mit passenden Schuhen, zeitgenössischer Stil 2026',
-    },
-    VESTE: {
-      casual:      'diese Jacke über weißem T-Shirt, Straight-Jeans und Sneakern, Casual-Stil 2026',
-      chic:        'diese Jacke über Bluse, Anzughose und Absatzschuhen, schicker Stil',
-      sportif:     'diese Jacke mit Jogginghose und Sneakern, Sportswear-Stil',
-      vintage:     'diese Jacke über Grafik-T-Shirt, Vintage-Jeans und Ankle Boots, Retro-Look',
-      streetwear:  'diese Jacke mit Hoodie, Cargo und Chunky-Sneakern, Streetwear-Stil',
-      rock:        'diese Jacke über schwarzem T-Shirt, Straight-Jeans und Boots, Rock-Stil',
-      business:    'diese Jacke über Hemd, Anzughose und Halbschuhen, Business-Stil',
-      boheme:      'diese Jacke über Blumenkleid und Sandalen, Boho-Stil',
-      minimaliste: 'diese Jacke über neutralem T-Shirt, cleaner Hose und Loafern, minimalistisch',
-      default:     'diese Jacke mit Jeans und Sneakern, zeitgenössischer Stil 2026',
-    },
-    CHAUSSURE: {
-      casual:      'Schuhe mit Straight-Jeans und weißem T-Shirt, lässiger Casual-Stil 2026',
-      chic:        'Schuhe mit Anzughose und Bluse, schick-eleganter Stil',
-      sportif:     'Schuhe mit Sportleggings und Top, Sportswear-Stil',
-      vintage:     'Schuhe mit Highwaist-Jeans und Crop-Top, Vintage-Retro-Look',
-      streetwear:  'Schuhe mit Cargo und Oversized-Hoodie, Streetwear-Stil',
-      rock:        'Schuhe mit schwarzen Jeans und Band-T-Shirt, Rock-Stil',
-      business:    'Schuhe mit Anzug und Hemd, Business-Stil',
-      boheme:      'Schuhe mit langem Blumenkleid, Boho-Stil',
-      minimaliste: 'Schuhe mit cleaner Hose und neutralem T-Shirt, minimalistischer Stil',
-      default:     'Schuhe mit zeitgenössischem Casual-Outfit 2026',
-    },
-    ACCESSOIRE: {
-      casual:      'Accessoire mit Jeans und weißem T-Shirt, lässiger Casual-Stil 2026',
-      chic:        'Accessoire mit elegantem Outfit, Kleid oder Anzug',
-      sportif:     'Accessoire mit Sportswear, Leggings und Top',
-      vintage:     'Accessoire mit Vintage-Jeans und Crop-Top, Retro-Look',
-      streetwear:  'Accessoire mit Cargo und Oversized-Hoodie, Streetwear-Stil',
-      rock:        'Accessoire mit schwarzen Jeans und Band-T-Shirt, Rock-Stil',
-      business:    'Accessoire mit Anzug oder Blazer, Business-Stil',
-      boheme:      'Accessoire mit langem Kleid und Sandalen, Boho-Stil',
-      minimaliste: 'Accessoire mit cleanen neutralen Teilen, minimalistischer Stil',
-      default:     'Accessoire mit zeitgenössischem Casual-Outfit 2026',
-    },
+    casual:     'zeitgenössisches Casual-Outfit, Ergänzungsstücke in rohem Denim oder Neutratönen, gerade oder leicht weite Schnitte (nie slim-tailliert), minimalistische Ledersneaker, klares europäisches Flair',
+    classique:  'zeitloses klassisches Outfit, gut geschnittene Ergänzungsstücke in Neutratönen, strukturierte gerade Schnitte (nie slim), hochwertige Materialien, stille Eleganz',
+    sportif:    'hochwertiges Sportswear-Outfit, technische Ergänzungsstücke in dezenten Tönen, moderne komfortable Schnitte (nie slim-tailliert), gepflegter Athleisure-Look',
+    chic:       'schickes und elegantes Outfit, fließende und strukturierte Ergänzungsstücke in raffinierten Tönen, saubere Schnitte (nie slim), edle Materialien, sophistizierter Look',
+    boheme:     'raffiniertes Boho-Outfit, Ergänzungsstücke in fließenden Naturmaterialien, kontrollierte weite Schnitte, sanfte Erdtöne, lässige Eleganz',
+    streetwear: 'hochwertiges Streetwear-Outfit, Ergänzungsstücke in Oversized- oder strukturierten geraden Schnitten (nie slim), neutrale Töne, gepflegter urbaner Look',
+    vintage:    'reinterpretiertes Vintage-Outfit, retro-modernisierte Ergänzungsstücke in geraden oder weiten Schnitten, kontrollierte warme Palette, kuratierter Look',
+    romantique: 'zart romantisches Outfit, fließende und leichte Ergänzungsstücke, weiche Schnitte, sanfte pudrige Palette, gepflegter femininer Look',
+    minimaliste:'klares minimalistisches Outfit, Ergänzungsstücke in scharfen geraden Schnitten (nie slim), neutrale monochromatische Palette, kein Schnickschnack',
+    rock:       'klares Rock-Outfit, schwarzdominante Ergänzungsstücke in strukturierten geraden Schnitten, matte Materialien, dunkler zeitgenössischer Look',
+    preppy:     'europäisches Preppy-Outfit, strukturierte Ergänzungsstücke in nüchternen klassischen Tönen, saubere gerade Schnitte, lässig-schicker Look',
+    gothique:   'schickes Gothic-Outfit, Total-Black-Ergänzungsstücke in strukturierten geraden Schnitten, tiefe matte Materialien, dunkel-eleganter Look',
+    default:    'neutrales zeitgenössisches Outfit, gut geschnittene Ergänzungsstücke in dezenten Tönen, gerade oder leicht weite Schnitte (nie slim-tailliert), klares europäisches Flair',
   },
   it: {
-    HAUT: {
-      casual:      'indossare questo top con jeans straight-leg e sneakers bianche, stile casual 2026',
-      chic:        'indossare questo top con pantaloni sartoriali e décolleté, stile chic elegante',
-      sportif:     'indossare questo top con leggings sportivi e scarpe da running, stile sportswear',
-      vintage:     'indossare questo top con jeans a vita alta e stivaletti, look vintage retrò',
-      streetwear:  'indossare questo top con cargo baggy e sneakers chunky, stile streetwear urbano',
-      rock:        'indossare questo top con jeans neri straight e stivali, stile rock',
-      business:    'indossare questo top con pantaloni da ufficio e scarpe stringate, stile business',
-      boheme:      'indossare questo top con gonna lunga fiorata e sandali, stile boho',
-      minimaliste: 'indossare questo top con pantaloni puliti e mocassini, stile minimalista',
-      default:     'indossare questo top con jeans e sneakers, stile contemporaneo 2026',
-    },
-    BAS: {
-      casual:      'indossare questo capo con t-shirt bianca e sneakers, stile casual 2026',
-      chic:        'indossare questo capo con blusa in seta e décolleté, stile chic elegante',
-      sportif:     'indossare questo capo con top sportivo e scarpe da running, stile sportswear',
-      vintage:     'indossare questo capo con crop-top e mules, look vintage retrò',
-      streetwear:  'indossare questo capo con hoodie oversize e sneakers chunky, streetwear',
-      rock:        'indossare questo capo con t-shirt da band e stivali, stile rock',
-      business:    'indossare questo capo con camicia strutturata e scarpe stringate, business',
-      boheme:      'indossare questo capo con top in lino e sandali piatti, stile boho',
-      minimaliste: 'indossare questo capo con t-shirt neutra e sneakers pulite, minimalista',
-      default:     'indossare questo capo con semplice maglietta e sneakers, stile contemporaneo 2026',
-    },
-    PIECE_ENTIERE: {
-      casual:      'indossare questo capo con sneakers bianche, stile casual rilassato 2026',
-      chic:        'indossare questo capo con tacchi e clutch, stile chic elegante',
-      sportif:     'indossare questo capo con scarpe da running, stile sportswear',
-      vintage:     'indossare questo capo con stivaletti piatti, look vintage retrò',
-      streetwear:  'indossare questo capo con sneakers chunky, stile streetwear urbano',
-      rock:        'indossare questo capo con stivali e cintura borchiata, stile rock',
-      business:    'indossare questo capo con décolleté, stile business classico',
-      boheme:      'indossare questo capo con sandali intrecciati, stile boho naturale',
-      minimaliste: 'indossare questo capo con scarpe pulite, stile minimalista',
-      default:     'indossare questo capo con calzature adeguate, stile contemporaneo 2026',
-    },
-    VESTE: {
-      casual:      'indossare questa giacca su t-shirt bianca, jeans straight-leg e sneakers, casual 2026',
-      chic:        'indossare questa giacca su blusa, pantaloni sartoriali e décolleté, stile chic',
-      sportif:     'indossare questa giacca con tuta e scarpe da ginnastica, sportswear',
-      vintage:     'indossare questa giacca su t-shirt grafica, jeans vintage e stivaletti, retrò',
-      streetwear:  'indossare questa giacca con hoodie, cargo e sneakers chunky, streetwear',
-      rock:        'indossare questa giacca su t-shirt nera, jeans straight e stivali, rock',
-      business:    'indossare questa giacca su camicia, pantaloni da ufficio e stringate, business',
-      boheme:      'indossare questa giacca su vestito fiorato e sandali, stile boho',
-      minimaliste: 'indossare questa giacca su t-shirt neutra, pantaloni puliti e mocassini',
-      default:     'indossare questa giacca con jeans e sneakers, stile contemporaneo 2026',
-    },
-    CHAUSSURE: {
-      casual:      'scarpe con jeans straight-leg e t-shirt bianca, stile casual 2026',
-      chic:        'scarpe con pantaloni sartoriali e blusa, stile chic elegante',
-      sportif:     'scarpe con leggings sportivi e top, stile sportswear',
-      vintage:     'scarpe con jeans a vita alta e crop-top, look vintage retrò',
-      streetwear:  'scarpe con cargo e hoodie oversize, stile streetwear',
-      rock:        'scarpe con jeans neri e t-shirt da band, stile rock',
-      business:    'scarpe con abito o completo, stile business',
-      boheme:      'scarpe con vestito lungo fiorato, stile boho',
-      minimaliste: 'scarpe con pantaloni puliti e t-shirt neutra, stile minimalista',
-      default:     'scarpe con outfit casual contemporaneo 2026',
-    },
-    ACCESSOIRE: {
-      casual:      'accessorio con jeans e t-shirt bianca, stile casual rilassato 2026',
-      chic:        'accessorio con outfit elegante, abito o completo chic',
-      sportif:     'accessorio con abbigliamento sportivo, leggings e top',
-      vintage:     'accessorio con jeans vintage e crop-top, look retrò',
-      streetwear:  'accessorio con cargo e hoodie oversize, streetwear',
-      rock:        'accessorio con jeans neri e t-shirt da band, stile rock',
-      business:    'accessorio con abito o blazer, stile business',
-      boheme:      'accessorio con vestito lungo e sandali, stile boho',
-      minimaliste: 'accessorio con capi neutri puliti, stile minimalista',
-      default:     'accessorio con outfit casual contemporaneo 2026',
-    },
+    casual:     'outfit casual contemporaneo, capi di complemento in denim grezzo o toni neutri, tagli dritti o leggermente ampi (mai slim aderente), sneakers in pelle minimaliste, allure europea pulita',
+    classique:  'outfit classico senza tempo, capi di complemento ben tagliati in toni neutri, tagli dritti strutturati (mai slim), tessuti di qualità, eleganza discreta',
+    sportif:    'outfit sportswear premium, capi di complemento tecnici in toni sobri, tagli moderni e comodi (mai slim aderente), allure athleisure curata',
+    chic:       'outfit chic ed elegante, capi di complemento fluidi e strutturati in toni raffinati, tagli netti (mai slim), tessuti nobili, allure sofisticata',
+    boheme:     'outfit bohémien raffinato, capi di complemento in tessuti naturali fluidi, tagli ampi controllati, palette terrosa morbida, eleganza disinvolta',
+    streetwear: 'outfit streetwear premium, capi di complemento in tagli oversize o dritti strutturati (mai slim), toni neutri, allure urbana curata',
+    vintage:    'outfit vintage reinterpretato, capi di complemento retrò modernizzati in tagli dritti o ampi, palette calda controllata, allure curata',
+    romantique: 'outfit romantico delicato, capi di complemento fluidi e leggeri, tagli morbidi, palette dolce e cipriata, allure femminile curata',
+    minimaliste:'outfit minimalista pulito, capi di complemento in tagli netti e dritti (mai slim), palette monocromatica neutra, senza fronzoli',
+    rock:       'outfit rock pulito, capi di complemento a dominante nera in tagli dritti strutturati, tessuti opachi, allure scura contemporanea',
+    preppy:     'outfit preppy europeo, capi di complemento strutturati in toni classici sobri, tagli dritti netti, allure chic disinvolta',
+    gothique:   'outfit gothic chic, capi di complemento total black in tagli dritti strutturati, tessuti opachi profondi, allure scura ed elegante',
+    default:    'outfit neutro e contemporaneo, capi di complemento ben tagliati in toni sobri, tagli dritti o leggermente ampi (mai slim aderente), allure europea pulita',
   },
   nl: {
-    HAUT: {
-      casual:      'dit bovenstuk met straight-leg jeans en witte sneakers, casual stijl 2026',
-      chic:        'dit bovenstuk met pantalon en hakken, chic elegante stijl',
-      sportif:     'dit bovenstuk met sportlegging en hardloopschoenen, sportswear stijl',
-      vintage:     'dit bovenstuk met hoge taille jeans en enkellaarzen, vintage retro look',
-      streetwear:  'dit bovenstuk met baggy cargo en chunky sneakers, streetwear stijl',
-      rock:        'dit bovenstuk met zwarte straight jeans en boots, rock stijl',
-      business:    'dit bovenstuk met pantalon en nette schoenen, zakelijke stijl',
-      boheme:      'dit bovenstuk met lange bloemenrok en sandalen, boho stijl',
-      minimaliste: 'dit bovenstuk met strakke broek en loafers, minimalistische stijl',
-      default:     'dit bovenstuk met jeans en sneakers, hedendaagse stijl 2026',
-    },
-    BAS: {
-      casual:      'dit kledingstuk met wit t-shirt en sneakers, casual stijl 2026',
-      chic:        'dit kledingstuk met zijden blouse en hakken, chic elegante stijl',
-      sportif:     'dit kledingstuk met sporttop en hardloopschoenen, sportswear stijl',
-      vintage:     'dit kledingstuk met crop-top en mules, vintage retro look',
-      streetwear:  'dit kledingstuk met oversized hoodie en chunky sneakers, streetwear',
-      rock:        'dit kledingstuk met band t-shirt en boots, rock stijl',
-      business:    'dit kledingstuk met gestructureerd overhemd en nette schoenen, zakelijk',
-      boheme:      'dit kledingstuk met linnen top en platte sandalen, boho stijl',
-      minimaliste: 'dit kledingstuk met neutraal t-shirt en strakke sneakers, minimalistisch',
-      default:     'dit kledingstuk met eenvoudige top en sneakers, hedendaagse stijl 2026',
-    },
-    PIECE_ENTIERE: {
-      casual:      'dit kledingstuk met witte sneakers, casual ontspannen stijl 2026',
-      chic:        'dit kledingstuk met hakken en clutch, chic elegante stijl',
-      sportif:     'dit kledingstuk met hardloopschoenen, sportswear stijl',
-      vintage:     'dit kledingstuk met platte enkellaarzen, vintage retro look',
-      streetwear:  'dit kledingstuk met chunky sneakers, urban streetwear stijl',
-      rock:        'dit kledingstuk met boots en nieten riem, rock stijl',
-      business:    'dit kledingstuk met hakken, klassieke zakelijke stijl',
-      boheme:      'dit kledingstuk met gevlochten sandalen, natuurlijke boho stijl',
-      minimaliste: 'dit kledingstuk met strakke schoenen, minimalistische stijl',
-      default:     'dit kledingstuk met passend schoeisel, hedendaagse stijl 2026',
-    },
-    VESTE: {
-      casual:      'dit jasje over wit t-shirt, straight-leg jeans en sneakers, casual stijl 2026',
-      chic:        'dit jasje over blouse, pantalon en hakken, chic stijl',
-      sportif:     'dit jasje met joggingbroek en sneakers, sportswear stijl',
-      vintage:     'dit jasje over grafisch t-shirt, vintage jeans en enkellaarzen, retro look',
-      streetwear:  'dit jasje met hoodie, cargo en chunky sneakers, streetwear stijl',
-      rock:        'dit jasje over zwart t-shirt, straight jeans en boots, rock stijl',
-      business:    'dit jasje over overhemd, pantalon en nette schoenen, zakelijke stijl',
-      boheme:      'dit jasje over bloemenjurk en sandalen, boho stijl',
-      minimaliste: 'dit jasje over neutraal t-shirt, strakke broek en loafers, minimalistisch',
-      default:     'dit jasje met jeans en sneakers, hedendaagse stijl 2026',
-    },
-    CHAUSSURE: {
-      casual:      'schoenen met straight-leg jeans en wit t-shirt, casual stijl 2026',
-      chic:        'schoenen met pantalon en blouse, chic elegante stijl',
-      sportif:     'schoenen met sportlegging en top, sportswear stijl',
-      vintage:     'schoenen met hoge taille jeans en crop-top, vintage retro look',
-      streetwear:  'schoenen met cargo en oversized hoodie, streetwear stijl',
-      rock:        'schoenen met zwarte jeans en band t-shirt, rock stijl',
-      business:    'schoenen met pak en overhemd, zakelijke stijl',
-      boheme:      'schoenen met lange bloemenjurk, boho stijl',
-      minimaliste: 'schoenen met strakke broek en neutraal t-shirt, minimalistische stijl',
-      default:     'schoenen met hedendaagse casual outfit 2026',
-    },
-    ACCESSOIRE: {
-      casual:      'accessoire met jeans en wit t-shirt, casual ontspannen stijl 2026',
-      chic:        'accessoire met elegante outfit, jurk of chic ensemble',
-      sportif:     'accessoire met sportswear, legging en top',
-      vintage:     'accessoire met vintage jeans en crop-top, retro look',
-      streetwear:  'accessoire met cargo en oversized hoodie, streetwear',
-      rock:        'accessoire met zwarte jeans en band t-shirt, rock stijl',
-      business:    'accessoire met pak of blazer, zakelijke stijl',
-      boheme:      'accessoire met lange jurk en sandalen, boho stijl',
-      minimaliste: 'accessoire met neutrale strakke stukken, minimalistische stijl',
-      default:     'accessoire met hedendaagse casual outfit 2026',
-    },
+    casual:     'eigentijds casual outfit, aanvullende stukken in ruw denim of neutrale tinten, rechte of licht wijde sneden (nooit slim-passend), minimalistische leren sneakers, strak Europees allure',
+    classique:  'tijdloos klassiek outfit, goed gesneden aanvullende stukken in neutrale tinten, gestructureerde rechte sneden (nooit slim), kwalitatieve stoffen, stille elegantie',
+    sportif:    'premium sportswear outfit, technische aanvullende stukken in ingetogen tinten, moderne comfortabele sneden (nooit slim-passend), verzorgde athleisure allure',
+    chic:       'chic en elegant outfit, vloeiende en gestructureerde aanvullende stukken in verfijnde tinten, strakke sneden (nooit slim), edele stoffen, sophisticeerde allure',
+    boheme:     'verfijnd boho outfit, aanvullende stukken in vloeiende natuurlijke stoffen, beheerste wijde sneden, zachte aardse kleuren, ontspannen elegantie',
+    streetwear: 'premium streetwear outfit, aanvullende stukken in oversized of gestructureerde rechte sneden (nooit slim), neutrale tinten, verzorgde urbane allure',
+    vintage:    'herinterpreteerd vintage outfit, retro gemoderniseerde aanvullende stukken in rechte of wijde sneden, beheerst warm palet, gecureerd allure',
+    romantique: 'delicaat romantisch outfit, vloeiende en lichte aanvullende stukken, soepele sneden, zacht poederig palet, verzorgde vrouwelijke allure',
+    minimaliste:'strak minimalistisch outfit, aanvullende stukken in scherpe rechte sneden (nooit slim), neutraal monochromatisch palet, geen opsmuk',
+    rock:       'strak rock outfit, zwart-dominante aanvullende stukken in gestructureerde rechte sneden, matte stoffen, donker eigentijds allure',
+    preppy:     'Europees preppy outfit, gestructureerde aanvullende stukken in sobere klassieke tinten, strakke rechte sneden, chic casual allure',
+    gothique:   'chic gothic outfit, total black aanvullende stukken in gestructureerde rechte sneden, diepe matte stoffen, donker elegant allure',
+    default:    'neutraal en eigentijds outfit, goed gesneden aanvullende stukken in ingetogen tinten, rechte of licht wijde sneden (nooit slim-passend), strak Europees allure',
   },
   pl: {
-    HAUT: {
-      casual:      'ten top z dopasowanymi jeansami i białymi sneakersami, styl casual 2026',
-      chic:        'ten top z elegancką spódnicą i szpilkami, styl szykowny i elegancki',
-      sportif:     'ten top z legginsami sportowymi i butami do biegania, styl sportswear',
-      vintage:     'ten top z jeansami wysokim stanem i botkami, look vintage retro',
-      streetwear:  'ten top z cargo baggy i chunky sneakersami, styl streetwear',
-      rock:        'ten top z czarnymi straight jeansami i botkami, styl rock',
-      business:    'ten top ze spodniami do garnituru i oksoforkami, styl biznesowy',
-      boheme:      'ten top z długą kwiecistą spódnicą i sandałami, styl boho',
-      minimaliste: 'ten top z prostymi spodniami i loaferami, styl minimalistyczny',
-      default:     'ten top z jeansami i sneakersami, styl współczesny 2026',
-    },
-    BAS: {
-      casual:      'ta część garderoby z białą koszulką i sneakersami, styl casual 2026',
-      chic:        'ta część garderoby z jedwabną bluzką i szpilkami, styl szykowny',
-      sportif:     'ta część garderoby z topem sportowym i butami do biegania, styl sportswear',
-      vintage:     'ta część garderoby z crop-topem i mules, look vintage retro',
-      streetwear:  'ta część garderoby z oversized hoodie i chunky sneakersami, streetwear',
-      rock:        'ta część garderoby z koszulką kapeli i botkami, styl rock',
-      business:    'ta część garderoby z dopasowaną koszulą i oksoforkami, styl biznesowy',
-      boheme:      'ta część garderoby z lnianym topem i płaskimi sandałami, styl boho',
-      minimaliste: 'ta część garderoby z neutralną koszulką i czystymi sneakersami, minimalistyczny',
-      default:     'ta część garderoby z prostą koszulką i sneakersami, styl współczesny 2026',
-    },
-    PIECE_ENTIERE: {
-      casual:      'ta część garderoby z białymi sneakersami, styl casual zrelaksowany 2026',
-      chic:        'ta część garderoby z obcasami i torebką kopertową, styl szykowny i elegancki',
-      sportif:     'ta część garderoby z butami do biegania, styl sportswear',
-      vintage:     'ta część garderoby z płaskimi botkami, look vintage retro',
-      streetwear:  'ta część garderoby z chunky sneakersami, styl streetwear',
-      rock:        'ta część garderoby z botkami i ćwiekowanym paskiem, styl rock',
-      business:    'ta część garderoby ze szpilkami, klasyczny styl biznesowy',
-      boheme:      'ta część garderoby z plecionymi sandałami, naturalny styl boho',
-      minimaliste: 'ta część garderoby z prostymi butami, styl minimalistyczny',
-      default:     'ta część garderoby z odpowiednim obuwiem, styl współczesny 2026',
-    },
-    VESTE: {
-      casual:      'ta kurtka na białą koszulkę, dopasowane jeansy i sneakersy, casual 2026',
-      chic:        'ta kurtka na bluzkę, eleganckie spodnie i obcasy, styl szykowny',
-      sportif:     'ta kurtka z dresem i sneakersami, styl sportswear',
-      vintage:     'ta kurtka na koszulkę z nadrukiem, vintage jeansy i botki, retro look',
-      streetwear:  'ta kurtka z hoodie, cargo i chunky sneakersami, styl streetwear',
-      rock:        'ta kurtka na czarną koszulkę, straight jeansy i botki, styl rock',
-      business:    'ta kurtka na koszulę, spodnie do garnituru i oksoforki, styl biznesowy',
-      boheme:      'ta kurtka na kwiecistą sukienkę i sandały, styl boho',
-      minimaliste: 'ta kurtka na neutralną koszulkę, proste spodnie i loafery, minimalistyczny',
-      default:     'ta kurtka z jeansami i sneakersami, styl współczesny 2026',
-    },
-    CHAUSSURE: {
-      casual:      'buty z dopasowanymi jeansami i białą koszulką, styl casual 2026',
-      chic:        'buty z eleganckim spodniami i bluzką, styl szykowny i elegancki',
-      sportif:     'buty z legginsami sportowymi i topem, styl sportswear',
-      vintage:     'buty z jeansami wysokim stanem i crop-topem, look vintage retro',
-      streetwear:  'buty z cargo i oversized hoodie, styl streetwear',
-      rock:        'buty z czarnymi jeansami i koszulką kapeli, styl rock',
-      business:    'buty z garniturem i koszulą, styl biznesowy',
-      boheme:      'buty z długą kwiecistą sukienką, styl boho',
-      minimaliste: 'buty z prostymi spodniami i neutralną koszulką, styl minimalistyczny',
-      default:     'buty ze współczesnym casualowym outfitem 2026',
-    },
-    ACCESSOIRE: {
-      casual:      'akcesorium z jeansami i białą koszulką, styl casual zrelaksowany 2026',
-      chic:        'akcesorium z elegancką stylizacją, sukienka lub garnitur',
-      sportif:     'akcesorium ze strojem sportowym, legginsy i top',
-      vintage:     'akcesorium z vintage jeansami i crop-topem, look retro',
-      streetwear:  'akcesorium z cargo i oversized hoodie, streetwear',
-      rock:        'akcesorium z czarnymi jeansami i koszulką kapeli, styl rock',
-      business:    'akcesorium z garniturem lub marynarką, styl biznesowy',
-      boheme:      'akcesorium z długą sukienką i sandałami, styl boho',
-      minimaliste: 'akcesorium z neutralnymi prostymi ubraniami, styl minimalistyczny',
-      default:     'akcesorium ze współczesnym casualowym outfitem 2026',
-    },
+    casual:     'współczesny strój casual, uzupełniające elementy w surowym denimie lub neutralnych tonach, proste lub lekko luźne kroje (nigdy slim przylegający), minimalistyczne skórzane sneakersy, czysty europejski styl',
+    classique:  'ponadczasowy klasyczny strój, dobrze skrojone uzupełniające elementy w neutralnych tonach, strukturowane proste kroje (nigdy slim), wysokiej jakości tkaniny, dyskretna elegancja',
+    sportif:    'premium strój sportswear, techniczne uzupełniające elementy w stonowanych tonach, nowoczesne wygodne kroje (nigdy slim przylegający), dopracowany wygląd athleisure',
+    chic:       'elegancki i szykowny strój, płynne i strukturalne uzupełniające elementy w wyrafinowanych tonach, czyste kroje (nigdy slim), szlachetne tkaniny, wyrafinowany styl',
+    boheme:     'wyrafinowany strój boho, uzupełniające elementy w płynnych naturalnych tkaninach, opanowane luźne kroje, miękka ziemista paleta, swobodna elegancja',
+    streetwear: 'premium strój streetwear, uzupełniające elementy w oversizowych lub strukturowanych prostych krojach (nigdy slim), neutralne tony, dopracowany miejski styl',
+    vintage:    'reinterpretowany strój vintage, retro unowocześnione uzupełniające elementy w prostych lub luźnych krojach, opanowana ciepła paleta, kuratowany styl',
+    romantique: 'delikatny romantyczny strój, płynne i lekkie uzupełniające elementy, miękkie kroje, miękka pudrowa paleta, dopracowany kobiecy styl',
+    minimaliste:'czysty minimalistyczny strój, uzupełniające elementy w ostrych prostych krojach (nigdy slim), neutralna monochromatyczna paleta, bez ozdóbek',
+    rock:       'czysty rockowy strój, uzupełniające elementy z dominantą czerni w strukturowanych prostych krojach, matowe tkaniny, ciemny współczesny styl',
+    preppy:     'europejski strój preppy, strukturowane uzupełniające elementy w stonowanych klasycznych tonach, czyste proste kroje, swobodny szykowny styl',
+    gothique:   'szykowny gotycki strój, total black uzupełniające elementy w strukturowanych prostych krojach, głębokie matowe tkaniny, ciemny i elegancki styl',
+    default:    'neutralny i współczesny strój, dobrze skrojone uzupełniające elementy w stonowanych tonach, proste lub lekko luźne kroje (nigdy slim przylegający), czysty europejski styl',
   },
 }
 
 function generateOutfitPrompt(result: RecognitionResult, lang: Lang): string {
-  const type = classifyGarment(result.vintedPath?.value ?? '')
   const style = normalizeStyle(result.style?.value ?? '')
   const prompts = OUTFIT_PROMPTS[lang] ?? OUTFIT_PROMPTS.en
-  return (
-    prompts[type]?.[style]
-    ?? prompts[type]?.['default']
-    ?? OUTFIT_PROMPTS.en[type]?.['default']
-    ?? 'outfit adapted to the garment, contemporary 2026 casual style'
-  )
+  return prompts[style] ?? prompts['default'] ?? OUTFIT_PROMPTS.en['default']
+}
+
+const WEARING_PROMPTS: Record<Lang, Record<GarmentType, string>> = {
+  fr: {
+    HAUT:         'manches à leur longueur naturelle, non retroussées, vêtement tombant naturellement, porté non rentré, col à plat',
+    BAS:          'porté à la taille naturelle, à sa longueur réelle, sans revers ni ourlet ajouté',
+    PIECE_ENTIERE:'porté à sa longueur et sa coupe naturelles, tombant normalement',
+    VESTE:        'manches déployées à leur longueur naturelle, portée naturellement, col à plat',
+    CHAUSSURE:    'portées normalement aux pieds',
+    ACCESSOIRE:   'porté ou présenté normalement',
+  },
+  en: {
+    HAUT:         'sleeves at their natural length, not rolled up, garment hanging naturally, untucked, collar flat',
+    BAS:          'worn at the natural waist, at its actual length, no cuffs or added hem',
+    PIECE_ENTIERE:'worn at its natural length and cut, hanging normally',
+    VESTE:        'sleeves extended to their natural length, worn naturally, collar flat',
+    CHAUSSURE:    'worn normally on the feet',
+    ACCESSOIRE:   'worn or presented normally',
+  },
+  es: {
+    HAUT:         'mangas a su longitud natural, sin remangar, prenda cayendo naturalmente, sin meter, cuello plano',
+    BAS:          'llevado a la cintura natural, a su longitud real, sin vueltas ni dobladillo añadido',
+    PIECE_ENTIERE:'llevado a su longitud y corte naturales, cayendo normalmente',
+    VESTE:        'mangas desplegadas a su longitud natural, llevada naturalmente, cuello plano',
+    CHAUSSURE:    'llevados normalmente en los pies',
+    ACCESSOIRE:   'llevado o presentado normalmente',
+  },
+  de: {
+    HAUT:         'Ärmel in natürlicher Länge, nicht aufgerollt, Kleidungsstück fällt natürlich, nicht eingesteckt, Kragen flach',
+    BAS:          'in natürlicher Taillenhöhe getragen, in echter Länge, ohne Aufschlag oder zusätzlichen Saum',
+    PIECE_ENTIERE:'in natürlicher Länge und Schnitt getragen, fällt normal',
+    VESTE:        'Ärmel in natürlicher Länge ausgestreckt, natürlich getragen, Kragen flach',
+    CHAUSSURE:    'normal an den Füßen getragen',
+    ACCESSOIRE:   'normal getragen oder präsentiert',
+  },
+  it: {
+    HAUT:         'maniche alla loro lunghezza naturale, non arrotolate, capo che cade naturalmente, non infilato, collo piatto',
+    BAS:          'indossato alla vita naturale, alla sua lunghezza reale, senza risvolti né orlo aggiunto',
+    PIECE_ENTIERE:'indossato alla sua lunghezza e vestibilità naturali, caduta normale',
+    VESTE:        'maniche distese alla loro lunghezza naturale, indossata naturalmente, collo piatto',
+    CHAUSSURE:    'indossate normalmente ai piedi',
+    ACCESSOIRE:   'indossato o presentato normalmente',
+  },
+  nl: {
+    HAUT:         'mouwen op hun natuurlijke lengte, niet opgerold, kledingstuk valt natuurlijk, niet ingestopt, kraag plat',
+    BAS:          'gedragen op de natuurlijke taille, op zijn werkelijke lengte, geen omgeslagen zoom of toegevoegde zoom',
+    PIECE_ENTIERE:'gedragen op zijn natuurlijke lengte en snit, valt normaal',
+    VESTE:        'mouwen uitgestrekt tot hun natuurlijke lengte, natuurlijk gedragen, kraag plat',
+    CHAUSSURE:    'normaal aan de voeten gedragen',
+    ACCESSOIRE:   'normaal gedragen of gepresenteerd',
+  },
+  pl: {
+    HAUT:         'rękawy w naturalnej długości, niepodsunięte, ubranie układające się naturalnie, niezatuczone, kołnierz płaski',
+    BAS:          'noszone w naturalnej talii, w rzeczywistej długości, bez mankietów ani dodatkowych podwinięć',
+    PIECE_ENTIERE:'noszone w naturalnej długości i kroju, układające się normalnie',
+    VESTE:        'rękawy rozciągnięte do naturalnej długości, noszone naturalnie, kołnierz płaski',
+    CHAUSSURE:    'noszone normalnie na stopach',
+    ACCESSOIRE:   'noszone lub prezentowane normalnie',
+  },
+}
+
+function generateWearingPrompt(result: RecognitionResult, lang: Lang): string {
+  const type = classifyGarment(result.vintedPath?.value ?? '')
+  const prompts = WEARING_PROMPTS[lang] ?? WEARING_PROMPTS.en
+  return prompts[type] ?? WEARING_PROMPTS.en[type] ?? ''
 }
 
 /* ─── Composant principal ────────────────────────────────────────────────── */
@@ -1825,6 +1540,11 @@ export default function RecognitionStep({ slots, setSlots, result, aiPhotos: _ai
     setMannequinCustomPrompt(v)
   }
   const [mannequinWearingPrompt, setMannequinWearingPrompt] = useState('')
+  const wearingIsAutoRef = useRef(true)
+  const handleWearingPromptChange = (v: string) => {
+    wearingIsAutoRef.current = false
+    setMannequinWearingPrompt(v)
+  }
   // Poses portées cochées par l'utilisateur (la face est toujours générée en base, hors de cette liste)
   const [mannequinPoses, setMannequinPoses] = useState<string[]>(['back', 'selfie_34'])
 
@@ -1864,8 +1584,9 @@ export default function RecognitionStep({ slots, setSlots, result, aiPhotos: _ai
 
   /* Régénère le prompt de tenue quand result change, sauf si l'utilisateur l'a modifié */
   useEffect(() => {
-    if (!result || !promptIsAutoRef.current) return
-    setMannequinCustomPrompt(generateOutfitPrompt(result, lang))
+    if (!result) return
+    if (promptIsAutoRef.current) setMannequinCustomPrompt(generateOutfitPrompt(result, lang))
+    if (wearingIsAutoRef.current) setMannequinWearingPrompt(generateWearingPrompt(result, lang))
   // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [result])
 
@@ -1889,7 +1610,7 @@ export default function RecognitionStep({ slots, setSlots, result, aiPhotos: _ai
     setIsCompositing(true)
     Promise.all(
       processedSlots.map(slot =>
-        compositeWithBackground(slot.processedUrl!, plan === 'freemium' ? BACKGROUNDS[0] : (BACKGROUNDS.find(b => b.id === selectedBgUser) ?? BACKGROUNDS[0]), slot.id >= 9)
+        compositeWithBackground(slot.processedUrl!, plan === 'freemium' ? BACKGROUNDS_ALL[0] : (BACKGROUNDS_ALL.find(b => b.id === selectedBgUser) ?? BACKGROUNDS_ALL[0]), slot.id >= 9)
           .then(url => ({ id: slot.id, url }))
           .catch(() => ({ id: slot.id, url: '' }))
       )
@@ -1935,6 +1656,21 @@ export default function RecognitionStep({ slots, setSlots, result, aiPhotos: _ai
         reader.onerror = reject
         reader.readAsDataURL(slot0.file!)
       })
+
+      // Photo de dos de l'article (verso) — slot 1, ou slot 2 pour les chaussures.
+      // Sert à générer une pose "dos" fidèle au vrai dos du vêtement (si fournie).
+      const isShoe = classifyGarment(result?.vintedPath?.value ?? '') === 'CHAUSSURE'
+      const versoSlot = isShoe ? slots[2] : slots[1]
+      let base64Verso: string | undefined
+      if (versoSlot?.file) {
+        base64Verso = await new Promise<string>((resolve, reject) => {
+          const r = new FileReader()
+          r.onload  = () => resolve(r.result as string)
+          r.onerror = reject
+          r.readAsDataURL(versoSlot.file!)
+        })
+      }
+
       const rawPrompt = mannequinCustomPrompt.trim()
       let outfitPromptEn = rawPrompt || undefined
       if (rawPrompt) {
@@ -1961,7 +1697,9 @@ export default function RecognitionStep({ slots, setSlots, result, aiPhotos: _ai
           outfit_prompt:  outfitPromptEn,
           wearing_prompt: mannequinWearingPrompt.trim() || undefined,
           background_id:  selectedBgAi,
-          poses:          mannequinPoses,
+          poses:          base64Verso ? mannequinPoses : mannequinPoses.filter(p => p !== 'back'),
+          ouverture:      result.ouverture?.value || undefined,
+          verso_image:    base64Verso,
         }),
       })
       if (!res.ok) throw new Error('Generation failed')
@@ -1976,7 +1714,7 @@ export default function RecognitionStep({ slots, setSlots, result, aiPhotos: _ai
     } finally {
       setIsGeneratingMannequin(false)
     }
-  }, [selectedMannequin, isGeneratingMannequin, mannequinCustomPrompt, mannequinWearingPrompt, mannequinPoses, selectedBgAi, slots, setAiPhotos])
+  }, [selectedMannequin, isGeneratingMannequin, mannequinCustomPrompt, mannequinWearingPrompt, mannequinPoses, selectedBgAi, slots, result, setAiPhotos])
 
   const handleGenerateProductPhoto = useCallback(async () => {
     if (isGeneratingProductPhoto) return
@@ -2006,6 +1744,7 @@ export default function RecognitionStep({ slots, setSlots, result, aiPhotos: _ai
           verso_image:   base64Verso,
           display_mode:  productDisplayMode,
           background_id: selectedBgAi,
+          ouverture:     result.ouverture?.value || undefined,
         }),
       })
       if (!res.ok) throw new Error('Generation failed')
@@ -2131,11 +1870,12 @@ export default function RecognitionStep({ slots, setSlots, result, aiPhotos: _ai
         onGenerate={handleGenerateMannequin}
         isGenerating={isGeneratingMannequin}
         hasSlot0Photo={!!slots[0]?.file}
+        hasVersoPhoto={!!(classifyGarment(result?.vintedPath?.value ?? '') === 'CHAUSSURE' ? slots[2]?.file : slots[1]?.file)}
         mannI18n={mannI18n}
         customPrompt={mannequinCustomPrompt}
         onCustomPromptChange={handleCustomPromptChange}
         wearingPrompt={mannequinWearingPrompt}
-        onWearingPromptChange={setMannequinWearingPrompt}
+        onWearingPromptChange={handleWearingPromptChange}
         poses={mannequinPoses}
         onPosesChange={setMannequinPoses}
         productDisplayMode={productDisplayMode}
@@ -2186,6 +1926,7 @@ interface MannequinPanelProps {
   onGenerate: () => void
   isGenerating: boolean
   hasSlot0Photo: boolean
+  hasVersoPhoto: boolean
   mannI18n: typeof MANNEQUIN_I18N.fr
   customPrompt: string
   onCustomPromptChange: (v: string) => void
@@ -2206,7 +1947,7 @@ interface MannequinPanelProps {
 }
 
 function MannequinPanel({
-  selectedMannequin, onSelect, onGenerate, isGenerating, hasSlot0Photo,
+  selectedMannequin, onSelect, onGenerate, isGenerating, hasSlot0Photo, hasVersoPhoto,
   mannI18n, customPrompt, onCustomPromptChange,
   wearingPrompt, onWearingPromptChange,
   poses, onPosesChange,
@@ -2220,12 +1961,19 @@ function MannequinPanel({
   const [previewId, setPreviewId]             = useState<string | null>(null)
   const [showCustomPrompt, setShowCustomPrompt]   = useState(false)
   const [showWearingPrompt, setShowWearingPrompt] = useState(false)
-  const canGenerate        = !!selectedMannequin && hasSlot0Photo
-  const canGenerateProduct = hasSlot0Photo
+  const isPro              = plan === 'pro'
+  const canGenerate        = isPro && !!selectedMannequin && hasSlot0Photo
+  const canGenerateProduct = isPro && hasSlot0Photo
   const mannequins         = gender === 'men' ? MEN_MANNEQUINS : WOMEN_MANNEQUINS
 
   return (
     <div className="bg-purple-50 border border-purple-100 rounded-2xl p-4 space-y-3">
+      {!hasVersoPhoto && (
+        <div className="flex items-start gap-3 rounded-xl bg-amber-100 border-2 border-amber-300 px-4 py-3.5">
+          <AlertTriangle className="w-6 h-6 text-amber-600 shrink-0 mt-0.5" />
+          <p className="text-sm font-semibold text-amber-800 leading-snug">{mannI18n.noVersoWarning}</p>
+        </div>
+      )}
       {/* En-tête */}
       <div className="flex items-center gap-2">
         <div className="w-8 h-8 rounded-xl bg-purple-100 flex items-center justify-center shrink-0">
@@ -2234,6 +1982,11 @@ function MannequinPanel({
         <div>
           <h3 className="font-display font-extrabold text-base text-purple-900">
             {mannI18n.mannequinTitle}
+            {!isPro && (
+              <span className="ml-2 inline-flex items-center gap-1 text-[10px] font-semibold px-2 py-0.5 rounded-full bg-purple-600 text-white align-middle">
+                <Lock className="w-2.5 h-2.5" /> {mannI18n.proBadge}
+              </span>
+            )}
             {totalGeneratedPhotos > 0 && (
               <span className="font-semibold text-purple-500 ml-1">{mannI18n.photosGenerated(totalGeneratedPhotos)}</span>
             )}
@@ -2245,7 +1998,7 @@ function MannequinPanel({
       {/* 1 — Sélecteur de fond */}
       <div className="space-y-1.5">
         <p className="text-[10px] font-bold text-purple-400 uppercase tracking-widest">{bgI18n.bgPanelTitle}</p>
-        <BgSelector plan={plan} selectedBg={selectedBgAi} onSelect={onBgAiSelect} />
+        <BgSelector plan={plan} selectedBg={selectedBgAi} onSelect={onBgAiSelect} bgI18n={bgI18n} proOnly={true} />
         {plan === 'freemium' && (
           <p className="text-xs text-purple-400 flex items-center gap-1.5">
             <Lock className="w-3 h-3 shrink-0" />
@@ -2297,6 +2050,9 @@ function MannequinPanel({
             </>
           )}
         </button>
+        {!isPro && (
+          <p className="text-[11px] text-purple-500 text-center mt-2">{mannI18n.proMessage}</p>
+        )}
       </div>
 
       <div className="border-t border-purple-100" />
@@ -2324,11 +2080,14 @@ function MannequinPanel({
         {mannequins.map(id => (
           <button
             key={id}
-            onClick={() => { onSelect(id); setPreviewId(id) }}
+            onClick={() => { if (!isPro) return; onSelect(id); setPreviewId(id) }}
+            disabled={!isPro}
             className={`relative snap-start shrink-0 w-20 h-20 rounded-xl overflow-hidden transition-all ${
-              selectedMannequin === id
-                ? 'ring-2 ring-purple-500 ring-offset-1 scale-[1.06]'
-                : 'ring-1 ring-purple-200 hover:ring-purple-400'
+              !isPro
+                ? 'ring-1 ring-purple-100 opacity-60 cursor-not-allowed'
+                : selectedMannequin === id
+                  ? 'ring-2 ring-purple-500 ring-offset-1 scale-[1.06]'
+                  : 'ring-1 ring-purple-200 hover:ring-purple-400'
             }`}
           >
             <img
@@ -2337,9 +2096,14 @@ function MannequinPanel({
               style={{ objectPosition: '50% 0%' }}
               draggable={false}
             />
-            {selectedMannequin === id && (
+            {isPro && selectedMannequin === id && (
               <div className="absolute inset-0 flex items-center justify-center bg-purple-600/20">
                 <Check className="w-4 h-4 text-white drop-shadow" />
+              </div>
+            )}
+            {!isPro && (
+              <div className="absolute inset-0 flex items-center justify-center bg-black/10 rounded-[inherit]">
+                <Lock className="w-4 h-4 text-white drop-shadow" />
               </div>
             )}
           </button>
@@ -2480,13 +2244,21 @@ function MannequinPanel({
             <div className="w-4 h-4 border-2 border-purple-400 border-t-transparent rounded-full animate-spin" />
             {mannI18n.mannequinGenerating}
           </>
-        ) : (
+        ) : isPro ? (
           <>
             <Sparkles className="w-4 h-4" />
             {mannI18n.mannequinGenerate}
           </>
+        ) : (
+          <>
+            <Lock className="w-4 h-4" />
+            {mannI18n.proRequired}
+          </>
         )}
       </button>
+      {!isPro && (
+        <p className="text-[11px] text-purple-500 text-center mt-2">{mannI18n.proMessage}</p>
+      )}
 
       {isGenerating && (
         <div className="w-full rounded-lg bg-indigo-50 border border-indigo-200 p-3 my-2">
@@ -2517,45 +2289,70 @@ function MannequinPanel({
 
 /* ─── BgSelector — carrousel de swatches réutilisable ───────────────────── */
 
-function BgSelector({ plan, selectedBg, onSelect }: {
+function BgSelector({ plan, selectedBg, onSelect, bgI18n, proOnly }: {
   plan: Plan
   selectedBg: number
   onSelect: (id: number) => void
+  bgI18n: typeof BG_PANEL_I18N.fr
+  proOnly?: boolean
 }) {
+  const [bgCategory, setBgCategory] = useState<'interieur' | 'studio'>('interieur')
+  const bgList = bgCategory === 'interieur' ? BACKGROUNDS_INTERIEUR : BACKGROUNDS_STUDIO
+  const WHITE   = makeBg(0)
+
   return (
-    <div className="flex gap-2 overflow-x-auto snap-x snap-mandatory py-1 -mx-0.5 px-0.5">
-      {BACKGROUNDS.map(bg => {
-        const isLocked = plan === 'freemium' && bg.id !== 0
-        return (
+    <div className="space-y-2">
+      {/* Category toggle */}
+      <div className="flex gap-2">
+        {(['interieur', 'studio'] as const).map(cat => (
           <button
-            key={bg.id}
-            onClick={() => { if (!isLocked) onSelect(bg.id) }}
-            disabled={isLocked}
-            className={`relative snap-start shrink-0 w-20 h-20 rounded-xl overflow-hidden transition-all ${
-              isLocked ? 'cursor-not-allowed' : 'cursor-pointer'
-            } ${
-              selectedBg === bg.id && !isLocked
-                ? 'ring-2 ring-indigo-500 ring-offset-2 scale-[1.06] shadow-md shadow-indigo-200'
-                : isLocked ? 'ring-1 ring-gray-200 opacity-60'
-                : 'ring-1 ring-gray-200 hover:ring-indigo-300'
+            key={cat}
+            onClick={() => setBgCategory(cat)}
+            className={`flex-1 text-xs font-semibold py-1.5 rounded-xl transition-all ${
+              bgCategory === cat
+                ? 'bg-indigo-600 text-white shadow-sm'
+                : 'bg-white text-indigo-500 border border-indigo-200 hover:border-indigo-400'
             }`}
           >
-            {bg.type === 'color'
-              ? <div className="w-full h-full" style={{ backgroundColor: bg.color }} />
-              : <img src={bg.src} alt={bg.label} className="w-full h-full object-cover" draggable={false} />}
-            {selectedBg === bg.id && !isLocked && (
-              <div className="absolute inset-0 flex items-center justify-center bg-indigo-600/20">
-                <Check className="w-4 h-4 text-white drop-shadow-md" />
-              </div>
-            )}
-            {isLocked && (
-              <div className="absolute inset-0 flex items-center justify-center bg-black/25">
-                <Lock className="w-3 h-3 text-white/90" />
-              </div>
-            )}
+            {cat === 'interieur' ? bgI18n.bgCatInterieur : bgI18n.bgCatStudio}
           </button>
-        )
-      })}
+        ))}
+      </div>
+      {/* Carousel */}
+      <div className="flex gap-2 overflow-x-auto snap-x snap-mandatory py-1 -mx-0.5 px-0.5">
+        {[WHITE, ...bgList].map(bg => {
+          const isLocked = bg.id !== 0 && (proOnly ? plan !== 'pro' : plan === 'freemium')
+          return (
+            <button
+              key={bg.id}
+              onClick={() => { if (!isLocked) onSelect(bg.id) }}
+              disabled={isLocked}
+              className={`relative snap-start shrink-0 w-20 h-20 rounded-xl overflow-hidden transition-all ${
+                isLocked ? 'cursor-not-allowed' : 'cursor-pointer'
+              } ${
+                selectedBg === bg.id && !isLocked
+                  ? 'ring-2 ring-indigo-500 ring-offset-2 scale-[1.06] shadow-md shadow-indigo-200'
+                  : isLocked ? 'ring-1 ring-gray-200 opacity-60'
+                  : 'ring-1 ring-gray-200 hover:ring-indigo-300'
+              }`}
+            >
+              {bg.type === 'color'
+                ? <div className="w-full h-full" style={{ backgroundColor: bg.color }} />
+                : <img src={bg.src} alt={bg.label} className="w-full h-full object-cover" draggable={false} />}
+              {selectedBg === bg.id && !isLocked && (
+                <div className="absolute inset-0 flex items-center justify-center bg-indigo-600/20">
+                  <Check className="w-4 h-4 text-white drop-shadow-md" />
+                </div>
+              )}
+              {isLocked && (
+                <div className="absolute inset-0 flex items-center justify-center bg-black/25">
+                  <Lock className="w-3 h-3 text-white/90" />
+                </div>
+              )}
+            </button>
+          )
+        })}
+      </div>
     </div>
   )
 }
@@ -2580,7 +2377,7 @@ function BgPanel({
   onValidateFreemium, bgI18n,
 }: BgPanelProps) {
   const [showPreview, setShowPreview] = useState(false)
-  const currentBg = BACKGROUNDS.find(b => b.id === selectedBg) ?? BACKGROUNDS[0]
+  const currentBg = BACKGROUNDS_ALL.find(b => b.id === selectedBg) ?? BACKGROUNDS_ALL[0]
   const filledSlots = slots.filter(s => s.file !== null)
 
   return (
@@ -2622,6 +2419,7 @@ function BgPanel({
         plan={plan}
         selectedBg={selectedBg}
         onSelect={(id) => { onBgSelect(id); setShowPreview(true) }}
+        bgI18n={bgI18n}
       />
 
       {/* Preview inline du fond sélectionné */}
@@ -2679,19 +2477,19 @@ function BgPanel({
       ) : (
         /* Premium / Pro : bouton traitement */
         <>
-          {bgCheckedSlots.size > 0 && (
-            <button
-              onClick={onProcess}
-              disabled={isProcessing}
-              className={`w-full flex items-center justify-center gap-2 font-semibold text-sm py-3 rounded-xl transition-all ${
-                !isProcessing ? 'bg-indigo-600 hover:bg-indigo-700 text-white active:scale-[0.98]'
-                : 'bg-indigo-100 text-indigo-400 cursor-wait'}`}
-            >
-              {isProcessing
-                ? <><div className="w-4 h-4 border-2 border-indigo-400 border-t-transparent rounded-full animate-spin" />{isModelLoading ? bgI18n.modelLoading : bgI18n.processing}</>
-                : <><Wand2 className="w-4 h-4" />{bgI18n.processBtn(bgCheckedSlots.size)}</>}
-            </button>
-          )}
+          <button
+            onClick={onProcess}
+            disabled={bgCheckedSlots.size === 0 || isProcessing}
+            className={`w-full flex items-center justify-center gap-2 font-semibold text-sm py-3 rounded-xl transition-all ${
+              isProcessing ? 'bg-indigo-100 text-indigo-400 cursor-wait'
+              : bgCheckedSlots.size === 0 ? 'bg-indigo-100 text-indigo-400 cursor-not-allowed'
+              : 'bg-indigo-600 hover:bg-indigo-700 text-white active:scale-[0.98]'
+            }`}
+          >
+            {isProcessing
+              ? <><div className="w-4 h-4 border-2 border-indigo-400 border-t-transparent rounded-full animate-spin" />{isModelLoading ? bgI18n.modelLoading : bgI18n.processing}</>
+              : <><Wand2 className="w-4 h-4" />{bgCheckedSlots.size === 0 ? bgI18n.selectPhotosHint : bgI18n.processBtn(bgCheckedSlots.size)}</>}
+          </button>
         </>
       )}
     </div>

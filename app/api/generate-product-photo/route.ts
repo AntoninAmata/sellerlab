@@ -6,14 +6,25 @@ const FASHN_BASE = 'https://api.fashn.ai/v1'
 
 /* ── Clause de fidélité + amélioration (commune aux 3 présentations) ──────── */
 const FIDELITY_CLAUSE =
-  'Show the garment exactly as in the product image (same color, same design, same closure state — if closed keep it closed). ' +
+  'Show the garment exactly as in the product image: same color, same design, same collar, same cut and proportions. ' +
   'The garment is well-pressed, smooth and well-presented, while keeping its real fabric texture, true color and any genuine signs of wear — do not alter or hide real defects, do not redesign it.'
 
-/* ── Prompts selon le mode d'affichage ───────────────────────────────────── */
-const PROMPTS: Record<string, string> = {
-  bust:   `the garment displayed on a visible tailor's dress form mannequin bust (fabric-covered mannequin torso on a stand, clearly visible as a display mannequin), no head, no person, the full mannequin bust is visible inside the frame and nothing is cropped out, garment fully visible and centered, product photography. ${FIDELITY_CLAUSE}`,
-  hanger: `the garment on a wooden hanger hung on a visible clothing rack / garment rail, the rack and hook clearly visible so the garment is not floating, no person, garment fully visible and centered, product photography. ${FIDELITY_CLAUSE}`,
-  flat:   `the garment laid completely flat and lying down on the floor surface of the scene, photographed directly from above in a top-down overhead flat lay view, no person, no mannequin, no hanger, the garment rests on the ground fully visible and centered. ${FIDELITY_CLAUSE}`,
+/* Instruction d'ouverture NON AMBIGUË selon l'état détecté par Claude Vision. */
+function closureInstruction(ouverture?: string): string {
+  if (ouverture === 'ferme') {
+    return ' CRITICAL: the garment is shown FULLY CLOSED — zipped and/or buttoned all the way up to the top collar, the front completely closed. Do NOT show it open, do NOT show the inside lining.'
+  }
+  if (ouverture === 'ouvert') {
+    return ' The garment is shown OPEN at the front (unzipped / unbuttoned), exactly as in the product image.'
+  }
+  return ''
+}
+
+/* ── Prompts selon le mode d'affichage (la clause fidélité + ouverture est ajoutée dynamiquement) ── */
+const PROMPTS_BASE: Record<string, string> = {
+  bust:   `the garment displayed on a visible tailor's dress form mannequin bust (fabric-covered mannequin torso on a stand, clearly visible as a display mannequin), no head, no person, the full mannequin bust is visible inside the frame and nothing is cropped out, garment fully visible and centered, product photography.`,
+  hanger: `the garment on a wooden hanger hung on a visible clothing rack / garment rail, the rack and hook clearly visible so the garment is not floating, no person, garment fully visible and centered, product photography.`,
+  flat:   `the garment laid completely flat and lying down on the floor surface of the scene, photographed directly from above in a top-down overhead flat lay view, no person, no mannequin, no hanger, the garment rests on the ground fully visible and centered.`,
 }
 
 /* ── Charge un fond en base64 JPEG ───────────────────────────────────────── */
@@ -93,24 +104,30 @@ export async function POST(request: NextRequest) {
   }
 
   try {
-    const { product_image, verso_image, display_mode, background_id } = await request.json() as {
+    const { product_image, verso_image, display_mode, background_id, ouverture } = await request.json() as {
       product_image: string
       verso_image?: string
       display_mode: 'bust' | 'hanger' | 'flat'
       background_id?: number
+      ouverture?: string
     }
 
     if (!product_image || !display_mode) {
       return NextResponse.json({ error: 'Missing required fields' }, { status: 400 })
     }
 
-    const prompt = PROMPTS[display_mode]
-    if (!prompt) {
+    const basePrompt = PROMPTS_BASE[display_mode]
+    if (!basePrompt) {
       return NextResponse.json({ error: `display_mode invalide : "${display_mode}"` }, { status: 400 })
     }
-
     // Charger le fond choisi (si fourni) — passé en background_reference à FASHN
     const backgroundData = typeof background_id === 'number' ? loadBackground(background_id) : null
+    // Si un fond est fourni, renforcer le prompt pour que FASHN ancre la scène sur la référence
+    const backgroundClause = backgroundData
+      ? ' The background and setting MUST exactly match the provided background reference image — same scene, same colors and lighting. Do NOT replace it with a plain studio background.'
+      : ''
+    // Prompt final = présentation + fidélité + ouverture + ancrage du fond
+    const prompt = `${basePrompt} ${FIDELITY_CLAUSE}${closureInstruction(ouverture)}${backgroundClause}`
 
     console.log(`[product-photo] display_mode="${display_mode}" verso=${!!verso_image} bg=${background_id ?? 'none'}`)
 

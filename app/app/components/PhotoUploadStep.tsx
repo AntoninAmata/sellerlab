@@ -548,11 +548,17 @@ const MEN_MANNEQUINS: string[] = [
   'man-01', 'man-02', 'man-03', 'man-04', 'man-05',
   'man-06', 'man-07', 'man-08', 'man-09', 'man-10',
   'man-11', 'man-12', 'man-13', 'man-14', 'man-15',
+  'man-16', 'man-17', 'man-18', 'man-19', 'man-20',
+  'man-21', 'man-22', 'man-23', 'man-24', 'man-25',
+  'man-26', 'man-27', 'man-28', 'man-29', 'man-30',
 ]
 const WOMEN_MANNEQUINS: string[] = [
   'woman-01', 'woman-02', 'woman-03', 'woman-04', 'woman-05',
   'woman-06', 'woman-07', 'woman-08', 'woman-09', 'woman-10',
   'woman-11', 'woman-12', 'woman-13', 'woman-14', 'woman-15',
+  'woman-16', 'woman-17', 'woman-18', 'woman-19', 'woman-20',
+  'woman-21', 'woman-22', 'woman-23', 'woman-24', 'woman-25',
+  'woman-26', 'woman-27', 'woman-28', 'woman-29', 'woman-30',
 ]
 
 /* ─── Resize image to max dimension (storage + classification) ───────────── */
@@ -1130,6 +1136,7 @@ function normalizeConfidence(result: RecognitionResult): RecognitionResult {
     style:         fix(result.style),
     motif:         fix(result.motif),
     defauts:       fix(result.defauts),
+    ouverture:     fix(result.ouverture),
     ...(result.brand_segment ? { brand_segment: result.brand_segment } : {}),
   }
 }

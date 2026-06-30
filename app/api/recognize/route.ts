@@ -125,6 +125,7 @@ Réponds UNIQUEMENT avec ce JSON (sans markdown, sans texte avant ou après) :
   "style": { "value": "string — parmi les styles autorisés", "confidence": "high|medium|low" },
   "motif": { "value": "string — parmi les motifs autorisés", "confidence": "high|medium|low" },
   "defauts": { "value": "string — défauts visibles décrits précisément, sinon vide", "confidence": "high|medium|low" },
+  "ouverture": { "value": "ferme|ouvert|sans_objet — pour un vêtement qui se ferme (veste, blouson, gilet, manteau, chemise, sweat zippé) indique s'il est porté/montré fermé ou ouvert sur la photo principale ; pour tout le reste (t-shirt, pull, pantalon, robe, accessoire) mets sans_objet", "confidence": "high|medium|low" },
   "brand_segment": "fast_fashion|standard|premium_accessible|premium_createur|luxe_contemporain|luxe_etabli|luxe_iconique|ultra_luxe"
 }
 

@@ -63,12 +63,23 @@ async function runJob(
   return null
 }
 
-/* ── Clause de fidélité du vêtement (par défaut, wearing_prompt vide) ──────── */
+/* Clause de base : qualité/fidélité du vêtement, SANS mention de l'ouverture
+   (l'état d'ouverture est géré séparément par closureInstruction, de façon non ambiguë) */
 const FIDELITY_CLAUSE =
-  'CRITICAL — match the garment EXACTLY as it appears in the product image: same opening/closure state, same collar, same zipper/buttons position. ' +
-  'If the garment is closed in the product image, it MUST remain FULLY closed and fastened all the way — do NOT open it, do NOT show the inside lining, do NOT leave it hanging open. ' +
-  'If it is open in the product image, keep it open the same way. Do not change the design, cut, length or proportions. ' +
-  'The garment is well-pressed, smooth and well-presented, while keeping its real fabric texture, true color, natural drape and any genuine signs of wear — do not alter or hide real defects.'
+  'Match the garment EXACTLY as it appears in the product image: same design, same collar, same cut, same proportions, same color. ' +
+  'The garment is well-pressed, smooth and well-presented, while keeping its real fabric texture, true color, natural drape and any genuine signs of wear — do not alter or hide real defects, do not redesign it.'
+
+/* Instruction d'ouverture NON AMBIGUË selon l'état détecté par Claude Vision.
+   On ne mentionne jamais les deux états à la fois (sinon FASHN retombe sur son biais). */
+function closureInstruction(ouverture?: string): string {
+  if (ouverture === 'ferme') {
+    return ' CRITICAL: the garment is worn FULLY CLOSED — zipped and/or buttoned all the way up to the top collar. The front is completely closed and covers the chest entirely. Do NOT open it, do NOT show the inside lining, do NOT leave any gap.'
+  }
+  if (ouverture === 'ouvert') {
+    return ' The garment is worn OPEN at the front (unzipped / unbuttoned), exactly as in the product image, revealing the layer underneath.'
+  }
+  return '' // sans_objet ou non détecté : aucune instruction de fermeture
+}
 
 /* ── Catalogue des poses dérivées (générées par edit depuis la photo de face) ─
    La face n'est pas ici : elle est toujours générée comme base.
@@ -97,13 +108,15 @@ export async function POST(request: NextRequest) {
   }
 
   try {
-    const { product_image, mannequin_id, outfit_prompt, wearing_prompt, background_id, poses } = await request.json() as {
+    const { product_image, mannequin_id, outfit_prompt, wearing_prompt, background_id, poses, ouverture, verso_image } = await request.json() as {
       product_image: string
       mannequin_id: string
       outfit_prompt?: string
       wearing_prompt?: string
       background_id?: number
       poses?: PoseId[]
+      ouverture?: string
+      verso_image?: string
     }
 
     if (!product_image || !mannequin_id) {
@@ -124,17 +137,26 @@ export async function POST(request: NextRequest) {
 
     const outfitPart  = (outfit_prompt ?? '').trim() || 'outfit adapted to the garment, contemporary 2026 casual style'
     const wearingPart = (wearing_prompt ?? '').trim()
-    // Si le user précise comment porter → on l'utilise ; sinon clause de fidélité (ne pas inventer)
-    const wearingClause = wearingPart ? `Wear the garment ${wearingPart}.` : FIDELITY_CLAUSE
+    // L'ouverture détectée s'applique TOUJOURS (jamais perdue), même si le user a renseigné "comment porter".
+    // Exception : si le user mentionne explicitement l'ouverture dans son texte, on le laisse décider.
+    const userMentionsClosure = /\b(ouvert|ferm|open|clos|zip|button|bouton)/i.test(wearingPart)
+    const closure = userMentionsClosure ? '' : closureInstruction(ouverture)
+    // Port = clause de fidélité + ajouts du user (port neutre ou perso) + ouverture détectée
+    const wearingClause = `${FIDELITY_CLAUSE}${wearingPart ? ` Wear the garment: ${wearingPart}.` : ''}${closure}`
 
     // ── 1. PHOTO DE FACE (base) — product-to-model + face_reference ──────────
+    // Si un fond est fourni, on renforce le prompt pour que FASHN ancre la scène sur la référence
+    const backgroundClause = backgroundData
+      ? ' The background and environment MUST exactly match the provided background reference image — same indoor scene, same setting, same colors and lighting. Do NOT invent a different location, no street, no outdoor scene unless the reference is outdoor.'
+      : ''
+
     const baseUrl = await runJob(FASHN_API_KEY, {
       model_name: 'product-to-model',
       inputs: {
         product_image,
         face_reference: faceRef,
         face_reference_mode: 'match_reference',
-        prompt: `A person wearing the garment, ${outfitPart}. Casual natural relaxed standing pose facing the camera. Natural daylight. ${wearingClause}`,
+        prompt: `A person wearing the garment, ${outfitPart}. Casual natural relaxed standing pose facing the camera.${backgroundClause} ${wearingClause}`,
         aspect_ratio: '3:4',
         output_format: 'png',
         generation_mode: 'fast',
@@ -146,14 +168,33 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ error: 'Génération de la photo de base échouée' }, { status: 502 })
     }
 
-    // ── 2. Poses dérivées via edit (selon les poses cochées) ─────────────────
+    // ── 2. Poses dérivées (selon les poses cochées) ──────────────────────────
     const requestedPoses: PoseId[] = (poses ?? []).filter(
       (p): p is PoseId => p in POSE_PROMPTS
     )
 
     const derivedUrls = await Promise.all(
-      requestedPoses.map(poseId =>
-        runJob(FASHN_API_KEY, {
+      requestedPoses.map(poseId => {
+        // Cas spécial : la pose "dos" + photo de dos uploadée → on génère un dos FIDÈLE
+        // au vrai dos du vêtement (product-to-model depuis le verso), en gardant
+        // l'apparence du mannequin via image_prompt (cohérence ethnicité/cheveux/carrure).
+        // Le visage n'étant pas visible de dos, pas besoin de face_reference (coût: 1 crédit).
+        if (poseId === 'back' && verso_image) {
+          return runJob(FASHN_API_KEY, {
+            model_name: 'product-to-model',
+            inputs: {
+              product_image: verso_image,
+              image_prompt: faceRef, // le mannequin choisi, pour la cohérence d'apparence
+              prompt: `Back view of a person seen from behind, wearing the garment shown. ${outfitPart}. Natural standing posture seen from the back, no face visible.${backgroundClause} ${wearingClause}`,
+              aspect_ratio: '3:4',
+              output_format: 'png',
+              generation_mode: 'fast',
+              ...(backgroundData ? { background_reference: backgroundData } : {}),
+            },
+          }, 'back(verso)')
+        }
+        // Sinon : pose dérivée par edit depuis la photo de face
+        return runJob(FASHN_API_KEY, {
           model_name: 'edit',
           inputs: {
             image: baseUrl,
@@ -162,12 +203,12 @@ export async function POST(request: NextRequest) {
             generation_mode: 'fast',
           },
         }, poseId)
-      )
+      })
     )
 
     // Ordre de retour : face (base) d'abord, puis les poses cochées dans l'ordre
     const urls = [baseUrl, ...derivedUrls].filter(Boolean) as string[]
-    console.log('[mannequin] URLs générées:', urls.length, `(face + ${requestedPoses.length} poses)`)
+    console.log('[mannequin] URLs générées:', urls.length, `(face + ${requestedPoses.length} poses, verso=${!!verso_image})`)
 
     return NextResponse.json({ urls })
 

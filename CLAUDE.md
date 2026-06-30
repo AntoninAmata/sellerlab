@@ -193,9 +193,21 @@ Les deux fonds sont mémorisés séparément via `lib/user-prefs.ts` (localStora
 - Wrapper : lib/background-removal.ts — charge les bundles UMD au runtime via <script> tags (invisible pour Turbopack, évite le hang de compilation)
 - Modèle servi depuis /public/models/ (~170 Mo, mis en cache IndexedDB au premier chargement)
 - Bannière "Préparation du détourage…" au premier load (7 langues)
-- Post-traitement cleanCutout : seuillage alpha + plus grande zone connexe + érodage 2px (anti-liseré)
+- Post-traitement cleanCutout : seuillage alpha + plus grande zone connexe + érodage 1px + lissage alpha 3x3 (anti-liseré et anti-dents-de-scie)
 - Safari : message orange d'avertissement — NE PAS bloquer le flux
 - Résultat : détourage PNG → composition sur fond choisi → JPEG 3:4 1080×1440
+
+#### Pipeline de composition (compositeWithBackground) — traitements canvas côté client
+Tout est local (canvas), gratuit, illimité. La recomposition repart toujours du cutout original (PNG transparent), jamais d'une image déjà composée → aucune accumulation d'effets au changement de fond. Ordre exact :
+1. Recadrage intelligent — bounding box du sujet (getContentBounds) ; photos portées (slots 9-14) ancrées en haut (cy = H*0.01), non portées centrées
+2. Color matching — brightness du sujet ajusté selon la chaleur du fond (sampleAvgColor)
+3. Balance des blancs — gray-world doux (strength 0.6) sur les pixels opaques du sujet, neutralise la dominante d'éclairage de la photo originale
+4. Sharpening — convolution 3x3 (amount 0.35), préserve l'alpha (pas de halo sur les bords)
+5. Ombre portée — canvas temporaire, silhouette noire (source-in) décalée 12/22px, blur 14px, globalAlpha 0.38 (suit la forme réelle du sujet)
+6. Contraste léger du sujet — contrast(1.06) dans le filter
+7. Color bleed — teinte du fond déposée sur le sujet en soft-light, globalAlpha 0.20 (ambiance, s'adapte à toute couleur)
+8. Grain uniforme — bruit monochrome ±5 sur toute l'image (harmonise sujet net / fond)
+- Testé et retiré : ombre de contact au sol (incohérente sur cintre), lumière directionnelle (dénaturait le rendu)
 
 #### Fonds disponibles — 31 au total
 - Blanc pur : `/public/backgrounds/bg-white.jpg`

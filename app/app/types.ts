@@ -45,6 +45,7 @@ export interface RecognitionResult {
   style:         RecognitionField<string>
   motif:         RecognitionField<string>
   defauts:       RecognitionField<string>
+  ouverture:     RecognitionField<string>
   /* Systèmes de taille applicables — premier = taxonomie, suivants = étiquette visible */
   tailleSysteme: RecognitionField<string[]>
   extraInfo?:    ExtraInfo
