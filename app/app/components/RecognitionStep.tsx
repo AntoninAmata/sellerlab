@@ -381,6 +381,7 @@ const MANNEQUIN_I18N: Record<Lang, {
   proBadge: string
   proRequired: string
   proMessage: string
+  modalConfirmBg: string
 }> = {
   fr: {
     mannequinTitle: 'Studio photo IA',
@@ -405,6 +406,7 @@ const MANNEQUIN_I18N: Record<Lang, {
     proBadge: 'Pro',
     proRequired: 'Réservé au plan Pro',
     proMessage: 'Passez au plan Pro pour générer des photos portées avec mannequin IA',
+    modalConfirmBg: 'Utiliser ce fond',
   },
   en: {
     mannequinTitle: 'AI Photo Studio',
@@ -429,6 +431,7 @@ const MANNEQUIN_I18N: Record<Lang, {
     proBadge: 'Pro',
     proRequired: 'Pro plan only',
     proMessage: 'Upgrade to Pro to generate worn photos with AI models',
+    modalConfirmBg: 'Use this background',
   },
   es: {
     mannequinTitle: 'Estudio foto IA',
@@ -453,6 +456,7 @@ const MANNEQUIN_I18N: Record<Lang, {
     proBadge: 'Pro',
     proRequired: 'Solo plan Pro',
     proMessage: 'Cambia al plan Pro para generar fotos vestidas con modelos IA',
+    modalConfirmBg: 'Usar este fondo',
   },
   de: {
     mannequinTitle: 'KI-Fotostudio',
@@ -477,6 +481,7 @@ const MANNEQUIN_I18N: Record<Lang, {
     proBadge: 'Pro',
     proRequired: 'Nur im Pro-Tarif',
     proMessage: 'Wechsle zum Pro-Tarif, um getragene Fotos mit KI-Modellen zu erstellen',
+    modalConfirmBg: 'Diesen Hintergrund verwenden',
   },
   it: {
     mannequinTitle: 'Studio foto IA',
@@ -501,6 +506,7 @@ const MANNEQUIN_I18N: Record<Lang, {
     proBadge: 'Pro',
     proRequired: 'Solo piano Pro',
     proMessage: 'Passa al piano Pro per generare foto indossate con modelli IA',
+    modalConfirmBg: 'Usa questo sfondo',
   },
   nl: {
     mannequinTitle: 'AI-fotostudio',
@@ -525,6 +531,7 @@ const MANNEQUIN_I18N: Record<Lang, {
     proBadge: 'Pro',
     proRequired: 'Alleen Pro-abonnement',
     proMessage: 'Upgrade naar Pro om gedragen foto\'s met AI-modellen te genereren',
+    modalConfirmBg: 'Deze achtergrond gebruiken',
   },
   pl: {
     mannequinTitle: 'Studio foto AI',
@@ -549,6 +556,7 @@ const MANNEQUIN_I18N: Record<Lang, {
     proBadge: 'Pro',
     proRequired: 'Tylko plan Pro',
     proMessage: 'Przejdź na plan Pro, aby generować zdjęcia noszone z modelami AI',
+    modalConfirmBg: 'Użyj tego tła',
   },
 }
 
@@ -1698,7 +1706,7 @@ export default function RecognitionStep({ slots, setSlots, result, aiPhotos: _ai
           wearing_prompt: mannequinWearingPrompt.trim() || undefined,
           background_id:  selectedBgAi,
           poses:          base64Verso ? mannequinPoses : mannequinPoses.filter(p => p !== 'back'),
-          ouverture:      result.ouverture?.value || undefined,
+          ouverture:      result?.ouverture?.value || undefined,
           verso_image:    base64Verso,
         }),
       })
@@ -1744,7 +1752,7 @@ export default function RecognitionStep({ slots, setSlots, result, aiPhotos: _ai
           verso_image:   base64Verso,
           display_mode:  productDisplayMode,
           background_id: selectedBgAi,
-          ouverture:     result.ouverture?.value || undefined,
+          ouverture:     result?.ouverture?.value || undefined,
         }),
       })
       if (!res.ok) throw new Error('Generation failed')
@@ -1961,6 +1969,8 @@ function MannequinPanel({
   const [previewId, setPreviewId]             = useState<string | null>(null)
   const [showCustomPrompt, setShowCustomPrompt]   = useState(false)
   const [showWearingPrompt, setShowWearingPrompt] = useState(false)
+  const [showPreviewAi, setShowPreviewAi] = useState(false)
+  const currentBgAi = BACKGROUNDS_ALL.find(b => b.id === selectedBgAi) ?? BACKGROUNDS_ALL[0]
   const isPro              = plan === 'pro'
   const canGenerate        = isPro && !!selectedMannequin && hasSlot0Photo
   const canGenerateProduct = isPro && hasSlot0Photo
@@ -1998,7 +2008,25 @@ function MannequinPanel({
       {/* 1 — Sélecteur de fond */}
       <div className="space-y-1.5">
         <p className="text-[10px] font-bold text-purple-400 uppercase tracking-widest">{bgI18n.bgPanelTitle}</p>
-        <BgSelector plan={plan} selectedBg={selectedBgAi} onSelect={onBgAiSelect} bgI18n={bgI18n} proOnly={true} />
+        <BgSelector plan={plan} selectedBg={selectedBgAi} onSelect={id => { onBgAiSelect(id); setShowPreviewAi(true) }} bgI18n={bgI18n} proOnly={true} />
+        {showPreviewAi && isPro && (
+          <div className="rounded-xl overflow-hidden border border-purple-200 shadow-sm">
+            <div className="w-full" style={{ maxHeight: '380px', minHeight: '120px' }}>
+              {currentBgAi.type === 'color'
+                ? <div className="w-full h-full" style={{ backgroundColor: currentBgAi.color, minHeight: '120px' }} />
+                : <img src={currentBgAi.src} alt={currentBgAi.label} className="w-full object-contain" style={{ maxHeight: '380px' }} draggable={false} />}
+            </div>
+            <div className="p-2 border-t border-purple-100">
+              <button
+                onClick={() => setShowPreviewAi(false)}
+                className="w-full flex items-center justify-center gap-2 font-semibold text-sm py-2.5 rounded-xl bg-purple-600 hover:bg-purple-700 text-white active:scale-[0.98] transition-all"
+              >
+                <Check className="w-4 h-4" />
+                {mannI18n.modalConfirmBg}
+              </button>
+            </div>
+          </div>
+        )}
         {plan === 'freemium' && (
           <p className="text-xs text-purple-400 flex items-center gap-1.5">
             <Lock className="w-3 h-3 shrink-0" />
